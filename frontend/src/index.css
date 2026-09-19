@@ -1834,9 +1834,73 @@ select.form-input {
   animation: hyetographBarPulse 1.8s ease-in-out infinite;
 }
 
+/* ─── Northeastern Region (NER) Landslide Early Warning System ─── */
+@keyframes nerPulseRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 92, 0.7); }
+  50% { box-shadow: 0 0 0 12px rgba(255, 59, 92, 0); }
+}
 
+@keyframes nerPulseAmber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 32, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 176, 32, 0); }
+}
 
+@keyframes nerPulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
 
+.ner-marker-critical {
+  animation: nerPulseRed 1.8s infinite;
+}
 
+.ner-marker-high {
+  animation: nerPulseAmber 2.2s infinite;
+}
 
+.ner-marker-safe {
+  animation: nerPulseGreen 2.8s infinite;
+}
+
+.ner-card-glass {
+  background: linear-gradient(135deg, rgba(8, 16, 28, 0.92), rgba(12, 24, 40, 0.88));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 229, 255, 0.18);
+  border-radius: 8px;
+}
+
+.ner-slider-container {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.ner-slider-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+  cursor: ew-resize;
+  z-index: 30;
+}
+
+.ner-slider-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cyan);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.8);
+}
 

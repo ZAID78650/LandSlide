@@ -82,6 +82,11 @@ export const getLandslideDataset = () => api.get('/landslide/dataset');
 export const runLandslideInference = (filename) => api.post(`/landslide/infer/${filename}`);
 export const getDatasetPreview = (filename) => api.get(`/datasets/${filename}/preview`);
 export const deleteDataset = (id) => api.delete(`/datasets/${id}`);
+export const getNerHotspots = (state, minRisk) => api.get('/landslide/ner/hotspots', { params: { state, min_risk: minRisk } });
+export const getNerHistoricalEvents = () => api.get('/landslide/ner/historical-events');
+export const getNerSensorFleet = () => api.get('/landslide/ner/sensor-fleet');
+export const getNerActiveAlerts = () => api.get('/landslide/ner/alerts');
+export const predictNerLandslideRisk = (payload) => api.post('/landslide/ner/predict', payload);
 
 // Risk Intelligence & Geotechnical Engine
 export const calculateRisk = (lat, lon, slopeAngle = 28.0) => api.get(`/risk/calculate`, { params: { lat, lon, slope_angle: slopeAngle } });
