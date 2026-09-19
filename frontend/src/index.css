@@ -1692,6 +1692,58 @@ select.form-input {
   animation: mpptTrackingPulse 2s ease-in-out infinite;
 }
 
+/* Optical Mode Shaders for Sensor Spotlight */
+.thermal-shader-view {
+  filter: contrast(1.6) saturate(2.4) hue-rotate(-50deg) invert(0.15) !important;
+}
+
+.lidar-contour-overlay {
+  background-image: 
+    linear-gradient(rgba(0, 229, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+@keyframes livePointPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.live-point-pulse {
+  transform-origin: center center;
+  animation: livePointPulse 1.8s ease-out infinite;
+}
+
+@keyframes laserScanVertical {
+  0% { top: 0%; opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.85; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.laser-scan-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  box-shadow: 0 0 12px 2px var(--cyan);
+  pointer-events: none;
+  animation: laserScanVertical 3s linear infinite;
+}
+
+.graph-card-interactive {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.graph-card-interactive:hover {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+
 
 
 

@@ -1183,6 +1183,137 @@ export default function SensorPricingPage() {
   const [showDiagnosticsPanel, setShowDiagnosticsPanel] = useState(false);
   const [zeroCalibrated, setZeroCalibrated] = useState(false);
   const [spotlightThumbCategory, setSpotlightThumbCategory] = useState('ALL');
+  const [spotlightVisualMode, setSpotlightVisualMode] = useState('OPTICAL'); // 'OPTICAL' | 'THERMAL' | 'LIDAR'
+  const [graphTimeWindow, setGraphTimeWindow] = useState('LIVE');
+  const [graphStreamingActive, setGraphStreamingActive] = useState(true);
+  const [graphCriticalPulse, setGraphCriticalPulse] = useState(false);
+
+  // Progressive real-time multi-channel geotechnical stream buffer
+  const [progressiveTelemetryData, setProgressiveTelemetryData] = useState(() => {
+    const pts = [];
+    const basePore = 138.4;
+    const baseDisp = 14.2;
+    for (let i = 24; i >= 0; i--) {
+      const t = Date.now() - i * 1500;
+      pts.push({
+        time: new Date(t).toLocaleTimeString('en-US', { hour12: false }),
+        porePressure: +(basePore + (24 - i) * 0.18 + (Math.sin(i) * 0.4)).toFixed(1),
+        effectiveStress: +(210 - (basePore + (24 - i) * 0.18)).toFixed(1),
+        displacementMm: +(baseDisp + (24 - i) * 0.05 + (Math.cos(i) * 0.02)).toFixed(2),
+        inverseVelocity: +(1.0 / Math.max(0.01, 0.08 + (24 - i) * 0.005)).toFixed(2),
+        rainfallRate: +(24 + Math.sin(i * 0.5) * 6).toFixed(1),
+        cumulativeRain: +(210 + (24 - i) * 0.3).toFixed(1),
+        aeHits: Math.round(35 + Math.sin(i * 0.8) * 12 + (i === 3 ? 45 : 0)),
+        ppvVelocity: +(12.4 + Math.sin(i * 0.6) * 2.2).toFixed(1),
+        vwc10cm: +(88.2 + Math.sin(i * 0.3) * 0.8).toFixed(1),
+        vwc30cm: +(84.5 + Math.sin(i * 0.25) * 0.6).toFixed(1),
+        vwc60cm: +(79.8 + (24 - i) * 0.08).toFixed(1),
+        vwc100cm: +(72.1 + (24 - i) * 0.05).toFixed(1)
+      });
+    }
+    return pts;
+  });
+
+  // Live Streaming Progressive Telemetry Updater
+  useEffect(() => {
+    if (!graphStreamingActive) return;
+    const timer = setInterval(() => {
+      setProgressiveTelemetryData(prev => {
+        const last = prev[prev.length - 1] || {
+          porePressure: 142.8,
+          effectiveStress: 67.2,
+          displacementMm: 15.4,
+          inverseVelocity: 8.2,
+          rainfallRate: 28.4,
+          cumulativeRain: 214.2,
+          aeHits: 42,
+          ppvVelocity: 14.2,
+          vwc10cm: 88.4,
+          vwc30cm: 84.8,
+          vwc60cm: 80.2,
+          vwc100cm: 72.8
+        };
+
+        const pulseAdd = graphCriticalPulse ? 3.5 : 0;
+        const nowStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+        const jitter = (Math.random() - 0.48) * 0.5;
+
+        const nextPore = Math.min(180, +(last.porePressure + 0.06 + jitter + pulseAdd).toFixed(1));
+        const nextStress = +(210 - nextPore).toFixed(1);
+        const nextDisp = +(last.displacementMm + 0.012 + (graphCriticalPulse ? 0.06 : 0)).toFixed(2);
+        const velocity = Math.max(0.005, (nextDisp - last.displacementMm) / 1.5);
+        const nextInvVel = +(1.0 / velocity).toFixed(2);
+        const nextRain = +(28.4 + (Math.random() - 0.5) * 3).toFixed(1);
+        const nextCumRain = +(last.cumulativeRain + nextRain / 2400).toFixed(1);
+        const nextAe = Math.round(Math.max(10, 42 + (Math.random() - 0.5) * 16 + (graphCriticalPulse ? 65 : 0)));
+        const nextPpv = +(14.2 + (Math.random() - 0.5) * 2.5 + (graphCriticalPulse ? 8 : 0)).toFixed(1);
+
+        const newPoint = {
+          time: nowStr,
+          porePressure: nextPore,
+          effectiveStress: nextStress,
+          displacementMm: nextDisp,
+          inverseVelocity: nextInvVel,
+          rainfallRate: nextRain,
+          cumulativeRain: nextCumRain,
+          aeHits: nextAe,
+          ppvVelocity: nextPpv,
+          vwc10cm: +(88.4 + (Math.random() - 0.5) * 0.4).toFixed(1),
+          vwc30cm: +(84.8 + (Math.random() - 0.5) * 0.3).toFixed(1),
+          vwc60cm: +(80.2 + (Math.random() - 0.5) * 0.2).toFixed(1),
+          vwc100cm: +(72.8 + (Math.random() - 0.5) * 0.2).toFixed(1)
+        };
+
+        return [...prev.slice(1), newPoint];
+      });
+    }, 1500);
+
+    return () => clearInterval(timer);
+  }, [graphStreamingActive, graphCriticalPulse]);
+
+  const [activeGraphStation, setActiveGraphStation] = useState('STATION_A');
+
+  const handleDownloadTelemetryCsv = () => {
+    playTacticalAudio('click');
+    const headers = [
+      'Timestamp',
+      'PorePressure_kPa',
+      'EffectiveStress_kPa',
+      'Displacement_mm',
+      'Saito_InverseVelocity_d_mm',
+      'RainfallRate_mm_h',
+      'CumulativeRain_mm',
+      'AE_Hits_min',
+      'PPV_Velocity_mm_s',
+      'VWC_10cm_pct',
+      'VWC_30cm_pct',
+      'VWC_60cm_pct',
+      'VWC_100cm_pct'
+    ];
+    const rows = progressiveTelemetryData.map(pt => [
+      pt.time,
+      pt.porePressure,
+      pt.effectiveStress,
+      pt.displacementMm,
+      pt.inverseVelocity,
+      pt.rainfallRate,
+      pt.cumulativeRain,
+      pt.aeHits,
+      pt.ppvVelocity,
+      pt.vwc10cm,
+      pt.vwc30cm,
+      pt.vwc60cm,
+      pt.vwc100cm
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `NEXUS_GEOTECHNICAL_TELEMETRY_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
 
   // Real-time Terrain Analytics & Field Simulation States
@@ -1742,14 +1873,66 @@ export default function SensorPricingPage() {
         border: '1px solid rgba(0, 229, 255, 0.35)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(0, 229, 255, 0.08)'
       }}>
-        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 10px var(--cyan)' }} />
-            <span className="label-caps" style={{ color: 'var(--cyan)' }}>FEATURED FIELD INSTRUMENT SPOTLIGHT • 8K OPTICAL VIEW</span>
+            <span className="label-caps" style={{ color: 'var(--cyan)' }}>FEATURED FIELD INSTRUMENT SPOTLIGHT • MULTI-SPECTRAL FIELD SCAN</span>
           </div>
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-            CLICK ANY THUMBNAIL BELOW TO INSPECT HARDWARE
-          </span>
+          {/* Real-time Optical Mode Switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginRight: '2px' }}>MODE:</span>
+            <button
+              onClick={() => { playTacticalAudio('click'); setSpotlightVisualMode('OPTICAL'); }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                border: spotlightVisualMode === 'OPTICAL' ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                background: spotlightVisualMode === 'OPTICAL' ? 'rgba(0, 229, 255, 0.22)' : 'rgba(0,0,0,0.4)',
+                color: spotlightVisualMode === 'OPTICAL' ? 'var(--cyan)' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📷 OPTICAL RGB
+            </button>
+            <button
+              onClick={() => { playTacticalAudio('click'); setSpotlightVisualMode('THERMAL'); }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                border: spotlightVisualMode === 'THERMAL' ? '1px solid #ff7b00' : '1px solid var(--border-subtle)',
+                background: spotlightVisualMode === 'THERMAL' ? 'rgba(255, 123, 0, 0.22)' : 'rgba(0,0,0,0.4)',
+                color: spotlightVisualMode === 'THERMAL' ? '#ff9e3b' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🌡️ THERMAL LWIR
+            </button>
+            <button
+              onClick={() => { playTacticalAudio('click'); setSpotlightVisualMode('LIDAR'); }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                border: spotlightVisualMode === 'LIDAR' ? '1px solid #22c55e' : '1px solid var(--border-subtle)',
+                background: spotlightVisualMode === 'LIDAR' ? 'rgba(34, 197, 94, 0.22)' : 'rgba(0,0,0,0.4)',
+                color: spotlightVisualMode === 'LIDAR' ? '#4ade80' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📡 LIDAR 3D
+            </button>
+          </div>
         </div>
         <div className="panel-body" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 440px) 1fr', gap: '24px', alignItems: 'center' }}>
@@ -1759,9 +1942,18 @@ export default function SensorPricingPage() {
               height: '270px',
               borderRadius: '8px',
               overflow: 'hidden',
-              border: '1px solid rgba(0, 229, 255, 0.4)',
-              boxShadow: '0 0 20px rgba(0, 229, 255, 0.15)',
-              background: '#040608'
+              border: spotlightVisualMode === 'THERMAL'
+                ? '1px solid rgba(255, 123, 0, 0.6)'
+                : spotlightVisualMode === 'LIDAR'
+                ? '1px solid rgba(34, 197, 94, 0.6)'
+                : '1px solid rgba(0, 229, 255, 0.4)',
+              boxShadow: spotlightVisualMode === 'THERMAL'
+                ? '0 0 24px rgba(255, 123, 0, 0.25)'
+                : spotlightVisualMode === 'LIDAR'
+                ? '0 0 24px rgba(34, 197, 94, 0.25)'
+                : '0 0 20px rgba(0, 229, 255, 0.15)',
+              background: '#040608',
+              transition: 'border 0.3s ease, box-shadow 0.3s ease'
             }}>
               <div className="tactical-corner tactical-corner-tl" />
               <div className="tactical-corner tactical-corner-tr" />
@@ -1771,14 +1963,27 @@ export default function SensorPricingPage() {
               <img
                 src={SENSOR_IMAGE_MAP[spotlightItem.id] || spotlightItem.imageUrl}
                 alt={spotlightItem.name}
+                className={spotlightVisualMode === 'THERMAL' ? 'thermal-shader-view' : ''}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  filter: 'contrast(1.1) brightness(1.02)'
+                  filter: spotlightVisualMode === 'OPTICAL'
+                    ? 'contrast(1.08) brightness(1.02)'
+                    : spotlightVisualMode === 'LIDAR'
+                    ? 'contrast(1.35) brightness(0.9) grayscale(0.5)'
+                    : undefined,
+                  transition: 'filter 0.3s ease'
                 }}
               />
               <div className="sensor-scan-line" />
+
+              {/* LiDAR Laser Grid & Scan Bar Overlay */}
+              {spotlightVisualMode === 'LIDAR' && (
+                <div className="lidar-contour-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                  <div className="laser-scan-bar" />
+                </div>
+              )}
 
               {/* Tactical HUD Overlay Details */}
               <div style={{
@@ -1786,15 +1991,62 @@ export default function SensorPricingPage() {
                 top: '12px',
                 left: '12px',
                 background: 'rgba(0,0,0,0.85)',
-                border: '1px solid var(--cyan)',
+                border: spotlightVisualMode === 'THERMAL'
+                  ? '1px solid #ff7b00'
+                  : spotlightVisualMode === 'LIDAR'
+                  ? '1px solid #22c55e'
+                  : '1px solid var(--cyan)',
                 borderRadius: '4px',
                 padding: '4px 8px',
                 fontSize: '11px',
                 fontWeight: 700,
-                color: '#00e5ff',
-                fontFamily: 'var(--font-mono)'
+                color: spotlightVisualMode === 'THERMAL'
+                  ? '#ff9e3b'
+                  : spotlightVisualMode === 'LIDAR'
+                  ? '#4ade80'
+                  : '#00e5ff',
+                fontFamily: 'var(--font-mono)',
+                backdropFilter: 'blur(4px)'
               }}>
-                ● LIVE CALIBRATED OPTICAL FEED
+                {spotlightVisualMode === 'OPTICAL' && '● LIVE 8K OPTICAL FEED [50mm f/2.8 IS]'}
+                {spotlightVisualMode === 'THERMAL' && '● RADIOMETRIC THERMAL LWIR (8-14μm)'}
+                {spotlightVisualMode === 'LIDAR' && '● TIME-OF-FLIGHT LIDAR TOF (905nm)'}
+              </div>
+
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'rgba(0,0,0,0.85)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: '#cbd5e1',
+                fontFamily: 'var(--font-mono)',
+                backdropFilter: 'blur(4px)'
+              }}>
+                {spotlightVisualMode === 'OPTICAL' && 'EXP: 1/800s • ISO 100'}
+                {spotlightVisualMode === 'THERMAL' && 'T_CORE: 19.2°C • ε: 0.96'}
+                {spotlightVisualMode === 'LIDAR' && 'DENSITY: 148 pts/m²'}
+              </div>
+
+              <div style={{
+                position: 'absolute',
+                bottom: '12px',
+                left: '12px',
+                background: 'rgba(0,0,0,0.85)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                fontFamily: 'var(--font-mono)',
+                backdropFilter: 'blur(4px)'
+              }}>
+                STATION ID: SN-GEO-{spotlightItem.id.toString().padStart(3, '0')}
               </div>
 
               <div style={{
@@ -1808,7 +2060,8 @@ export default function SensorPricingPage() {
                 fontSize: '11px',
                 fontWeight: 700,
                 color: '#22c55e',
-                fontFamily: 'var(--font-mono)'
+                fontFamily: 'var(--font-mono)',
+                backdropFilter: 'blur(4px)'
               }}>
                 {SIMULATED_TELEMETRY[spotlightItem.id]?.value}
               </div>
@@ -1853,7 +2106,21 @@ export default function SensorPricingPage() {
                   onClick={() => { playTacticalAudio('click'); setInspectModalItem(spotlightItem); }}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span>🔍</span> Inspect Full Technical Datasheet
+                  <span>🔍</span> Inspect Technical Datasheet
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => { playTacticalAudio('click'); setActiveTab('GRAPHS'); }}
+                  style={{
+                    background: 'rgba(0, 229, 255, 0.12)',
+                    border: '1px solid var(--cyan)',
+                    color: 'var(--cyan)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>📈</span> Progressive Live Graphs & Predictions
                 </button>
                 <button
                   className="btn"
@@ -1870,7 +2137,7 @@ export default function SensorPricingPage() {
                     gap: '6px'
                   }}
                 >
-                  <span>🔬</span> {showDiagnosticsPanel ? 'Hide Live Diagnostics' : 'Live Signal & Diagnostics'}
+                  <span>🔬</span> {showDiagnosticsPanel ? 'Hide Diagnostics' : 'Signal Diagnostics'}
                 </button>
                 <button
                   className="btn"
@@ -2157,7 +2424,7 @@ export default function SensorPricingPage() {
             <span>⚡</span> POWER & SOLAR AUTONOMY ({powerAutonomy.autonomyDays} DAYS)
           </button>
           <button
-            onClick={() => setActiveTab('BOM_TABLE')}
+            onClick={() => { playTacticalAudio('click'); setActiveTab('BOM_TABLE'); }}
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
@@ -2174,6 +2441,36 @@ export default function SensorPricingPage() {
             }}
           >
             <span>📋</span> BOM COST MATRIX
+          </button>
+          <button
+            onClick={() => { playTacticalAudio('click'); setActiveTab('GRAPHS'); }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'GRAPHS' ? 'var(--cyan)' : 'transparent',
+              color: activeTab === 'GRAPHS' ? '#000' : 'var(--text-secondary)',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>📈</span> PROGRESSIVE REAL-TIME GRAPHS
+            <span style={{
+              background: activeTab === 'GRAPHS' ? 'rgba(0,0,0,0.25)' : 'rgba(0, 229, 255, 0.2)',
+              color: activeTab === 'GRAPHS' ? '#000' : 'var(--cyan)',
+              fontSize: '10px',
+              padding: '1px 6px',
+              borderRadius: '10px',
+              fontWeight: 800,
+              letterSpacing: '0.5px'
+            }}>
+              ● LIVE STREAM
+            </span>
           </button>
         </div>
 
@@ -4999,6 +5296,906 @@ export default function SensorPricingPage() {
           </div>
         </div>
       )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 5th TAB: PROGRESSIVE REAL-TIME GEOTECHNICAL TELEMETRY SUITE */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeTab === 'GRAPHS' && (() => {
+        const data = progressiveTelemetryData;
+        const lastPt = data[data.length - 1] || data[0];
+        const normalEffStress = Math.max(5, 210 - lastPt.porePressure);
+        const shearStrength = 12 + normalEffStress * 0.6249;
+        const liveFoS = +(shearStrength / 62.0).toFixed(2);
+        const foSStatus = liveFoS < 1.05 ? 'CRITICAL (IMMINENT SLIP)' : liveFoS < 1.25 ? 'WARNING (REDUCED MARGIN)' : 'STABLE EQUILIBRIUM';
+        const foSColor = liveFoS < 1.05 ? '#ff3b5c' : liveFoS < 1.25 ? '#ffb020' : '#22c55e';
+        const saitoCountdownHours = lastPt.inverseVelocity > 0 ? (lastPt.inverseVelocity * 2.2).toFixed(1) : '0.0';
+
+        // Inclinometer Depth Deflection Profile Data (0 to 25m)
+        const inclinometerDepths = [
+          { z: 0.0, base: 0.0, h24: 4.8, live: +(lastPt.displacementMm).toFixed(2), stratum: 'TOPSOIL' },
+          { z: 2.0, base: 0.0, h24: 4.6, live: +(lastPt.displacementMm - 0.2).toFixed(2), stratum: 'COLLUVIUM' },
+          { z: 4.0, base: 0.0, h24: 4.4, live: +(lastPt.displacementMm - 0.4).toFixed(2), stratum: 'WEATHERED SILT' },
+          { z: 6.0, base: 0.0, h24: 4.2, live: +(lastPt.displacementMm - 0.7).toFixed(2), stratum: 'SATURATED CLAY' },
+          { z: 8.0, base: 0.0, h24: 4.0, live: +(lastPt.displacementMm - 0.9).toFixed(2), stratum: 'UPPER SLIP BOUNDARY' },
+          { z: 8.2, base: 0.0, h24: 1.2, live: +(lastPt.displacementMm * 0.42).toFixed(2), stratum: 'CRITICAL SHEAR PLANE ⚠️' },
+          { z: 9.0, base: 0.0, h24: 0.6, live: 2.1, stratum: 'LOWER SHEAR CONTACT' },
+          { z: 12.0, base: 0.0, h24: 0.2, live: 0.8, stratum: 'FRACTURED QUARTZITE' },
+          { z: 16.0, base: 0.0, h24: 0.0, live: 0.2, stratum: 'INTACT BEDROCK' },
+          { z: 20.0, base: 0.0, h24: 0.0, live: 0.0, stratum: 'BEDROCK ANCHOR' },
+          { z: 25.0, base: 0.0, h24: 0.0, live: 0.0, stratum: 'FIXED DATUM' },
+        ];
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Real-time Telemetry Station Header & Global Controls */}
+            <div className="panel" style={{ background: 'linear-gradient(135deg, rgba(6, 12, 20, 0.96), rgba(12, 22, 34, 0.96))', border: '1px solid var(--border-cyan)' }}>
+              <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    background: graphStreamingActive ? '#22c55e' : '#ffb020',
+                    boxShadow: graphStreamingActive ? '0 0 12px #22c55e' : '0 0 8px #ffb020',
+                    animation: graphStreamingActive ? 'livePointPulse 1.5s infinite' : 'none'
+                  }} />
+                  <span className="label-caps" style={{ color: 'var(--cyan)' }}>
+                    PROGRESSIVE GEOTECHNICAL TELEMETRY ENGINE • LEWS SPECIFICATION ISO 18674
+                  </span>
+                  <span className="chip chip-cyan" style={{ fontSize: '10px', fontFamily: 'var(--font-mono)' }}>
+                    {graphStreamingActive ? '● STREAMING ACTIVE (1.5s)' : '⏸ STREAM PAUSED'}
+                  </span>
+                  {graphCriticalPulse && (
+                    <span className="chip chip-red alert-critical-pulse" style={{ fontSize: '10px', fontWeight: 800 }}>
+                      ⚡ CRITICAL SEEPAGE SURGE INJECTED
+                    </span>
+                  )}
+                </div>
+
+                {/* Right Header Actions: Window selector & Stream triggers */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {/* Station Selector */}
+                  <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-subtle)' }}>
+                    {[
+                      { id: 'STATION_A', label: '🏔️ STA-A (Crest Scarp)' },
+                      { id: 'STATION_B', label: '🌊 STA-B (Debris Ravine)' },
+                      { id: 'STATION_C', label: '🕳️ STA-C (Borehole BH-04)' }
+                    ].map(st => (
+                      <button
+                        key={st.id}
+                        onClick={() => { playTacticalAudio('click'); setActiveGraphStation(st.id); }}
+                        style={{
+                          background: activeGraphStation === st.id ? 'var(--cyan)' : 'transparent',
+                          color: activeGraphStation === st.id ? '#000' : 'var(--text-secondary)',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Time Window Pills */}
+                  <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-subtle)' }}>
+                    {['LIVE', '1H', '24H', '7D', 'SEASON'].map(win => (
+                      <button
+                        key={win}
+                        onClick={() => { playTacticalAudio('click'); setGraphTimeWindow(win); }}
+                        style={{
+                          background: graphTimeWindow === win ? 'rgba(0, 229, 255, 0.25)' : 'transparent',
+                          color: graphTimeWindow === win ? 'var(--cyan)' : 'var(--text-muted)',
+                          border: graphTimeWindow === win ? '1px solid var(--cyan)' : 'none',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-mono)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {win}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Pause / Resume Button */}
+                  <button
+                    className="btn"
+                    onClick={() => { playTacticalAudio('click'); setGraphStreamingActive(!graphStreamingActive); }}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid var(--border-default)',
+                      padding: '5px 10px',
+                      fontSize: '11px',
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    {graphStreamingActive ? '⏸ Pause Stream' : '▶ Resume Stream'}
+                  </button>
+
+                  {/* Pulse Injection Trigger */}
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      playTacticalAudio('alarm');
+                      setGraphCriticalPulse(true);
+                      setTimeout(() => setGraphCriticalPulse(false), 5000);
+                    }}
+                    style={{
+                      background: graphCriticalPulse ? 'rgba(255, 59, 92, 0.3)' : 'rgba(255, 176, 32, 0.15)',
+                      border: graphCriticalPulse ? '1px solid var(--red)' : '1px solid var(--amber)',
+                      color: graphCriticalPulse ? 'var(--red)' : 'var(--amber)',
+                      padding: '5px 12px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    ⚡ Trigger Seepage Pulse
+                  </button>
+
+                  {/* CSV Export Button */}
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleDownloadTelemetryCsv}
+                    style={{
+                      padding: '5px 12px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    📥 Export CSV
+                  </button>
+                </div>
+              </div>
+
+              {/* Real-time Physical KPI Summary Strip */}
+              <div className="panel-body" style={{ padding: '16px 20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                  {/* Card 1: Factor of Safety */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${foSColor}`, borderRadius: '6px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>MOHR-COULOMB FoS</span>
+                      <span style={{ fontSize: '9px', color: foSColor, fontWeight: 700 }}>{foSStatus}</span>
+                    </div>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: foSColor, fontFamily: 'var(--font-mono)' }}>
+                      {liveFoS}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Rupture Criterion: FoS &lt; 1.00 (Critical equilibrium)
+                    </div>
+                  </div>
+
+                  {/* Card 2: Saito Inverse Velocity Forecast */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255, 176, 32, 0.4)', borderRadius: '6px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SAITO 1/v FORECAST</span>
+                      <span className="chip chip-amber" style={{ fontSize: '8px' }}>TERTIARY CREEP</span>
+                    </div>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--amber)', fontFamily: 'var(--font-mono)' }}>
+                      ~{saitoCountdownHours} hrs
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Inverse velocity 1/v = {lastPt.inverseVelocity} d/mm (Approaching 0)
+                    </div>
+                  </div>
+
+                  {/* Card 3: Pore Pressure & Effective Stress */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '6px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>PORE-WATER PRESSURE (u)</span>
+                      <span style={{ fontSize: '9px', color: lastPt.porePressure > 140 ? 'var(--red)' : 'var(--cyan)' }}>
+                        {lastPt.porePressure > 140 ? 'HIGH SEEPAGE' : 'ELEVATED'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                      {lastPt.porePressure} <span style={{ fontSize: '14px', fontWeight: 500 }}>kPa</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Effective Stress σ': {lastPt.effectiveStress} kPa (Drop of {(142.8 - lastPt.effectiveStress).toFixed(1)} kPa)
+                    </div>
+                  </div>
+
+                  {/* Card 4: Cumulative Rainfall & Burst Intensity */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '6px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>MONSOON RAIN ACCUMULATION</span>
+                      <span className="chip chip-blue" style={{ fontSize: '8px' }}>CAINE THRESHOLD EXCEEDED</span>
+                    </div>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>
+                      {lastPt.cumulativeRain} <span style={{ fontSize: '14px', fontWeight: 500 }}>mm</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Burst Rate: {lastPt.rainfallRate} mm/hr (Torrential infiltration)
+                    </div>
+                  </div>
+
+                  {/* Card 5: Acoustic Fracturing & Seismics */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(217, 70, 239, 0.4)', borderRadius: '6px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>MICRO-SEISMIC AE BURSTS</span>
+                      <span style={{ fontSize: '9px', color: '#d946ef' }}>PAC 150kHz SENSOR</span>
+                    </div>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: '#d946ef', fontFamily: 'var(--font-mono)' }}>
+                      {lastPt.aeHits} <span style={{ fontSize: '14px', fontWeight: 500 }}>hits/min</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      PPV: {lastPt.ppvVelocity} mm/s (DIN 4150 limit: 20 mm/s)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 6 PROGRESSIVE REAL-TIME GEOTECHNICAL GRAPHS GRID */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '20px' }}>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 1: PORE PRESSURE (u) VS. EFFECTIVE STRESS (σ')     */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: 'var(--cyan)' }}>💧</span>
+                    <span className="label-caps">1. PORE-WATER PRESSURE (u) VS. TERZAGHI EFFECTIVE STRESS (σ')</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    σ' = σ_total - u (kPa)
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      <defs>
+                        <linearGradient id="poreGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ff3b5c" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.05" />
+                        </linearGradient>
+                        <linearGradient id="stressGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ffb020" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#ffb020" stopOpacity="0.02" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (Pore Pressure kPa: 100 to 180) */}
+                      <text x="40" y="34" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">180</text>
+                      <text x="40" y="74" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">160</text>
+                      <text x="40" y="114" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">140</text>
+                      <text x="40" y="154" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">120</text>
+                      <text x="40" y="193" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">100</text>
+
+                      {/* Y-Axis Labels Right (Effective Stress kPa: 30 to 110) */}
+                      <text x="486" y="34" fill="var(--amber)" fontSize="9" fontFamily="monospace">30</text>
+                      <text x="486" y="74" fill="var(--amber)" fontSize="9" fontFamily="monospace">50</text>
+                      <text x="486" y="114" fill="var(--amber)" fontSize="9" fontFamily="monospace">70</text>
+                      <text x="486" y="154" fill="var(--amber)" fontSize="9" fontFamily="monospace">90</text>
+                      <text x="486" y="193" fill="var(--amber)" fontSize="9" fontFamily="monospace">110</text>
+
+                      {/* Critical Liquefaction Threshold Line (135 kPa -> y ≈ 118) */}
+                      <line x1="45" y1="118" x2="480" y2="118" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="113" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        CRITICAL LIQUEFACTION LIMIT: 135 kPa
+                      </text>
+
+                      {/* Area Fill for Pore Pressure */}
+                      <path
+                        d={`M 45 190 ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.porePressure - 100) / 80) * 160;
+                          return `L ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')} L 480 190 Z`}
+                        fill="url(#poreGrad)"
+                      />
+
+                      {/* Pore Pressure Line */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.porePressure - 100) / 80) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#00e5ff"
+                        strokeWidth="2.5"
+                      />
+
+                      {/* Effective Stress Line */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.effectiveStress - 30) / 80) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#ffb020"
+                        strokeWidth="2"
+                        strokeDasharray="2 1"
+                      />
+
+                      {/* Pulsing Live Point for latest sample */}
+                      {(() => {
+                        const lastX = 480;
+                        const lastY = 190 - ((lastPt.porePressure - 100) / 80) * 160;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="9" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
+                            <circle r="4.5" fill="#00e5ff" />
+                            <circle r="2" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: 'var(--cyan)' }}>● Pore Pressure (u): <strong>{lastPt.porePressure} kPa</strong></span>
+                      <span style={{ color: 'var(--amber)' }}>-- Effective Stress (σ'): <strong>{lastPt.effectiveStress} kPa</strong></span>
+                    </div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
+                      Buffer: {data[0].time} → {lastPt.time}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 2: 3D DISPLACEMENT & SAITO INVERSE VELOCITY (1/v)   */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(255, 176, 32, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: 'var(--amber)' }}>📐</span>
+                    <span className="label-caps">2. 3D DISPLACEMENT & SAITO INVERSE VELOCITY FORECAST (1/v → 0)</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                    COLLAPSE HORIZON: ~{saitoCountdownHours}h
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (Cumulative Disp mm: 12 to 18 mm) */}
+                      <text x="40" y="34" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">18mm</text>
+                      <text x="40" y="86" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">16mm</text>
+                      <text x="40" y="138" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">14mm</text>
+                      <text x="40" y="193" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">12mm</text>
+
+                      {/* Y-Axis Labels Right (Saito 1/v d/mm: 0 to 16) */}
+                      <text x="486" y="34" fill="#ff9e3b" fontSize="9" fontFamily="monospace">16</text>
+                      <text x="486" y="86" fill="#ff9e3b" fontSize="9" fontFamily="monospace">10</text>
+                      <text x="486" y="138" fill="#ff9e3b" fontSize="9" fontFamily="monospace">5</text>
+                      <text x="486" y="193" fill="#ff3b5c" fontSize="9" fontFamily="monospace">0 (FAIL)</text>
+
+                      {/* Saito Zero Intercept Rupture Line */}
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="#ff3b5c" strokeWidth="2" />
+
+                      {/* Cumulative Displacement Curve (Green) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.displacementMm - 12) / 6) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#22c55e"
+                        strokeWidth="2.5"
+                      />
+
+                      {/* Saito Inverse Velocity Line (Orange) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - (Math.max(0, d.inverseVelocity) / 16) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#ff9e3b"
+                        strokeWidth="2.5"
+                      />
+
+                      {/* Saito Linear Rupture Projection Ray towards 1/v = 0 */}
+                      {(() => {
+                        const lastX = 480;
+                        const lastY = 190 - (Math.max(0, lastPt.inverseVelocity) / 16) * 160;
+                        const projX = Math.min(515, lastX + 30);
+                        return (
+                          <g>
+                            <line x1={lastX} y1={lastY} x2={projX} y2="190" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="3 2" />
+                            <polygon points={`${projX},186 ${projX+4},190 ${projX},194 ${projX-4},190`} fill="#ff3b5c" />
+                          </g>
+                        );
+                      })()}
+
+                      {/* Live Dot on Saito Curve */}
+                      {(() => {
+                        const lastX = 480;
+                        const lastY = 190 - (Math.max(0, lastPt.inverseVelocity) / 16) * 160;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="8" fill="rgba(255, 158, 59, 0.4)" className="live-point-pulse" />
+                            <circle r="4" fill="#ff9e3b" />
+                            <circle r="1.5" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: '#22c55e' }}>● Cumulative Disp: <strong>{lastPt.displacementMm} mm</strong></span>
+                      <span style={{ color: '#ff9e3b' }}>● Saito 1/v: <strong>{lastPt.inverseVelocity} d/mm</strong></span>
+                    </div>
+                    <span className="chip chip-amber" style={{ fontSize: '9px' }}>
+                      J. Saito Creep Law: d(1/v)/dt &lt; 0
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 3: BOREHOLE INCLINOMETER DEPTH DEFLECTION PROFILE   */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(34, 197, 94, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#22c55e' }}>🕳️</span>
+                    <span className="label-caps">3. BOREHOLE INCLINOMETER PROFILE VS. DEPTH (0m - 25m)</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: 'var(--red)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                    ⚠️ SHEAR PLANE DETECTED AT 8.2m DEPTH
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      {/* Stratigraphy Shading Bands */}
+                      {/* Topsoil & Colluvium: 0 - 4m -> y: 25 to 51 */}
+                      <rect x="75" y="25" width="415" height="26" fill="rgba(180, 120, 60, 0.12)" />
+                      {/* Weathered Siltstone: 4 - 8.2m -> y: 51 to 78 */}
+                      <rect x="75" y="51" width="415" height="27" fill="rgba(210, 160, 60, 0.14)" />
+                      {/* Shear Zone Highlight: 8.0 - 9.0m -> y: 77 to 84 */}
+                      <rect x="75" y="77" width="415" height="8" fill="rgba(255, 59, 92, 0.3)" />
+                      {/* Bedrock Anchor: 12 - 25m -> y: 104 to 190 */}
+                      <rect x="75" y="104" width="415" height="86" fill="rgba(60, 100, 160, 0.1)" />
+
+                      {/* Depth Grid Lines */}
+                      {[0, 5, 8.2, 12, 16, 20, 25].map(z => {
+                        const y = 25 + (z / 25) * 165;
+                        return (
+                          <g key={z}>
+                            <line x1="75" y1={y} x2="490" y2={y} stroke={z === 8.2 ? 'rgba(255, 59, 92, 0.7)' : 'rgba(255,255,255,0.06)'} strokeDasharray={z === 8.2 ? 'none' : '3 3'} />
+                            <text x="70" y={y + 3} textAnchor="end" fill={z === 8.2 ? '#ff3b5c' : 'var(--text-muted)'} fontSize="9" fontFamily="monospace">
+                              {z}m
+                            </text>
+                          </g>
+                        );
+                      })}
+
+                      {/* Vertical Datum Line (0mm Deflection -> x = 115) */}
+                      <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.3)" />
+                      <line x1="195" y1="25" x2="195" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+                      <line x1="295" y1="25" x2="295" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+                      <line x1="395" y1="25" x2="395" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+
+                      {/* X-Axis Deflection Labels */}
+                      <text x="115" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">0mm</text>
+                      <text x="195" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">5mm</text>
+                      <text x="295" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">10mm</text>
+                      <text x="395" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">15mm</text>
+
+                      {/* Shear Plane Tag */}
+                      <text x="485" y="74" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        ◀ SLIP INTERFACE @ 8.2m
+                      </text>
+
+                      {/* Baseline Profile (T0: 0mm all depths) */}
+                      <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeDasharray="3 3" />
+
+                      {/* 24-Hour Ago Profile (Cyan) */}
+                      <path
+                        d={`M ${inclinometerDepths.map((p, i) => {
+                          const y = 25 + (p.z / 25) * 165;
+                          const x = 115 + (p.h24 / 20) * 370;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#00e5ff"
+                        strokeWidth="1.8"
+                        strokeDasharray="2 1"
+                      />
+
+                      {/* Live Profile (Green turning Red in shear zone) */}
+                      <path
+                        d={`M ${inclinometerDepths.map((p, i) => {
+                          const y = 25 + (p.z / 25) * 165;
+                          const x = 115 + (p.live / 20) * 370;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#22c55e"
+                        strokeWidth="2.8"
+                      />
+
+                      {/* Live Nodes on the Profile */}
+                      {inclinometerDepths.map((p, i) => {
+                        const y = 25 + (p.z / 25) * 165;
+                        const x = 115 + (p.live / 20) * 370;
+                        const isShear = p.z === 8.2;
+                        return (
+                          <circle
+                            key={i}
+                            cx={x}
+                            cy={y}
+                            r={isShear ? 5 : 2.5}
+                            fill={isShear ? '#ff3b5c' : '#22c55e'}
+                            className={isShear ? 'live-point-pulse' : ''}
+                          />
+                        );
+                      })}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: '#22c55e' }}>● Live Deflection: <strong>{lastPt.displacementMm} mm</strong></span>
+                      <span style={{ color: '#00e5ff' }}>-- 24h Ago: <strong>4.8 mm</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>- - Baseline: <strong>0.0 mm</strong></span>
+                    </div>
+                    <span style={{ color: 'var(--cyan)', fontSize: '10px' }}>
+                      IPI Transducers: 12-Node Smart String
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 4: PRECIPITATION HYETOGRAPH & CAINE I-D THRESHOLD   */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(96, 165, 250, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#60a5fa' }}>🌧️</span>
+                    <span className="label-caps">4. PRECIPITATION HYETOGRAPH & CAINE I-D COLLAPSE CRITERION</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>
+                    I = 14.82 · D^(-0.39) (mm/hr)
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      <defs>
+                        <linearGradient id="rainBarGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.85" />
+                          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.3" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (Rainfall Rate mm/hr: 0 to 50) */}
+                      <text x="40" y="34" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">50mm</text>
+                      <text x="40" y="86" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">35mm</text>
+                      <text x="40" y="138" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">20mm</text>
+                      <text x="40" y="193" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">0mm</text>
+
+                      {/* Y-Axis Labels Right (Cumulative mm: 200 to 230) */}
+                      <text x="486" y="34" fill="#93c5fd" fontSize="9" fontFamily="monospace">230mm</text>
+                      <text x="486" y="86" fill="#93c5fd" fontSize="9" fontFamily="monospace">220mm</text>
+                      <text x="486" y="138" fill="#93c5fd" fontSize="9" fontFamily="monospace">210mm</text>
+                      <text x="486" y="193" fill="#93c5fd" fontSize="9" fontFamily="monospace">200mm</text>
+
+                      {/* Caine Empirical Landslide Trigger Line (22 mm/h -> y ≈ 120) */}
+                      <line x1="45" y1="120" x2="480" y2="120" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="115" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        CAINE 1980 COLLAPSE THRESHOLD (22 mm/h)
+                      </text>
+
+                      {/* Rainfall Intensity Hyetograph Bars */}
+                      {data.map((d, i) => {
+                        const x = 48 + (i / (data.length - 1)) * 425;
+                        const barH = (d.rainfallRate / 50) * 155;
+                        const y = 190 - barH;
+                        return (
+                          <rect
+                            key={i}
+                            x={x - 6}
+                            y={y}
+                            width="12"
+                            height={barH}
+                            fill="url(#rainBarGrad)"
+                            rx="2"
+                          />
+                        );
+                      })}
+
+                      {/* Cumulative Rainfall Line */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 48 + (i / (data.length - 1)) * 425;
+                          const y = 190 - ((d.cumulativeRain - 200) / 30) * 155;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#93c5fd"
+                        strokeWidth="2.5"
+                      />
+
+                      {/* Live Dot on Cumulative Curve */}
+                      {(() => {
+                        const lastX = 473;
+                        const lastY = 190 - ((lastPt.cumulativeRain - 200) / 30) * 155;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="7" fill="rgba(147, 197, 253, 0.4)" className="live-point-pulse" />
+                            <circle r="3.5" fill="#93c5fd" />
+                            <circle r="1" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: '#38bdf8' }}>▮ Instantaneous Rate: <strong>{lastPt.rainfallRate} mm/hr</strong></span>
+                      <span style={{ color: '#93c5fd' }}>● Cumulative Rain: <strong>{lastPt.cumulativeRain} mm</strong></span>
+                    </div>
+                    <span className="chip chip-red" style={{ fontSize: '9px' }}>
+                      CRITICAL ANTECEDENT SATURATION
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 5: MICRO-SEISMIC ACOUSTIC EMISSION & PPV            */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(217, 70, 239, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#d946ef' }}>⚡</span>
+                    <span className="label-caps">5. MICRO-SEISMIC ACOUSTIC EMISSION (PAC 150kHz) & PPV VELOCITY</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: '#d946ef', fontFamily: 'var(--font-mono)' }}>
+                    FRACTURE ENERGY ACOUSTICS
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (AE Hits/min: 0 to 120) */}
+                      <text x="40" y="34" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">120</text>
+                      <text x="40" y="86" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">80</text>
+                      <text x="40" y="138" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">40</text>
+                      <text x="40" y="193" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">0</text>
+
+                      {/* Y-Axis Labels Right (PPV mm/s: 0 to 30) */}
+                      <text x="486" y="34" fill="#00e5ff" fontSize="9" fontFamily="monospace">30</text>
+                      <text x="486" y="86" fill="#00e5ff" fontSize="9" fontFamily="monospace">20</text>
+                      <text x="486" y="138" fill="#00e5ff" fontSize="9" fontFamily="monospace">10</text>
+                      <text x="486" y="193" fill="#00e5ff" fontSize="9" fontFamily="monospace">0</text>
+
+                      {/* DIN 4150 Ground Vibration Limit (20 mm/s -> y ≈ 86) */}
+                      <line x1="45" y1="86" x2="480" y2="86" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="81" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        DIN 4150 STRUCTURAL RISK (20 mm/s)
+                      </text>
+
+                      {/* AE Hits Vertical Columns */}
+                      {data.map((d, i) => {
+                        const x = 48 + (i / (data.length - 1)) * 425;
+                        const barH = (Math.min(120, d.aeHits) / 120) * 155;
+                        const y = 190 - barH;
+                        return (
+                          <rect
+                            key={i}
+                            x={x - 4}
+                            y={y}
+                            width="8"
+                            height={barH}
+                            fill="rgba(217, 70, 239, 0.6)"
+                            rx="1"
+                          />
+                        );
+                      })}
+
+                      {/* PPV Waveform Trace */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 48 + (i / (data.length - 1)) * 425;
+                          const y = 190 - (d.ppvVelocity / 30) * 155;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#00e5ff"
+                        strokeWidth="2.2"
+                      />
+
+                      {/* Live Dot on PPV */}
+                      {(() => {
+                        const lastX = 473;
+                        const lastY = 190 - (lastPt.ppvVelocity / 30) * 155;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="7" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
+                            <circle r="3.5" fill="#00e5ff" />
+                            <circle r="1" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: '#d946ef' }}>▮ AE Hits: <strong>{lastPt.aeHits} hits/min</strong></span>
+                      <span style={{ color: '#00e5ff' }}>● Particle Velocity: <strong>{lastPt.ppvVelocity} mm/s</strong></span>
+                    </div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
+                      Transducer: Piezoelectric 150kHz
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 6: MULTI-DEPTH SOIL MOISTURE SATURATION GRADIENT   */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(168, 85, 247, 0.25)' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#a855f7' }}>🌱</span>
+                    <span className="label-caps">6. MULTI-DEPTH SOIL VWC (%) SATURATION GRADIENT (10cm - 100cm)</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: '#a855f7', fontFamily: 'var(--font-mono)' }}>
+                    WETTING FRONT VELOCITY: 4.2 cm/hr
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (VWC %: 60 to 100%) */}
+                      <text x="40" y="34" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">100%</text>
+                      <text x="40" y="74" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">90%</text>
+                      <text x="40" y="114" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">80%</text>
+                      <text x="40" y="154" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">70%</text>
+                      <text x="40" y="193" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">60%</text>
+
+                      {/* Saturation / Field Capacity Limit (85% VWC -> y ≈ 94) */}
+                      <line x1="45" y1="94" x2="480" y2="94" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="89" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        SOIL FIELD SATURATION CAPACITY (85% VWC)
+                      </text>
+
+                      {/* 10cm Depth Curve (Cyan) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.vwc10cm - 60) / 40) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#00e5ff"
+                        strokeWidth="2.5"
+                      />
+
+                      {/* 30cm Depth Curve (Green) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.vwc30cm - 60) / 40) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#22c55e"
+                        strokeWidth="2"
+                      />
+
+                      {/* 60cm Depth Curve (Amber) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.vwc60cm - 60) / 40) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#ffb020"
+                        strokeWidth="2"
+                      />
+
+                      {/* 100cm Depth Curve (Purple) */}
+                      <path
+                        d={`M ${data.map((d, i) => {
+                          const x = 45 + (i / (data.length - 1)) * 435;
+                          const y = 190 - ((d.vwc100cm - 60) / 40) * 160;
+                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}`}
+                        fill="none"
+                        stroke="#c084fc"
+                        strokeWidth="2"
+                        strokeDasharray="3 2"
+                      />
+
+                      {/* Pulsing Live Dot on 10cm */}
+                      {(() => {
+                        const lastX = 480;
+                        const lastY = 190 - ((lastPt.vwc10cm - 60) / 40) * 160;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="7" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
+                            <circle r="3.5" fill="#00e5ff" />
+                            <circle r="1" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <span style={{ color: '#00e5ff' }}>● 10cm: <strong>{lastPt.vwc10cm}%</strong></span>
+                      <span style={{ color: '#22c55e' }}>● 30cm: <strong>{lastPt.vwc30cm}%</strong></span>
+                      <span style={{ color: '#ffb020' }}>● 60cm: <strong>{lastPt.vwc60cm}%</strong></span>
+                      <span style={{ color: '#c084fc' }}>-- 100cm: <strong>{lastPt.vwc100cm}%</strong></span>
+                    </div>
+                    <span style={{ color: 'var(--cyan)', fontSize: '10px' }}>
+                      Sentek Drill & Drop TDR
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {/* FULL TECHNICAL DATASHEET & 8K PHOTO INSPECTION MODAL */}
       {inspectModalItem && (
