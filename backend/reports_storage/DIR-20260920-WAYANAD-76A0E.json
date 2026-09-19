@@ -1,0 +1,352 @@
+{
+  "location_id": "wayanad",
+  "location_name": "Wayanad Chooralmala Escarpment",
+  "classification": "EXECUTIVE",
+  "audit_window": "Real-Time",
+  "hazards": [
+    "LANDSLIDE",
+    "FLOOD",
+    "EARTHQUAKE"
+  ],
+  "location": {
+    "id": "wayanad",
+    "name": "Wayanad Chooralmala Escarpment",
+    "state": "Kerala",
+    "country": "India",
+    "lat": 11.605,
+    "lon": 76.083,
+    "elevation_m": 3459
+  },
+  "snapshot_time": "2026-09-19T22:10:02.312315+00:00",
+  "report_version": "WHISPER-LARGE-V3 / RF-ENGINE-v1.0",
+  "ai_narrative": "Moderate environmental stress at Lat 11.61, Lon 76.08. Tectonic readings (4.92mGal) and surface moisture (28.5%) from current rainfall (0.0mm) require continuous automated monitoring.",
+  "ai_model": "WHISPER-LARGE-V3 Geotechnical Intelligence Pipeline",
+  "primary_threat": "Geotechnical Stress",
+  "forecast_trend": "Stable / Watching",
+  "risk_score": 64,
+  "risk_level": "MODERATE",
+  "sensors": [
+    {
+      "id": "VS-RAIN",
+      "type": "rainfall",
+      "name": "Virtual Rainfall Array",
+      "value": 0,
+      "unit": "mm",
+      "health": "ONLINE",
+      "source": "WHISPER-SIM",
+      "is_virtual": true
+    },
+    {
+      "id": "VS-SEIS",
+      "type": "seismic",
+      "name": "Virtual Seismic Array",
+      "value": 4.92,
+      "unit": "mGal",
+      "health": "ONLINE",
+      "source": "WHISPER-SIM",
+      "is_virtual": true
+    },
+    {
+      "id": "VS-SOIL",
+      "type": "soil_moisture",
+      "name": "Virtual Soil Saturation",
+      "value": 28.5,
+      "unit": "%",
+      "health": "ONLINE",
+      "source": "WHISPER-SIM",
+      "is_virtual": true
+    },
+    {
+      "id": "VS-TEMP",
+      "type": "temperature",
+      "name": "Virtual Temperature Sensor",
+      "value": 20,
+      "unit": "\u00b0C",
+      "health": "ONLINE",
+      "source": "Open-Meteo",
+      "is_virtual": true
+    },
+    {
+      "id": "VS-HUMID",
+      "type": "humidity",
+      "name": "Virtual Humidity Sensor",
+      "value": 65,
+      "unit": "%",
+      "health": "ONLINE",
+      "source": "Open-Meteo",
+      "is_virtual": true
+    },
+    {
+      "id": "VS-WIND",
+      "type": "wind_speed",
+      "name": "Virtual Wind Speed Sensor",
+      "value": 10,
+      "unit": "km/h",
+      "health": "ONLINE",
+      "source": "Open-Meteo",
+      "is_virtual": true
+    }
+  ],
+  "current_risk": {
+    "location_id": "LOC-wayanad",
+    "timestamp": "2026-09-19T22:10:02.309249+00:00",
+    "overall_score": 64,
+    "overall_level": "MODERATE",
+    "primary_threat": "Geotechnical Stress",
+    "explanation": "Moderate environmental stress at Lat 11.61, Lon 76.08. Tectonic readings (4.92mGal) and surface moisture (28.5%) from current rainfall (0.0mm) require continuous automated monitoring.",
+    "hazards": {
+      "landslide": {
+        "hazard": "landslide",
+        "score": 20,
+        "level": "LOW"
+      },
+      "flood": {
+        "hazard": "flood",
+        "score": 15,
+        "level": "LOW"
+      },
+      "earthquake": {
+        "hazard": "earthquake",
+        "score": 10,
+        "level": "LOW"
+      },
+      "cyclone": {
+        "hazard": "cyclone",
+        "score": 5,
+        "level": "LOW"
+      },
+      "volcano": {
+        "hazard": "volcano",
+        "score": 5,
+        "level": "LOW"
+      }
+    },
+    "remedial_actions": {
+      "immediate": [
+        "Elevate monitoring frequency to 1Hz telemetry"
+      ],
+      "short_term": [
+        "Inspect drainage infrastructure",
+        "Review slope hazard maps"
+      ]
+    }
+  },
+  "hazard_matrix": {
+    "landslide": {
+      "score": 64,
+      "level": "MODERATE",
+      "hazard": "Landslide",
+      "probability_pct": 69,
+      "reasons": [
+        "Rainfall 0.0mm saturating regolith",
+        "Soil saturation 28.5%",
+        "Factor of safety approaching critical threshold",
+        "Steep slope with poor drainage"
+      ],
+      "trigger": "Sustained rainfall + antecedent soil moisture",
+      "evacuation_zone_km2": 5.1
+    },
+    "flood": {
+      "score": 48,
+      "level": "MODERATE",
+      "hazard": "Flash Flood",
+      "probability_pct": 51,
+      "reasons": [
+        "Surface runoff elevated at 0.0mm rainfall",
+        "Impervious surface accumulation",
+        "River bank stress indicators above normal",
+        "Drainage capacity approaching saturation"
+      ],
+      "trigger": "Peak hourly rainfall exceeding channel capacity",
+      "evacuation_zone_km2": 5.8
+    },
+    "earthquake": {
+      "score": 39,
+      "level": "LOW",
+      "hazard": "Seismic Event",
+      "probability_pct": 41,
+      "reasons": [
+        "Tectonic stress 4.92mGal above regional baseline",
+        "Fault proximity index elevated",
+        "Lithological amplification factor present",
+        "Recent microseismic cluster detected"
+      ],
+      "trigger": "Stress accumulation on mapped fault segment",
+      "evacuation_zone_km2": 5.8
+    },
+    "cyclone": {
+      "score": 6,
+      "level": "LOW",
+      "hazard": "Cyclone / High Wind",
+      "probability_pct": 6,
+      "reasons": [
+        "Bay of Bengal SST anomaly monitoring active",
+        "Pressure gradient within watch zone",
+        "Wind shear indices within cyclogenesis range",
+        "Track model convergence zone"
+      ],
+      "trigger": "Low pressure system intensification",
+      "evacuation_zone_km2": 1.8
+    },
+    "volcano": {
+      "score": 23,
+      "level": "LOW",
+      "hazard": "Volcanic Activity",
+      "probability_pct": 23,
+      "reasons": [
+        "Magmatic SO\u2082 flux within baseline",
+        "Ground deformation GPS: negligible",
+        "Tremor frequency within normal range",
+        "Thermal anomaly monitoring: nominal"
+      ],
+      "trigger": "Magma chamber overpressure",
+      "evacuation_zone_km2": 11.5
+    }
+  },
+  "forecast": [
+    {
+      "date": "2026-09-20",
+      "landslide_risk": 22,
+      "flood_risk": 17,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-21",
+      "landslide_risk": 24,
+      "flood_risk": 19,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-22",
+      "landslide_risk": 26,
+      "flood_risk": 21,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-23",
+      "landslide_risk": 12,
+      "flood_risk": 7,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-24",
+      "landslide_risk": 10,
+      "flood_risk": 5,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-25",
+      "landslide_risk": 8,
+      "flood_risk": 3,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-26",
+      "landslide_risk": 6,
+      "flood_risk": 1,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    }
+  ],
+  "geotechnical": {
+    "slope_angle_deg": 38.8,
+    "soil_cohesion_kpa": 35,
+    "internal_friction_deg": 26.9,
+    "factor_of_safety": 0.6,
+    "stability_status": "UNSTABLE",
+    "lithology": "Quaternary alluvium over fractured granite",
+    "drainage_condition": "Moderately drained",
+    "aspect_deg": 216.3,
+    "curvature": "Concave (accumulation zone)",
+    "vegetation_cover_pct": 46,
+    "infiltration_rate_mmh": 33.6,
+    "groundwater_depth_m": 9.2
+  },
+  "affected_assets": {
+    "roads_km": 44.8,
+    "bridges": 4,
+    "villages": 16,
+    "schools": 2,
+    "hospitals": 1,
+    "power_lines_km": 22.4,
+    "population_at_risk": 12800,
+    "agricultural_ha": 480,
+    "telecom_towers": 2,
+    "water_sources": 3
+  },
+  "remedial_measures": {
+    "immediate": [
+      "Elevate monitoring frequency to 1Hz telemetry",
+      "Activate Emergency Operations Centre (EOC) \u2014 Incident Command System Level 3",
+      "Dispatch NDRF / SDRF rapid-response teams to all vulnerable quadrants",
+      "Issue public broadcast alerts via NDMA Common Alerting Protocol",
+      "Temporarily suspend all construction activities on slopes within 2km radius"
+    ],
+    "short_term": [
+      "Inspect drainage infrastructure",
+      "Review slope hazard maps",
+      "Conduct LiDAR-based slope displacement survey across the monitored sector",
+      "Install additional real-time piezometers at soil saturation hotspots",
+      "Review and upgrade drainage infrastructure \u2014 inspect all culverts and spillways",
+      "Audit structural integrity of all load-bearing assets within exposure zone"
+    ],
+    "long_term": [
+      "Develop micro-zonation maps at 1:5000 scale for all high-risk wards",
+      "Implement slope stabilisation works (soil nailing, retaining walls, bio-engineering)",
+      "Establish permanent GPS + InSAR ground deformation monitoring network",
+      "Update District Disaster Management Plan (DDMP) with revised hazard exposure data",
+      "Commission detailed Probabilistic Seismic Hazard Analysis (PSHA) study",
+      "Introduce land-use zoning bylaws restricting construction on class-III slopes"
+    ],
+    "early_warning": [
+      "Rainfall threshold trigger: >40mm/hr \u2192 auto-alert",
+      "Soil saturation trigger: >80% \u2192 pre-evacuation advisory",
+      "Seismic trigger: >Mw 3.5 \u2192 structural inspection order",
+      "Slope displacement trigger: >15mm/day \u2192 mandatory evacuation"
+    ]
+  },
+  "data_sources": [
+    {
+      "source": "Open-Meteo API",
+      "type": "Meteorological",
+      "latency": "15-min",
+      "reliability": "99.2%"
+    },
+    {
+      "source": "USGS Earthquake Catalog",
+      "type": "Seismic",
+      "latency": "5-min",
+      "reliability": "99.8%"
+    },
+    {
+      "source": "IMD Rainfall Network",
+      "type": "Hydrology",
+      "latency": "1-hour",
+      "reliability": "96.4%"
+    },
+    {
+      "source": "ISRO Bhuvan LISS-IV",
+      "type": "Satellite Imagery",
+      "latency": "5-day",
+      "reliability": "94.1%"
+    },
+    {
+      "source": "GSI Geological Survey",
+      "type": "Lithology",
+      "latency": "Annual",
+      "reliability": "98.7%"
+    },
+    {
+      "source": "WHISPER-LARGE-V3",
+      "type": "AI Geotechnical Synthesis",
+      "latency": "Real-time",
+      "reliability": "Deterministic"
+    }
+  ]
+}
