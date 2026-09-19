@@ -23,8 +23,32 @@ export default function DatasetsPage() {
   const [inferenceResult, setInferenceResult] = useState(null);
   const [showContours, setShowContours] = useState(true);
   const [showRiskMask, setShowRiskMask] = useState(true);
+  const [liveTelemetry, setLiveTelemetry] = useState({
+    elev: 468,
+    slope: 38.5,
+    radiance: 0.842,
+    band: 'B08 (NIR)',
+    ru: 0.68,
+    pixelRate: '124 kpx/s'
+  });
   const fileInputRef = useRef(null);
   const scanTimerRef = useRef(null);
+
+  // Live telemetry ticker during real-time scanning
+  useEffect(() => {
+    if (!scanning) return;
+    const interval = setInterval(() => {
+      setLiveTelemetry({
+        elev: Math.round(390 + Math.random() * 130),
+        slope: +(35 + Math.random() * 7).toFixed(1),
+        radiance: +(0.78 + Math.random() * 0.18).toFixed(3),
+        band: ['B02 (Blue 490nm)', 'B03 (Green 560nm)', 'B04 (Red 665nm)', 'B08 (NIR 842nm)', 'B11 (SWIR 1610nm)', 'B12 (SWIR 2190nm)'][Math.floor(Math.random() * 6)],
+        ru: +(0.62 + Math.random() * 0.14).toFixed(2),
+        pixelRate: `${Math.round(110 + Math.random() * 35)} kpx/s`
+      });
+    }, 110);
+    return () => clearInterval(interval);
+  }, [scanning]);
 
   const handleView = async (file) => {
     setViewingFile(file);
@@ -52,7 +76,7 @@ export default function DatasetsPage() {
     let progress = 0;
     let stageIdx = 0;
     scanTimerRef.current = setInterval(() => {
-      progress += Math.random() * 8 + 4;
+      progress += Math.random() * 7 + 4;
       if (progress > 100) progress = 100;
       setScanProgress(Math.floor(progress));
       const newStage = Math.min(Math.floor((progress / 100) * SCAN_STAGES.length), SCAN_STAGES.length - 1);
@@ -65,7 +89,11 @@ export default function DatasetsPage() {
         setScanning(false);
         setScanComplete(true);
       }
-    }, 250);
+    }, 220);
+  };
+
+  const reScan = () => {
+    if (viewingFile) handleView(viewingFile);
   };
 
   const closeView = () => {
@@ -220,158 +248,242 @@ export default function DatasetsPage() {
 
         return (
           <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)',
-            backdropFilter: 'blur(6px)', zIndex: 1000,
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
+            backdropFilter: 'blur(8px)', zIndex: 1000,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             animation: 'fadeIn 0.25s ease-out',
           }}>
             <style>{`
-              @keyframes scanLaser {
-                0% { top: 0%; opacity: 0.9; }
+              @keyframes scanBeamSweep {
+                0% { top: -10%; opacity: 0.8; }
                 50% { opacity: 1; }
-                100% { top: 100%; opacity: 0.2; }
+                100% { top: 102%; opacity: 0.4; }
+              }
+              @keyframes radarSweepCircle {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
               }
               @keyframes pulseDangerArea {
-                0% { box-shadow: 0 0 25px rgba(255, 23, 68, 0.65), inset 0 0 20px rgba(255, 23, 68, 0.3); border-color: rgba(255, 23, 68, 0.85); }
-                50% { box-shadow: 0 0 45px rgba(255, 23, 68, 0.95), inset 0 0 35px rgba(255, 23, 68, 0.5); border-color: rgba(255, 60, 90, 1); }
-                100% { box-shadow: 0 0 25px rgba(255, 23, 68, 0.65), inset 0 0 20px rgba(255, 23, 68, 0.3); border-color: rgba(255, 23, 68, 0.85); }
+                0% { box-shadow: 0 0 30px rgba(255, 23, 68, 0.7), inset 0 0 25px rgba(255, 23, 68, 0.35); border-color: rgba(255, 23, 68, 0.85); }
+                50% { box-shadow: 0 0 55px rgba(255, 23, 68, 1), inset 0 0 45px rgba(255, 23, 68, 0.55); border-color: rgba(255, 75, 105, 1); }
+                100% { box-shadow: 0 0 30px rgba(255, 23, 68, 0.7), inset 0 0 25px rgba(255, 23, 68, 0.35); border-color: rgba(255, 23, 68, 0.85); }
               }
               @keyframes pulseRadarRing {
-                0% { transform: scale(0.92); opacity: 0.8; }
-                50% { transform: scale(1.08); opacity: 0.2; }
-                100% { transform: scale(1.18); opacity: 0; }
+                0% { transform: scale(0.9); opacity: 0.85; }
+                50% { transform: scale(1.08); opacity: 0.25; }
+                100% { transform: scale(1.22); opacity: 0; }
               }
               @keyframes contourDashFlow {
                 0% { stroke-dashoffset: 0; }
-                100% { stroke-dashoffset: -40; }
+                100% { stroke-dashoffset: -50; }
               }
             `}</style>
 
             <div className="panel" style={{
-              width: 'min(860px, 95vw)',
+              width: 'min(980px, 96vw)',
               padding: 0,
               overflow: 'hidden',
               animation: 'scaleIn 0.3s ease-out',
-              border: scanComplete ? '1px solid rgba(255, 23, 68, 0.4)' : '1px solid var(--border-default)',
-              boxShadow: scanComplete ? '0 0 40px rgba(255, 23, 68, 0.2)' : '0 10px 40px rgba(0,0,0,0.7)',
+              border: scanComplete ? '1.5px solid rgba(255, 23, 68, 0.55)' : '1.5px solid var(--border-cyan)',
+              boxShadow: scanComplete ? '0 0 50px rgba(255, 23, 68, 0.3), 0 20px 60px rgba(0,0,0,0.9)' : '0 0 40px rgba(0,229,255,0.25)',
+              background: 'var(--bg-panel)',
             }}>
               {/* Modal Header */}
               <div className="panel-header" style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)',
+                padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)',
                 background: 'var(--bg-panel-high)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span className="label-caps" style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em' }}>
-                    INSPECT: {viewingFile}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.06em', fontFamily: 'var(--font-headline)' }}>
+                    🛰️ INSPECT &amp; AI SCAN: <span style={{ color: 'var(--cyan)' }}>{viewingFile}</span>
                   </span>
                   {scanComplete && (
                     <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      background: 'rgba(255, 23, 68, 0.18)',
-                      border: '1px solid rgba(255, 23, 68, 0.6)',
-                      color: '#ff3b5c', padding: '2px 8px', borderRadius: 4,
-                      fontSize: 10, fontWeight: 800, fontFamily: 'var(--font-mono)'
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      background: 'linear-gradient(135deg, rgba(255, 23, 68, 0.25), rgba(183, 28, 28, 0.35))',
+                      border: '1.5px solid rgba(255, 23, 68, 0.8)',
+                      color: '#ff4d6d', padding: '4px 12px', borderRadius: 4,
+                      fontSize: 13, fontWeight: 900, fontFamily: 'var(--font-mono)',
+                      boxShadow: '0 0 12px rgba(255, 23, 68, 0.4)'
                     }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff1744', boxShadow: '0 0 6px #ff1744' }} />
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff1744', boxShadow: '0 0 8px #ff1744' }} />
                       🔴 {riskLevel} ({severity})
                     </span>
                   )}
                   {scanning && (
-                    <span style={{ fontSize: 10, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
-                      • {SCAN_STAGES[scanStage]}
+                    <span style={{
+                      fontSize: 13, color: 'var(--cyan)', fontFamily: 'var(--font-mono)',
+                      fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6
+                    }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 8px var(--cyan)' }} />
+                      ACTIVE MULTI-SPECTRAL TELEMETRY SCAN
                     </span>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   {scanComplete && (
                     <>
+                      <button
+                        onClick={reScan}
+                        title="Re-run Real-time Algorithmic Scan"
+                        style={{
+                          background: 'rgba(0, 229, 255, 0.12)',
+                          border: '1px solid var(--border-cyan)',
+                          color: 'var(--cyan)',
+                          borderRadius: 5, padding: '6px 14px', fontSize: 13,
+                          fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          transition: 'all 0.2s ease',
+                        }}>
+                        <span>🔄</span>
+                        <span>Re-Scan</span>
+                      </button>
+
                       <button
                         onClick={() => setShowContours(!showContours)}
                         title="Toggle Topographic Elevation Contours"
                         style={{
-                          background: showContours ? 'rgba(0, 229, 255, 0.18)' : 'rgba(255,255,255,0.05)',
-                          border: `1px solid ${showContours ? 'var(--cyan)' : 'var(--border-default)'}`,
-                          color: showContours ? 'var(--cyan)' : 'var(--text-muted)',
-                          borderRadius: 4, padding: '4px 10px', fontSize: 11,
-                          fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                          background: showContours ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.06)',
+                          border: `1.5px solid ${showContours ? 'var(--cyan)' : 'var(--border-default)'}`,
+                          color: showContours ? '#ffffff' : 'var(--text-muted)',
+                          borderRadius: 5, padding: '6px 14px', fontSize: 13,
+                          fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
                           display: 'flex', alignItems: 'center', gap: 6,
-                          boxShadow: showContours ? '0 0 12px rgba(0, 229, 255, 0.25)' : 'none',
+                          boxShadow: showContours ? '0 0 16px rgba(0, 229, 255, 0.35)' : 'none',
                           transition: 'all 0.2s ease',
                         }}>
                         <span>〰️ Contours:</span>
-                        <strong style={{ color: showContours ? '#fff' : 'inherit' }}>{showContours ? 'ON' : 'OFF'}</strong>
+                        <strong style={{ color: showContours ? 'var(--cyan)' : 'inherit' }}>{showContours ? 'ON' : 'OFF'}</strong>
                       </button>
 
                       <button
                         onClick={() => setShowRiskMask(!showRiskMask)}
                         title="Toggle High Risk Demarcation Mask"
                         style={{
-                          background: showRiskMask ? 'rgba(255, 23, 68, 0.2)' : 'rgba(255,255,255,0.05)',
-                          border: `1px solid ${showRiskMask ? '#ff1744' : 'var(--border-default)'}`,
-                          color: showRiskMask ? '#ff3b5c' : 'var(--text-muted)',
-                          borderRadius: 4, padding: '4px 10px', fontSize: 11,
-                          fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                          background: showRiskMask ? 'rgba(255, 23, 68, 0.25)' : 'rgba(255,255,255,0.06)',
+                          border: `1.5px solid ${showRiskMask ? '#ff1744' : 'var(--border-default)'}`,
+                          color: showRiskMask ? '#ffffff' : 'var(--text-muted)',
+                          borderRadius: 5, padding: '6px 14px', fontSize: 13,
+                          fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
                           display: 'flex', alignItems: 'center', gap: 6,
-                          boxShadow: showRiskMask ? '0 0 12px rgba(255, 23, 68, 0.3)' : 'none',
+                          boxShadow: showRiskMask ? '0 0 16px rgba(255, 23, 68, 0.4)' : 'none',
                           transition: 'all 0.2s ease',
                         }}>
                         <span>🔴 Risk Area:</span>
-                        <strong style={{ color: showRiskMask ? '#fff' : 'inherit' }}>{showRiskMask ? 'ON' : 'OFF'}</strong>
+                        <strong style={{ color: showRiskMask ? '#ff4d6d' : 'inherit' }}>{showRiskMask ? 'ON' : 'OFF'}</strong>
                       </button>
                     </>
                   )}
                   <button
                     onClick={closeView}
                     style={{
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 16,
-                      borderRadius: 4, width: 28, height: 28, display: 'flex',
+                      background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18, fontWeight: 700,
+                      borderRadius: 5, width: 32, height: 32, display: 'flex',
                       alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s ease'
                     }}>✕</button>
                 </div>
               </div>
 
-              {/* Viewport View (Image + Contours + Highlighted Area + HUD) */}
-              <div style={{ position: 'relative', width: '100%', height: 480, background: '#090c12', overflow: 'hidden' }}>
+              {/* Viewport View (Image + Laser Sweep + Contours + High Risk Area + HUD) */}
+              <div style={{ position: 'relative', width: '100%', height: 540, background: '#080c14', overflow: 'hidden' }}>
                 {/* Image / Satellite Base Layer */}
                 <div style={{
                   position: 'absolute', inset: 0,
                   backgroundImage: viewingFile?.match(/\.(png|jpg|jpeg|webp)$/i)
                     ? `url("http://localhost:8000/uploads/${viewingFile}")`
-                    : 'url("https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=800&q=80")',
+                    : 'url("https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=1000&q=80")',
                   backgroundSize: 'cover', backgroundPosition: 'center',
-                  filter: scanning ? 'sepia(0.2) hue-rotate(180deg) brightness(0.85) contrast(1.1)' : 'none',
+                  filter: scanning ? 'sepia(0.25) hue-rotate(180deg) brightness(0.82) contrast(1.15) saturate(1.2)' : 'none',
                   transition: 'filter 0.5s ease',
                 }} />
 
-                {/* Scan Grid & Line Animation */}
+                {/* REAL-TIME SCANNING LASER & TELEMETRY RETICLE */}
                 {scanning && (
                   <>
+                    {/* Volumetric Sweeping Laser Beam */}
                     <div style={{
-                      position: 'absolute', left: 0, width: '100%', height: 3,
-                      background: 'linear-gradient(90deg, transparent, var(--cyan), #fff, var(--cyan), transparent)',
-                      boxShadow: '0 0 20px var(--cyan), 0 0 40px rgba(0,229,255,0.6)',
-                      animation: 'scanLaser 2s linear infinite',
-                      zIndex: 5,
-                    }} />
+                      position: 'absolute', left: 0, width: '100%', height: 90,
+                      background: 'linear-gradient(180deg, transparent 0%, rgba(0, 229, 255, 0.12) 30%, rgba(0, 229, 255, 0.45) 85%, #00e5ff 100%)',
+                      borderBottom: '3px solid #ffffff',
+                      boxShadow: '0 0 25px #00e5ff, 0 0 50px rgba(0, 229, 255, 0.7), inset 0 -4px 12px rgba(255,255,255,0.8)',
+                      animation: 'scanBeamSweep 2.2s ease-in-out infinite',
+                      zIndex: 8,
+                      pointerEvents: 'none',
+                    }}>
+                      {/* Active Beam Position Tag */}
+                      <div style={{
+                        position: 'absolute', right: 20, bottom: 6,
+                        background: 'rgba(0, 0, 0, 0.85)', padding: '3px 8px', borderRadius: 3,
+                        border: '1px solid #00e5ff', color: '#00e5ff',
+                        fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 800,
+                        letterSpacing: '0.08em', boxShadow: '0 0 8px rgba(0,229,255,0.6)'
+                      }}>
+                        ⚡ LiDAR OPTICAL BEAM [Z: {liveTelemetry.elev}m | {liveTelemetry.band}]
+                      </div>
+                    </div>
+
+                    {/* Matrix Ortho Grid */}
                     <div style={{
                       position: 'absolute', inset: 0,
                       background: `
-                        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,229,255,0.07) 39px, rgba(0,229,255,0.07) 40px),
-                        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,229,255,0.07) 39px, rgba(0,229,255,0.07) 40px)
+                        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,229,255,0.1) 39px, rgba(0,229,255,0.1) 40px),
+                        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,229,255,0.1) 39px, rgba(0,229,255,0.1) 40px)
                       `,
-                      animation: 'scanGrid 2s linear infinite',
                       zIndex: 4,
+                      pointerEvents: 'none',
                     }} />
+
+                    {/* Central Radar Target Acquisition Crosshair */}
+                    <div style={{
+                      position: 'absolute', top: '50%', left: '50%',
+                      width: 220, height: 220, marginLeft: -110, marginTop: -110,
+                      border: '1.5px dashed rgba(0, 229, 255, 0.6)',
+                      borderRadius: '50%',
+                      zIndex: 7,
+                      pointerEvents: 'none',
+                    }}>
+                      <div style={{
+                        position: 'absolute', inset: -10,
+                        border: '1px solid rgba(0, 229, 255, 0.3)',
+                        borderRadius: '50%',
+                        borderTopColor: '#00e5ff',
+                        animation: 'radarSweepCircle 3s linear infinite',
+                      }} />
+                      <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, background: 'rgba(0, 229, 255, 0.5)' }} />
+                      <div style={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', background: 'rgba(0, 229, 255, 0.5)' }} />
+                    </div>
+
+                    {/* Bottom Live Data Stream Ribbon */}
+                    <div style={{
+                      position: 'absolute', bottom: 16, left: 16, right: 16,
+                      background: 'rgba(6, 10, 18, 0.92)', border: '1px solid rgba(0, 229, 255, 0.4)',
+                      borderRadius: 6, padding: '8px 16px', zIndex: 12, backdropFilter: 'blur(8px)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', fontSize: 12,
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>📡 REAL-TIME TELEMETRY:</span>
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>ACQUIRING {liveTelemetry.band}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>|</span>
+                        <span>RATE: <strong style={{ color: '#22c55e' }}>{liveTelemetry.pixelRate}</strong></span>
+                        <span style={{ color: 'var(--text-muted)' }}>|</span>
+                        <span>SLOPE GRADIENT: <strong style={{ color: '#ffb020' }}>{liveTelemetry.slope}°</strong></span>
+                      </div>
+                      <div style={{ color: 'var(--cyan)', fontWeight: 700 }}>
+                        ELEV: {liveTelemetry.elev}m · Ru: {liveTelemetry.ru}
+                      </div>
+                    </div>
                   </>
                 )}
 
                 {/* 〰️ TOPOGRAPHIC ELEVATION CONTOUR LINES LAYER 〰️ */}
                 {scanComplete && showContours && (
                   <svg
-                    viewBox="0 0 860 480"
+                    viewBox="0 0 980 540"
                     preserveAspectRatio="none"
                     style={{
                       position: 'absolute', inset: 0, width: '100%', height: '100%',
@@ -381,184 +493,193 @@ export default function DatasetsPage() {
                   >
                     <defs>
                       <filter id="contourGlow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="#00e5ff" floodOpacity="0.6" />
+                        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#00e5ff" floodOpacity="0.75" />
                       </filter>
                       <filter id="dangerGlow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#ff1744" floodOpacity="0.8" />
+                        <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#ff1744" floodOpacity="0.9" />
                       </filter>
                     </defs>
 
-                    {/* Secondary Minor Isolines (Intermediates - 15m intervals) */}
-                    <g stroke="rgba(0, 229, 255, 0.22)" strokeWidth="1" strokeDasharray="3 3" fill="none">
-                      <path d="M 20,70 Q 230,105 440,75 T 700,105 T 860,85" />
-                      <path d="M 15,135 Q 210,170 410,140 T 670,165 T 860,150" />
-                      <path d="M 10,200 Q 190,235 380,205 T 640,230 T 860,215" />
-                      <path d="M 8,265 Q 170,305 350,270 T 610,295 T 860,280" />
-                      <path d="M 5,335 Q 150,375 320,335 T 580,360 T 860,345" />
-                      <path d="M 0,405 Q 130,445 290,405 T 550,430 T 860,410" />
+                    {/* Minor Intermediate Isolines (Dashed, Thinner, 15m intervals) */}
+                    <g stroke="rgba(0, 229, 255, 0.28)" strokeWidth="1.2" strokeDasharray="4 4" fill="none">
+                      <path d="M 10,75 Q 260,115 500,85 T 790,115 T 980,95" />
+                      <path d="M 10,145 Q 240,185 470,150 T 750,180 T 980,160" />
+                      <path d="M 10,215 Q 220,255 440,220 T 720,245 T 980,230" />
+                      <path d="M 10,285 Q 200,325 410,290 T 690,315 T 980,300" />
+                      <path d="M 10,360 Q 180,400 380,360 T 660,385 T 980,370" />
+                      <path d="M 10,435 Q 160,475 350,435 T 630,460 T 980,440" />
                     </g>
 
-                    {/* Primary Index Isolines (30m Elevation Intervals with Color Gradient) */}
-                    {/* 510m - Steep Upper Scarp / High Tectonic Stress */}
+                    {/* Primary Index Isolines (30m Elevation Intervals with Bold Tags) */}
+                    {/* 510m - Steep Upper Scarp / Tension Rupture */}
                     <path
-                      d="M 10,40 Q 240,75 460,45 Q 640,75 860,55"
-                      fill="none" stroke="#ff3b5c" strokeWidth="2"
+                      d="M 5,45 Q 270,85 520,50 Q 730,85 980,60"
+                      fill="none" stroke="#ff3b5c" strokeWidth="2.5"
                       style={{ animation: 'contourDashFlow 20s linear infinite' }}
                     />
-                    <rect x="360" y="38" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#ff3b5c" strokeWidth="0.8" />
-                    <text x="383" y="49" fill="#ff708d" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">510m</text>
+                    <rect x="420" y="42" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#ff3b5c" strokeWidth="1.5" />
+                    <text x="450" y="58" fill="#ff708d" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">510m</text>
 
                     {/* 480m - Crown Rupture & Slip Initiation Zone */}
                     <path
-                      d="M 10,105 Q 220,145 420,115 Q 580,140 720,115 T 860,125"
-                      fill="none" stroke="#ff5252" strokeWidth="2.2"
+                      d="M 5,115 Q 250,160 480,125 Q 670,155 830,125 T 980,135"
+                      fill="none" stroke="#ff5252" strokeWidth="2.8"
                       filter="url(#dangerGlow)"
                     />
-                    <rect x="230" y="112" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#ff5252" strokeWidth="0.8" />
-                    <text x="253" y="123" fill="#ff708d" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">480m</text>
+                    <rect x="270" y="122" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#ff5252" strokeWidth="1.5" />
+                    <text x="300" y="138" fill="#ff708d" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">480m</text>
 
                     {/* 450m - Active Main Body Rupture Surface */}
                     <path
-                      d="M 10,170 Q 200,210 390,175 Q 540,210 680,170 T 860,190"
-                      fill="none" stroke="#ff6b35" strokeWidth="2.2"
+                      d="M 5,185 Q 230,230 450,190 Q 620,230 780,185 T 980,205"
+                      fill="none" stroke="#ff6b35" strokeWidth="2.6"
                     />
-                    <rect x="520" y="174" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#ff6b35" strokeWidth="0.8" />
-                    <text x="543" y="185" fill="#ffab91" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">450m</text>
+                    <rect x="590" y="188" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#ff6b35" strokeWidth="1.5" />
+                    <text x="620" y="204" fill="#ffab91" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">450m</text>
 
-                    {/* 420m - Intermediate Shear Transition */}
+                    {/* 420m - Intermediate Shear Transition Plane */}
                     <path
-                      d="M 10,235 Q 180,275 360,240 Q 500,275 650,235 T 860,255"
-                      fill="none" stroke="#ffb020" strokeWidth="2"
+                      d="M 5,255 Q 210,300 420,260 Q 580,300 740,255 T 980,275"
+                      fill="none" stroke="#ffb020" strokeWidth="2.5"
                     />
-                    <rect x="340" y="240" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#ffb020" strokeWidth="0.8" />
-                    <text x="363" y="251" fill="#ffd54f" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">420m</text>
+                    <rect x="390" y="260" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#ffb020" strokeWidth="1.5" />
+                    <text x="420" y="276" fill="#ffd54f" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">420m</text>
 
-                    {/* 390m - Accumulation / Mudflow Zone */}
+                    {/* 390m - Accumulation / Mudflow Displacement */}
                     <path
-                      d="M 10,300 Q 160,340 330,305 Q 470,345 620,300 T 860,320"
-                      fill="none" stroke="#ffd700" strokeWidth="1.8"
+                      d="M 5,325 Q 190,370 390,330 Q 540,375 710,325 T 980,345"
+                      fill="none" stroke="#ffd700" strokeWidth="2.2"
                     />
-                    <rect x="180" y="310" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#ffd700" strokeWidth="0.8" />
-                    <text x="203" y="321" fill="#fff59d" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">390m</text>
+                    <rect x="210" y="335" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#ffd700" strokeWidth="1.5" />
+                    <text x="240" y="351" fill="#fff59d" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">390m</text>
 
                     {/* 360m - Toe of Surface of Rupture */}
                     <path
-                      d="M 10,370 Q 140,410 300,370 Q 440,410 590,365 T 860,385"
-                      fill="none" stroke="#00e5ff" strokeWidth="2"
+                      d="M 5,400 Q 170,445 360,400 Q 510,445 680,395 T 980,415"
+                      fill="none" stroke="#00e5ff" strokeWidth="2.5"
                       filter="url(#contourGlow)"
                     />
-                    <rect x="470" y="375" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#00e5ff" strokeWidth="0.8" />
-                    <text x="493" y="386" fill="#80d8ff" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">360m</text>
+                    <rect x="540" y="405" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#00e5ff" strokeWidth="1.5" />
+                    <text x="570" y="421" fill="#80d8ff" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">360m</text>
 
-                    {/* 330m - Valley Inundation & Runout Floor */}
+                    {/* 330m - Valley Floor & Runout Inundation */}
                     <path
-                      d="M 10,440 Q 120,480 270,440 Q 410,480 560,430 T 860,450"
-                      fill="none" stroke="#22c55e" strokeWidth="2"
+                      d="M 5,475 Q 150,515 330,475 Q 480,515 650,465 T 980,485"
+                      fill="none" stroke="#22c55e" strokeWidth="2.5"
                     />
-                    <rect x="320" y="440" width="46" height="14" rx="3" fill="rgba(8, 12, 20, 0.85)" stroke="#22c55e" strokeWidth="0.8" />
-                    <text x="343" y="451" fill="#a7f3d0" fontSize="9" fontWeight="700" fontFamily="monospace" textAnchor="middle">330m</text>
+                    <rect x="360" y="475" width="60" height="22" rx="4" fill="rgba(6, 10, 18, 0.95)" stroke="#22c55e" strokeWidth="1.5" />
+                    <text x="390" y="491" fill="#a7f3d0" fontSize="13" fontWeight="800" fontFamily="monospace" textAnchor="middle">330m</text>
                   </svg>
                 )}
 
                 {/* 🔴 HIGHLIGHTED HIGH-RISK AREA OVERLAY 🔴 */}
                 {scanComplete && showRiskMask && (
                   <div style={{
-                    position: 'absolute', top: '18%', left: '26%', width: '48%', height: '56%',
+                    position: 'absolute', top: '16%', left: '25%', width: '50%', height: '60%',
                     background: `
                       repeating-linear-gradient(
                         45deg,
-                        rgba(255, 23, 68, 0.32),
-                        rgba(255, 23, 68, 0.32) 12px,
-                        rgba(255, 23, 68, 0.16) 12px,
-                        rgba(255, 23, 68, 0.16) 24px
+                        rgba(255, 23, 68, 0.35),
+                        rgba(255, 23, 68, 0.35) 14px,
+                        rgba(255, 23, 68, 0.18) 14px,
+                        rgba(255, 23, 68, 0.18) 28px
                       )
                     `,
-                    border: '2.5px solid #ff1744',
+                    border: '3px solid #ff1744',
                     borderRadius: '34% 66% 62% 38% / 28% 32% 68% 72%',
                     opacity: 1,
                     transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: '16px 20px',
+                    padding: '20px 24px',
                     animation: 'pulseDangerArea 3s ease-in-out infinite',
                     zIndex: 7,
                     pointerEvents: 'auto',
                   }}>
-                    {/* Animated Radar Pulse Wave Behind */}
+                    {/* Animated Outer Hazard Wave */}
                     <div style={{
-                      position: 'absolute', inset: -14,
-                      border: '2px solid rgba(255, 23, 68, 0.45)',
+                      position: 'absolute', inset: -16,
+                      border: '2.5px solid rgba(255, 23, 68, 0.5)',
                       borderRadius: '34% 66% 62% 38% / 28% 32% 68% 72%',
                       animation: 'pulseRadarRing 2.4s ease-out infinite',
                       pointerEvents: 'none',
                     }} />
 
-                    {/* Tactical Reticle Corner Crosshairs */}
-                    <div style={{ position: 'absolute', top: 8, left: 10, color: '#ff5252', fontSize: 10, fontFamily: 'monospace', opacity: 0.8 }}>+ [30.74°N]</div>
-                    <div style={{ position: 'absolute', bottom: 8, right: 10, color: '#ff5252', fontSize: 10, fontFamily: 'monospace', opacity: 0.8 }}>[79.06°E] +</div>
+                    {/* Tactical Reticle Corner Coordinates */}
+                    <div style={{ position: 'absolute', top: 10, left: 14, color: '#ffffff', fontSize: 12, fontFamily: 'monospace', fontWeight: 800, textShadow: '0 0 4px #000' }}>
+                      + [LAT: 30.7420°N]
+                    </div>
+                    <div style={{ position: 'absolute', bottom: 10, right: 14, color: '#ffffff', fontSize: 12, fontFamily: 'monospace', fontWeight: 800, textShadow: '0 0 4px #000' }}>
+                      [LON: 79.0550°E] +
+                    </div>
 
-                    {/* LEVEL OF HIGH RISK BADGE */}
+                    {/* BIG BOLD LEVEL OF HIGH RISK BADGE */}
                     <div style={{
-                      background: 'linear-gradient(135deg, #ff1744, #b71c1c)',
+                      background: 'linear-gradient(135deg, #ff1744, #c2185b)',
                       color: '#ffffff',
-                      padding: '4px 12px',
-                      borderRadius: 4,
+                      padding: '8px 18px',
+                      borderRadius: 6,
                       fontFamily: 'var(--font-headline)',
-                      fontSize: 12,
+                      fontSize: 16,
                       fontWeight: 900,
                       letterSpacing: '0.08em',
-                      boxShadow: '0 0 16px rgba(255, 23, 68, 0.95), 0 2px 4px rgba(0,0,0,0.6)',
+                      boxShadow: '0 0 24px rgba(255, 23, 68, 1), 0 4px 12px rgba(0,0,0,0.8)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 6,
-                      border: '1px solid rgba(255,255,255,0.4)',
+                      gap: 8,
+                      border: '2px solid rgba(255,255,255,0.7)',
                     }}>
-                      <span style={{ fontSize: 13 }}>⚠️</span>
+                      <span style={{ fontSize: 18 }}>🚨</span>
                       <span>LEVEL: HIGH RISK ({severity})</span>
                     </div>
 
-                    {/* Risk Title & Status */}
+                    {/* Hazard Title */}
                     <div style={{
                       color: '#ffffff',
-                      fontSize: 14,
-                      fontWeight: 800,
-                      textShadow: '0 0 10px rgba(0,0,0,0.9), 0 0 6px #ff1744',
-                      marginTop: 6,
+                      fontSize: 16,
+                      fontWeight: 900,
+                      textShadow: '0 0 12px rgba(0,0,0,0.9), 0 0 8px #ff1744',
+                      marginTop: 8,
                       textAlign: 'center',
-                      letterSpacing: '0.04em',
+                      letterSpacing: '0.05em',
+                      fontFamily: 'var(--font-headline)'
                     }}>
-                      LANDSLIDE & SLOPE FAILURE ZONE
+                      CRITICAL SLOPE FAILURE &amp; DEBRIS FLOW ZONE
                     </div>
 
-                    {/* Key Risk Metrics Chips */}
+                    {/* Big Key Risk Metrics Chips */}
                     <div style={{
-                      display: 'flex', gap: 6, flexWrap: 'wrap',
-                      justifyContent: 'center', marginTop: 8, maxWidth: 360,
+                      display: 'flex', gap: 8, flexWrap: 'wrap',
+                      justifyContent: 'center', marginTop: 12, maxWidth: 440,
                     }}>
                       <div style={{
-                        background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255, 23, 68, 0.7)',
-                        color: '#ff5252', padding: '2px 8px', borderRadius: 3,
-                        fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 700
+                        background: 'rgba(0,0,0,0.85)', border: '1.5px solid #ff1744',
+                        color: '#ff5252', padding: '4px 12px', borderRadius: 4,
+                        fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 800,
+                        boxShadow: '0 0 10px rgba(255,23,68,0.4)'
                       }}>
                         RISK SCORE: {riskScore}/100
                       </div>
                       <div style={{
-                        background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(34, 197, 94, 0.7)',
-                        color: '#22c55e', padding: '2px 8px', borderRadius: 3,
-                        fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 700
+                        background: 'rgba(0,0,0,0.85)', border: '1.5px solid #22c55e',
+                        color: '#22c55e', padding: '4px 12px', borderRadius: 4,
+                        fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 800,
+                        boxShadow: '0 0 10px rgba(34,197,94,0.4)'
                       }}>
                         CONFIDENCE: {confidenceVal}%
                       </div>
                       <div style={{
-                        background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255, 176, 32, 0.7)',
-                        color: '#ffb020', padding: '2px 8px', borderRadius: 3,
-                        fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 700
+                        background: 'rgba(0,0,0,0.85)', border: '1.5px solid #ffb020',
+                        color: '#ffb020', padding: '4px 12px', borderRadius: 4,
+                        fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 800,
+                        boxShadow: '0 0 10px rgba(255,176,32,0.4)'
                       }}>
                         FoS: {fos} (UNSTABLE &lt; 1.0)
                       </div>
                       <div style={{
-                        background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(0, 229, 255, 0.7)',
-                        color: '#00e5ff', padding: '2px 8px', borderRadius: 3,
-                        fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 700
+                        background: 'rgba(0,0,0,0.85)', border: '1.5px solid #00e5ff',
+                        color: '#00e5ff', padding: '4px 12px', borderRadius: 4,
+                        fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 800,
+                        boxShadow: '0 0 10px rgba(0,229,255,0.4)'
                       }}>
                         SLOPE: {slopeDeg}° STEEP
                       </div>
@@ -566,63 +687,84 @@ export default function DatasetsPage() {
 
                     {/* Area Footprint */}
                     <div style={{
-                      fontSize: 9, color: '#ffcdd2', fontFamily: 'var(--font-mono)',
-                      marginTop: 6, textShadow: '0 0 4px #000',
-                      background: 'rgba(0,0,0,0.65)', padding: '2px 8px', borderRadius: 3,
-                      border: '1px dashed rgba(255, 23, 68, 0.5)',
+                      fontSize: 12, color: '#ffffff', fontFamily: 'var(--font-mono)', fontWeight: 700,
+                      marginTop: 10, textShadow: '0 0 6px #000',
+                      background: 'rgba(0,0,0,0.8)', padding: '4px 14px', borderRadius: 4,
+                      border: '1.5px dashed rgba(255, 23, 68, 0.8)',
                     }}>
-                      IMPACT FOOTPRINT: ~{affectedArea.toLocaleString()} m² · IMMINENT SHEAR SLIP
+                      ⚡ ESTIMATED HAZARD FOOTPRINT: ~{affectedArea.toLocaleString()} m² · ACTIVE RUNOUT
                     </div>
                   </div>
                 )}
 
-                {/* 🎯 TOP-LEFT HUD OVERLAY: ANALYSIS STATUS & CONFIDENCE LEVEL */}
+                {/* 🎯 TOP-LEFT HUD OVERLAY: PREDICTION CONFIDENCE LEVEL & STATUS */}
                 <div style={{
-                  position: 'absolute', top: 12, left: 12, fontFamily: 'var(--font-mono)',
-                  fontSize: 10, color: 'var(--cyan)',
-                  background: 'rgba(6, 10, 18, 0.88)', padding: '10px 14px', borderRadius: 6,
-                  border: '1px solid var(--border-subtle)', backdropFilter: 'blur(8px)',
-                  boxShadow: '0 6px 24px rgba(0,0,0,0.6)', zIndex: 10,
-                  maxWidth: 290,
+                  position: 'absolute', top: 16, left: 16, fontFamily: 'var(--font-mono)',
+                  color: 'var(--text-primary)',
+                  background: 'rgba(6, 10, 18, 0.94)', padding: '14px 18px', borderRadius: 8,
+                  border: scanComplete ? '1.5px solid rgba(34, 197, 94, 0.6)' : '1.5px solid var(--border-cyan)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.7)', zIndex: 10,
+                  maxWidth: 340,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800 }}>
                     <span style={{
-                      width: 7, height: 7, borderRadius: '50%',
+                      width: 9, height: 9, borderRadius: '50%',
                       background: scanComplete ? '#22c55e' : 'var(--cyan)',
-                      boxShadow: scanComplete ? '0 0 8px #22c55e' : '0 0 8px var(--cyan)'
+                      boxShadow: scanComplete ? '0 0 10px #22c55e' : '0 0 10px var(--cyan)'
                     }} />
-                    <span>STATUS: {scanning ? `SCANNING (${scanProgress}%)` : scanComplete ? 'ANALYSIS COMPLETE' : 'STANDBY'}</span>
+                    <span>STATUS: {scanning ? `SCANNING TENSOR (${scanProgress}%)` : scanComplete ? 'ANALYSIS COMPLETE' : 'STANDBY'}</span>
                   </div>
 
                   {scanning && (
-                    <div style={{ marginTop: 8 }}>
-                      <div className="progress-bar" style={{ width: 220, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div className="progress-bar-fill" style={{ width: `${scanProgress}%`, height: '100%', background: 'linear-gradient(90deg, var(--cyan), #22c55e)' }} />
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, color: 'var(--cyan)', fontWeight: 700 }}>SPECTRAL INGESTION</span>
+                        <span style={{ fontSize: 22, color: 'var(--cyan)', fontWeight: 900 }}>{scanProgress}%</span>
                       </div>
-                      <div style={{ marginTop: 4, fontSize: 9, color: 'var(--text-secondary)' }}>
-                        {SCAN_STAGES[scanStage]}
+                      <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${scanProgress}%`, height: '100%', background: 'linear-gradient(90deg, #00e5ff, #22c55e)', boxShadow: '0 0 10px #00e5ff' }} />
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 12, color: '#ffffff', fontWeight: 600 }}>
+                        • {SCAN_STAGES[scanStage]}
+                      </div>
+                      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+                        Sensor: Sentinel-2 L2A · DEM: SRTM 30m
                       </div>
                     </div>
                   )}
 
                   {scanComplete && (
-                    <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 6 }}>
-                      {/* Prediction Confidence Section */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: 9, fontWeight: 600 }}>PREDICTION CONFIDENCE:</span>
-                        <span style={{ color: '#22c55e', fontWeight: 900, fontSize: 12 }}>{confidenceVal}%</span>
+                    <div style={{ marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: 10 }}>
+                      {/* Enormous, Crystal Clear Confidence Display */}
+                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em' }}>
+                        AI PREDICTION CONFIDENCE LEVEL:
                       </div>
-                      <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
+                        <span style={{ fontSize: 32, fontWeight: 900, color: '#22c55e', textShadow: '0 0 14px rgba(34,197,94,0.6)' }}>
+                          {confidenceVal}%
+                        </span>
+                        <span style={{
+                          background: 'rgba(34, 197, 94, 0.2)', border: '1px solid #22c55e',
+                          color: '#22c55e', padding: '2px 8px', borderRadius: 4,
+                          fontSize: 12, fontWeight: 800
+                        }}>
+                          HIGH CERTAINTY (p &lt; 0.01)
+                        </span>
+                      </div>
+
+                      {/* Confidence Meter Bar */}
+                      <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden', marginTop: 8 }}>
                         <div style={{
                           width: `${confidenceVal}%`, height: '100%',
                           background: 'linear-gradient(90deg, #2979ff, #00e5ff, #22c55e)',
-                          boxShadow: '0 0 10px #22c55e'
+                          boxShadow: '0 0 14px #22c55e'
                         }} />
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 5, fontSize: 8.5 }}>
-                        <span style={{ color: 'var(--text-muted)' }}>Certainty: <strong style={{ color: '#22c55e' }}>HIGH (p &gt; 0.95)</strong></span>
-                        <span style={{ color: '#ff3b5c', fontWeight: 800 }}>THREAT: {riskLevel}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 11 }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Model: <strong>ResU-Net v3.2</strong></span>
+                        <span style={{ color: '#ff4d6d', fontWeight: 800 }}>THREAT: {riskLevel}</span>
                       </div>
                     </div>
                   )}
@@ -631,33 +773,37 @@ export default function DatasetsPage() {
                 {/* 🗺️ TOP-RIGHT CONTOUR MAP KEY / LEGEND */}
                 {scanComplete && showContours && (
                   <div style={{
-                    position: 'absolute', top: 12, right: 12, fontFamily: 'var(--font-mono)',
-                    fontSize: 9, color: 'var(--text-primary)',
-                    background: 'rgba(6, 10, 18, 0.88)', padding: '8px 12px', borderRadius: 6,
-                    border: '1px solid rgba(0, 229, 255, 0.3)', backdropFilter: 'blur(8px)',
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.6)', zIndex: 10,
+                    position: 'absolute', top: 16, right: 16, fontFamily: 'var(--font-mono)',
+                    fontSize: 12, color: 'var(--text-primary)',
+                    background: 'rgba(6, 10, 18, 0.94)', padding: '12px 16px', borderRadius: 8,
+                    border: '1.5px solid rgba(0, 229, 255, 0.4)', backdropFilter: 'blur(10px)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.7)', zIndex: 10,
                     pointerEvents: 'none',
                   }}>
-                    <div style={{ color: 'var(--cyan)', fontWeight: 800, marginBottom: 5, display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <span>〰️</span>
+                    <div style={{ color: 'var(--cyan)', fontWeight: 800, fontSize: 13, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 15 }}>〰️</span>
                       <span>TOPOGRAPHIC CONTOURS (30m DEM)</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 14, height: 2.5, background: '#ff3b5c', display: 'inline-block' }} />
-                        <span>510m - 480m: Upper Scarp (Crown Cracks)</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 16, height: 3, background: '#ff3b5c', borderRadius: 1.5, display: 'inline-block' }} />
+                        <span style={{ fontWeight: 700, color: '#ff708d' }}>510m - 480m:</span>
+                        <span>Upper Scarp (Crown Cracks)</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 14, height: 2.5, background: '#ff6b35', display: 'inline-block' }} />
-                        <span>450m - 420m: Rupture Shear Plane</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 16, height: 3, background: '#ff6b35', borderRadius: 1.5, display: 'inline-block' }} />
+                        <span style={{ fontWeight: 700, color: '#ffab91' }}>450m - 420m:</span>
+                        <span>Rupture Shear Plane</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 14, height: 2.5, background: '#ffca28', display: 'inline-block' }} />
-                        <span>390m: Accumulation &amp; Debris Zone</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 16, height: 3, background: '#ffd700', borderRadius: 1.5, display: 'inline-block' }} />
+                        <span style={{ fontWeight: 700, color: '#fff59d' }}>390m:</span>
+                        <span>Accumulation &amp; Debris Flow</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 14, height: 2.5, background: '#00e5ff', display: 'inline-block' }} />
-                        <span>360m - 330m: Valley Inundation Toe</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 16, height: 3, background: '#00e5ff', borderRadius: 1.5, display: 'inline-block' }} />
+                        <span style={{ fontWeight: 700, color: '#80d8ff' }}>360m - 330m:</span>
+                        <span>Valley Inundation Floor</span>
                       </div>
                     </div>
                   </div>
@@ -666,26 +812,29 @@ export default function DatasetsPage() {
                 {/* 📊 BOTTOM TELEMETRY BAR: MODEL & COMPOSITE PREDICTION METRICS */}
                 {scanComplete && (
                   <div style={{
-                    position: 'absolute', bottom: 12, left: 12, right: 12,
-                    display: 'flex', gap: 8, flexWrap: 'wrap',
+                    position: 'absolute', bottom: 16, left: 16, right: 16,
+                    display: 'flex', gap: 10, flexWrap: 'wrap',
                     zIndex: 10,
                     animation: 'fadeInUp 0.3s ease-out',
                   }}>
                     {[
-                      { label: 'SAMPLE', value: viewingFile, color: 'var(--text-primary)' },
-                      { label: 'AI MODEL', value: 'ResU-Net v3.2 (Landslide4Sense)', color: 'var(--cyan)' },
-                      { label: 'CONFIDENCE LEVEL', value: `${confidenceVal}% [HIGH CERTAINTY]`, color: '#22c55e' },
-                      { label: 'RISK LEVEL', value: `🔴 ${riskLevel} (${riskScore}/100)`, color: '#ff3b5c' },
-                      { label: 'SLOPE / STABILITY', value: `${slopeDeg}° | FoS: ${fos} (UNSTABLE)`, color: '#ffb020' },
-                      { label: 'AFFECTED AREA', value: `~${affectedArea.toLocaleString()} m²`, color: 'var(--text-primary)' },
+                      { label: 'DATASET SAMPLE', value: viewingFile, color: '#ffffff' },
+                      { label: 'PREDICTION CONFIDENCE', value: `${confidenceVal}% [HIGH CERTAINTY]`, color: '#22c55e' },
+                      { label: 'ASSESSED RISK LEVEL', value: `🔴 ${riskLevel} (${riskScore}/100)`, color: '#ff4d6d' },
+                      { label: 'SLOPE STABILITY', value: `${slopeDeg}° | FoS: ${fos} (UNSTABLE)`, color: '#ffb020' },
+                      { label: 'HAZARD FOOTPRINT', value: `~${affectedArea.toLocaleString()} m²`, color: 'var(--cyan)' },
                     ].map(({ label, value, color }) => (
                       <div key={label} style={{
-                        background: 'rgba(6, 10, 18, 0.9)', padding: '5px 10px', borderRadius: 4,
+                        background: 'rgba(6, 10, 18, 0.94)', padding: '8px 14px', borderRadius: 6,
                         border: '1px solid var(--border-subtle)',
-                        backdropFilter: 'blur(8px)', flex: '1 1 auto', minWidth: 100,
+                        backdropFilter: 'blur(10px)', flex: '1 1 auto', minWidth: 130,
                       }}>
-                        <div style={{ fontSize: 8, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>{label}</div>
-                        <div style={{ fontSize: 10, color: color || 'var(--cyan)', fontFamily: 'var(--font-mono)', fontWeight: 800, marginTop: 1 }}>{value}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                          {label}
+                        </div>
+                        <div style={{ fontSize: 14, color: color || 'var(--cyan)', fontFamily: 'var(--font-mono)', fontWeight: 900, marginTop: 3 }}>
+                          {value}
+                        </div>
                       </div>
                     ))}
                   </div>
