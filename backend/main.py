@@ -43,6 +43,15 @@ upload_dir = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(upload_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
+# Mount Flood Area Segmentation images and masks if present
+flood_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Flood Area Segmentation")
+mask_dir = os.path.join(flood_dir, "Mask")
+if os.path.exists(mask_dir):
+    app.mount("/masks", StaticFiles(directory=mask_dir), name="masks")
+img_dir = os.path.join(flood_dir, "Image")
+if os.path.exists(img_dir):
+    app.mount("/flood-images", StaticFiles(directory=img_dir), name="flood_images")
+
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")

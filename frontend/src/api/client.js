@@ -80,6 +80,7 @@ export const createSensorWS = () => {
 // Landslide Intelligence
 export const getLandslideDataset = () => api.get('/landslide/dataset');
 export const runLandslideInference = (filename) => api.post(`/landslide/infer/${filename}`);
+export const getDatasetPreview = (filename) => api.get(`/datasets/${filename}/preview`);
 export const deleteDataset = (id) => api.delete(`/datasets/${id}`);
 
 // Risk Intelligence & Geotechnical Engine
