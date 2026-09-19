@@ -4,7 +4,8 @@ import json
 import random
 from datetime import datetime, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+import os
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db, SessionLocal
 import models, schemas
@@ -12,6 +13,29 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/sensors", tags=["Sensors"])
 active_connections: List[WebSocket] = []
+
+CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "sensor_catalog.json")
+
+@router.get("/catalog")
+def get_sensor_catalog():
+    """Returns the comprehensive geotechnical sensor and hardware catalog with specs and rationales."""
+    if os.path.exists(CATALOG_PATH):
+        try:
+            with open(CATALOG_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to load catalog: {str(e)}")
+    return []
+
+@router.post("/catalog")
+def save_sensor_catalog(items: list):
+    """Saves updated sensor prices or customized configurations."""
+    try:
+        with open(CATALOG_PATH, "w", encoding="utf-8") as f:
+            json.dump(items, f, indent=2)
+        return {"status": "SUCCESS", "count": len(items)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save catalog: {str(e)}")
 
 
 @router.get("", response_model=List[schemas.SensorOut])
