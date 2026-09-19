@@ -17,7 +17,21 @@ import hydrostaticImg from '../assets/sensors/hydrostatic.jpg';
 import enclosureImg from '../assets/sensors/enclosure.jpg';
 import slopeTerrainImg from '../assets/sensors/slope_terrain.jpg';
 
-// Guaranteed image mapping dictionary by ID
+// Additional field instrumentation and remote sensing assets
+import terrainWidePanoramicImg from '../assets/sensors/terrain_wide_panoramic.jpg';
+import terrainDroneLidarImg from '../assets/sensors/terrain_drone_lidar.jpg';
+import terrainInsarImg from '../assets/sensors/terrain_insar_interferometry.jpg';
+import terrainThermalSeepageImg from '../assets/sensors/terrain_thermal_seepage.jpg';
+import terrainMultispectralNdviImg from '../assets/sensors/terrain_multispectral_ndvi.jpg';
+import gnssRtkStationImg from '../assets/sensors/gnss_rtk_station.jpg';
+import laserDistanceMeterImg from '../assets/sensors/laser_distance_meter.jpg';
+import fiberOpticDasImg from '../assets/sensors/fiber_optic_das.jpg';
+import ipiInclinometerStringImg from '../assets/sensors/ipi_inclinometer_string.jpg';
+import tdrCoaxialProbeImg from '../assets/sensors/tdr_coaxial_probe.jpg';
+import aeRockfallDetectorImg from '../assets/sensors/ae_rockfall_detector.jpg';
+import debrisBarrierSensorImg from '../assets/sensors/debris_barrier_sensor.jpg';
+
+// Comprehensive 27-Asset Image Mapping Dictionary
 const SENSOR_IMAGE_MAP = {
   1: rainGaugeImg,
   2: piezometerImg,
@@ -33,7 +47,21 @@ const SENSOR_IMAGE_MAP = {
   12: solarPowerImg,
   13: hydrostaticImg,
   14: enclosureImg,
+  15: slopeTerrainImg,
+  16: terrainWidePanoramicImg,
+  17: terrainDroneLidarImg,
+  18: terrainInsarImg,
+  19: terrainThermalSeepageImg,
+  20: terrainMultispectralNdviImg,
+  21: gnssRtkStationImg,
+  22: laserDistanceMeterImg,
+  23: fiberOpticDasImg,
+  24: ipiInclinometerStringImg,
+  25: tdrCoaxialProbeImg,
+  26: aeRockfallDetectorImg,
+  27: debrisBarrierSensorImg,
 };
+
 
 // Real-time simulated telemetry readings for live dynamic feel
 const SIMULATED_TELEMETRY = {
@@ -618,7 +646,65 @@ function SensorVisual({ item, viewMode = 'PHOTO', onToggleMode, onInspect }) {
   );
 }
 
-// Tactical Mountain Slope Stations with Geotechnical Instrumentation
+// 6 Selectable Terrain Imagery & Remote Sensing Scenes
+const TERRAIN_SCENE_OPTIONS = [
+  {
+    id: 'OPTICAL_RIDGE',
+    name: '01. Ridge Summit Optical Station (8K Telephoto)',
+    tag: 'OPTICAL REALITY',
+    image: slopeTerrainImg,
+    description: 'Direct high-resolution optical telephoto of active monitoring masts, 50W solar station, and alpine terrain.',
+    idealFor: 'Daylight visual verification & physical station mount inspection',
+    color: 'var(--cyan)'
+  },
+  {
+    id: 'PANORAMIC_TRANSECT',
+    name: '02. Alpine Wide Transect (Panoramic Survey)',
+    tag: 'WIDE TRANSECT',
+    image: terrainWidePanoramicImg,
+    description: 'High alpine talus cone and colluvial valley catchment transect under stormy monsoon conditions.',
+    idealFor: 'Macro slope stability & whole-catchment runout trajectory analysis',
+    color: 'var(--green)'
+  },
+  {
+    id: 'LIDAR_DEM',
+    name: '03. Airborne Drone LiDAR 3D DEM (Point Cloud)',
+    tag: 'LiDAR POINT CLOUD',
+    image: terrainDroneLidarImg,
+    description: 'High-density 120 pts/m² 3D digital elevation point cloud displaying scarp morphology and shear displacements.',
+    idealFor: 'Micro-topography contouring & rotational slip mass volumetric estimation',
+    color: '#38bdf8'
+  },
+  {
+    id: 'INSAR_FRINGES',
+    name: '04. Sentinel-1 DInSAR Phase Deformation (Radar)',
+    tag: 'RADAR InSAR',
+    image: terrainInsarImg,
+    description: 'Synthetic aperture radar interferometric phase fringes displaying 28.3mm displacement cycles.',
+    idealFor: 'Millimeter-scale regional creep velocity & spatial strain field mapping',
+    color: '#e879f9'
+  },
+  {
+    id: 'THERMAL_SEEPAGE',
+    name: '05. Thermal Infrared Groundwater Seepage (LWIR)',
+    tag: 'THERMAL FLIR',
+    image: terrainThermalSeepageImg,
+    description: 'Long-wave infrared thermography identifying cold groundwater emergence anomalies at 11.2°C.',
+    idealFor: 'Subsurface pore pressure localization & shear band hydraulic weakening',
+    color: 'var(--amber)'
+  },
+  {
+    id: 'MULTISPECTRAL_NDVI',
+    name: '06. Sentinel-2 Multi-spectral Vegetation Stress (NDVI)',
+    tag: 'MULTI-SPECTRAL',
+    image: terrainMultispectralNdviImg,
+    description: 'Near-infrared/red band ratio identifying root-shear distress and canopy die-off along crown tension cracks.',
+    idealFor: 'Vegetation biomechanical degradation & root reinforcement loss tracking',
+    color: '#4ade80'
+  }
+];
+
+// Tactical Mountain Slope Stations with Geotechnical Instrumentation & Multi-Angle Photos
 const TERRAIN_STATIONS = [
   {
     id: 'ST-01',
@@ -627,13 +713,19 @@ const TERRAIN_STATIONS = [
     altitude: '2,240m ASL',
     slopeAngle: '12° Crest Flat',
     coords: '31.1072°N, 77.1768°E',
-    pinPos: { left: '81%', top: '16%' },
-    svgPos: { x: 810, y: 80 },
+    pinPos: { left: '82%', top: '20%' },
+    svgPos: { x: 820, y: 100 },
     color: 'var(--cyan)',
     statusText: 'ONLINE • MESH ROOT',
     primarySensorId: 10, // 4G Gateway
     secondarySensorId: 12, // Solar System
-    sensorTypes: ['4G LTE-M / Iridium Satellite Gateway', '50W Solar PV + MPPT', '12V LiFePO4 Smart Battery'],
+    hardwarePhotos: [
+      { title: '4G LTE-M & Satellite Gateway', image: gatewayImg, role: 'Primary Telemetry Uplink Root', model: 'MultiTech Conduit IP67' },
+      { title: '50W Solar PV & LiFePO4 Station', image: solarPowerImg, role: '14-Day Zero-Sun Autonomy Pack', model: 'Victron MPPT 75/15 + 20Ah' },
+      { title: 'Choke-Ring GNSS RTK Rover', image: gnssRtkStationImg, role: 'Millimeter Bedrock Creep Monitor', model: 'Trimble NetR9 Dual-Freq' },
+      { title: 'Armored NEMA 4X Stainless Enclosure', image: enclosureImg, role: 'IP67 Environmental Housing', model: 'Fibox ARCA Stainless' }
+    ],
+    sensorTypes: ['4G LTE-M / Iridium Satellite Gateway', '50W Solar PV + MPPT', '12V LiFePO4 Smart Battery', 'GNSS RTK Choke-Ring Rover'],
     geotechnicalSignificance: 'Acts as the redundant master telemetry root. Collects Sub-GHz LoRa packets from down-slope sensor clusters and relays real-time geotechnical warnings to the Cloud Civil Defense dashboard via satellite fallback if terrestrial fiber is severed.',
     governingPhysics: 'Line-of-Sight Fresnel Zone Clearance (915 MHz) & Monocrystalline PV Photovoltaic Autonomy with 14-day zero-sun buffer.',
     alertThreshold: 'Loss of Gateway Heartbeat > 5 min -> Automatic Alert Trigger'
@@ -645,13 +737,19 @@ const TERRAIN_STATIONS = [
     altitude: '2,160m ASL',
     slopeAngle: '44° Steep Rock Scarp',
     coords: '31.1061°N, 77.1752°E',
-    pinPos: { left: '63%', top: '34%' },
-    svgPos: { x: 630, y: 170 },
+    pinPos: { left: '62%', top: '36%' },
+    svgPos: { x: 620, y: 180 },
     color: 'var(--amber)',
     statusText: 'WARNING • ACTIVE DILATION',
     primarySensorId: 5, // Crackmeter
     secondarySensorId: 3, // Tiltmeter
-    sensorTypes: ['Quartz Vibrating Wire Crackmeter', 'Biaxial MEMS Inclinometer', 'Micro-Seismic Geophone'],
+    hardwarePhotos: [
+      { title: 'Quartz Vibrating Wire Crackmeter', image: crackmeterImg, role: 'Detachment Scarp Fissure Dilation', model: 'RST Model VW2100' },
+      { title: 'Biaxial MEMS Inclinometer / Tiltmeter', image: tiltmeterImg, role: 'Biaxial Rotational Slope Creep', model: 'Sisgeo Digital MD900' },
+      { title: 'Reflectorless Optical Scarp Laser', image: laserDistanceMeterImg, role: 'Non-Contact Scarp Rangefinding', model: 'Leica Disto Pulsed TOF' },
+      { title: 'Acoustic Emission (AE) Sensor', image: aeRockfallDetectorImg, role: 'Micro-Crack Ultrasonic Acoustic', model: 'PAC R15I-AST 150kHz' }
+    ],
+    sensorTypes: ['Quartz Vibrating Wire Crackmeter', 'Biaxial MEMS Inclinometer', 'Reflectorless Laser Distance', 'Micro-Seismic Geophone'],
     geotechnicalSignificance: 'Monitors progressive tensile opening of the detachment crown scarp. Creep acceleration here indicates tensile failure of the upper soil mass, preconditioning the slope for sudden rotational or planar slide release.',
     governingPhysics: "Saito's Creep Rupture Model (1969): Rate of crack opening acceleration d²w/dt² inversely models remaining time to catastrophic slope detachment: tr = t0 + C/(dw/dt).",
     alertThreshold: 'Extension > 2.0 mm/day or Angular Tilt > 1.5° -> Tertiary Creep Alarm'
@@ -663,13 +761,19 @@ const TERRAIN_STATIONS = [
     altitude: '2,050m ASL',
     slopeAngle: '38° Colluvial Slope',
     coords: '31.1048°N, 77.1734°E',
-    pinPos: { left: '44%', top: '53%' },
-    svgPos: { x: 440, y: 265 },
+    pinPos: { left: '44%', top: '56%' },
+    svgPos: { x: 440, y: 280 },
     color: 'var(--red)',
     statusText: 'CRITICAL • HIGH PORE PRESSURE',
     primarySensorId: 2, // Vibrating Wire Piezometer
     secondarySensorId: 4, // Soil Moisture TDR
-    sensorTypes: ['12m Deep Vibrating Wire Piezometer', 'In-Place Borehole Inclinometer', 'Multi-depth TDR Soil Moisture Array'],
+    hardwarePhotos: [
+      { title: '12m Subsurface VW Piezometer', image: piezometerImg, role: 'Subsurface Pore-Water Pressure (u)', model: 'Geokon Model 4500S' },
+      { title: 'In-Place Inclinometer (IPI) String', image: ipiInclinometerStringImg, role: 'Multi-Depth Shear Plane Deflection', model: 'Slope Indicator Digital MEMS' },
+      { title: 'Multi-Depth TDR Soil Probe', image: tdrCoaxialProbeImg, role: 'Volumetric Water Content Waveguide', model: 'Campbell TDR-200 Probe' },
+      { title: 'Distributed Acoustic Sensing (DAS)', image: fiberOpticDasImg, role: 'Continuous Optical Strain Fiber', model: 'Silixa iDAS 10km Aperture' }
+    ],
+    sensorTypes: ['12m Deep Vibrating Wire Piezometer', 'In-Place Borehole Inclinometer', 'Multi-depth TDR Soil Moisture Array', 'Fiber Optic DAS'],
     geotechnicalSignificance: 'Directly penetrates the active slip surface at 8.2m depth. Measures pore-water pressure buildup and deep shear displacement. This is the single most critical station governing total slope collapse.',
     governingPhysics: "Terzaghi's Principle of Effective Stress: σ' = σ - u. High pore pressure (u) cancels normal clamping stress across the shear plane, drastically dropping available shear resistance τ = c' + σ' tan φ'.",
     alertThreshold: 'Pore-Water Pressure > 135 kPa or Shear Slip > 10 mm -> EVACUATION RED ALERT'
@@ -681,18 +785,56 @@ const TERRAIN_STATIONS = [
     altitude: '1,920m ASL',
     slopeAngle: '22° Valley Channel',
     coords: '31.1025°N, 77.1710°E',
-    pinPos: { left: '19%', top: '75%' },
-    svgPos: { x: 190, y: 375 },
+    pinPos: { left: '18%', top: '76%' },
+    svgPos: { x: 180, y: 380 },
     color: 'var(--cyan)',
     statusText: 'MONITORING • MONSOON RUNOFF',
     primarySensorId: 1, // Rain Gauge
     secondarySensorId: 7, // Ultrasonic Debris Level
-    sensorTypes: ['Dual-Tipping Bucket Rain Gauge', 'High-Frequency Ultrasonic Debris Radar', 'Hydrostatic Stage Sensor'],
+    hardwarePhotos: [
+      { title: 'Dual-Tipping Bucket Rain Gauge', image: rainGaugeImg, role: 'Precipitation Intensity & Volume', model: 'Campbell Scientific TE525' },
+      { title: 'Ultrasonic Debris Flow Radar', image: ultrasonicImg, role: 'Runout Stream Stage & Surge Head', model: 'Massa M300 High-Frequency' },
+      { title: 'Flexible Ring-Net Debris Barrier', image: debrisBarrierSensorImg, role: 'Dynamic Impact Retention & Load Cell', model: 'Geobrugg VX080 1500 kJ' },
+      { title: 'Hydrostatic Stage Pressure Sensor', image: hydrostaticImg, role: 'Submersible Groundwater Level', model: 'Keller 36XiW Stage Probe' }
+    ],
+    sensorTypes: ['Dual-Tipping Bucket Rain Gauge', 'High-Frequency Ultrasonic Debris Radar', 'Flexible Debris Barrier Load Cell', 'Hydrostatic Stage Sensor'],
     geotechnicalSignificance: 'Monitors precipitation intensity (mm/hr) and flash flood debris surge in the toe channel. Seepage breakout at the toe signals slope saturation and rapid liquefactive mudflow transformation.',
     governingPhysics: 'Caine (1980) & Guzzetti Intensity-Duration (I-D) Empirical Threshold: I = 14.82 * D^(-0.39). Exceeding this boundary initiates mass debris mobilization.',
     alertThreshold: 'Precipitation Intensity > 25 mm/hr or Channel Surge > 3.0m -> Flash Mudflow Siren'
   }
 ];
+
+// Complete 27-Asset Field Instrumentation & Remote Sensing Atlas
+const ALL_FIELD_ASSETS = [
+  { id: 1, name: 'Tipping Bucket Rain Gauge', model: 'Campbell TE525', category: 'METEOROLOGICAL', image: rainGaugeImg, param: 'Precipitation Intensity (mm/hr)', accuracy: '±1.0%', interface: 'Pulse Switch', ingress: 'IP67', role: 'Monitors rainfall infiltration triggers against Caine empirical thresholds.' },
+  { id: 2, name: 'Vibrating Wire Piezometer', model: 'Geokon 4500S', category: 'GEOTECHNICAL', image: piezometerImg, param: 'Pore-Water Pressure (kPa)', accuracy: '±0.1% FS', interface: 'Vibrating Wire', ingress: 'IP68 (50 bar)', role: 'Directly tracks effective stress reduction across the critical rotational shear band.' },
+  { id: 3, name: 'Biaxial MEMS Inclinometer', model: 'Sisgeo MD900', category: 'GEOTECHNICAL', image: tiltmeterImg, param: 'Biaxial Tilt Angle (θx, θy)', accuracy: '±0.001°', interface: 'RS-485 Modbus', ingress: 'IP68', role: 'Monitors scarp angular creep acceleration according to Saito rupture law.' },
+  { id: 4, name: 'TDR Soil Moisture Array', model: 'Decagon 5TE', category: 'HYDROLOGICAL', image: soilMoistureImg, param: 'Volumetric Water Content (% VWC)', accuracy: '±2.0%', interface: 'SDI-12', ingress: 'IP68', role: 'Detects infiltration wetting fronts preconditioning colluvium for liquefaction.' },
+  { id: 5, name: 'Quartz Tension Crackmeter', model: 'RST VW2100', category: 'GEOTECHNICAL', image: crackmeterImg, param: 'Fracture Extension (mm)', accuracy: '±0.02 mm', interface: 'Vibrating Wire', ingress: 'IP68', role: 'Measures tensile opening rate of head scarp detachment fissures.' },
+  { id: 6, name: 'Triaxial Seismic Geophone', model: 'Instantel Minimate', category: 'METEOROLOGICAL', image: geophoneImg, param: 'Peak Particle Velocity (mm/s)', accuracy: '±0.1 mm/s', interface: 'Analog / 24-bit', ingress: 'IP67', role: 'Captures micro-tremors and shear acoustic emissions prior to slope release.' },
+  { id: 7, name: 'Ultrasonic Debris Flow Radar', model: 'Massa M300', category: 'HYDROLOGICAL', image: ultrasonicImg, param: 'Channel Flow Stage (m)', accuracy: '±2.5 mm', interface: '4-20 mA / SDI-12', ingress: 'IP68', role: 'Provides non-contact real-time tracking of flash floods and boulder slurry pulses.' },
+  { id: 8, name: 'All-in-One Weather Station', model: 'Vaisala WXT536', category: 'METEOROLOGICAL', image: weatherStationImg, param: 'Wind, Baro, Temp, Rain, RH', accuracy: 'Class A WMO', interface: 'SDI-12 / RS-485', ingress: 'IP67', role: 'Monitors atmospheric storm fronts and cyclonic barometric pressure drops.' },
+  { id: 9, name: 'Sub-GHz LoRaWAN Field Node', model: 'Dragino LSN50', category: 'TELECOM, POWER & AI', image: loraNodeImg, param: 'RF Telemetry (868/915 MHz)', accuracy: '-148 dBm Sens.', interface: 'LoRaWAN Class A', ingress: 'IP67', role: 'Transmits encrypted sensor packets over 15km line-of-sight mountain terrain.' },
+  { id: 10, name: '4G LTE-M / Satellite Gateway', model: 'MultiTech IP67', category: 'TELECOM, POWER & AI', image: gatewayImg, param: 'Cellular & Iridium Uplink', accuracy: '99.99% Uptime', interface: 'Ethernet / LTE-M', ingress: 'IP67', role: 'Master slope telemetry aggregator relaying early warning alarms to civil defense.' },
+  { id: 11, name: 'ESP32-S3 Edge AI Core', model: 'Espressif Dual 240MHz', category: 'TELECOM, POWER & AI', image: edgeComputeImg, param: 'Real-Time TinyML Inference', accuracy: '32-bit FPU', interface: 'CAN / SPI / I2C', ingress: 'Conformal IP65', role: 'Runs on-device geotechnical anomaly models with sub-second alert triggers.' },
+  { id: 12, name: 'LiFePO4 Solar Power System', model: 'Victron MPPT + 20Ah', category: 'TELECOM, POWER & AI', image: solarPowerImg, param: 'Autonomous Battery Storage', accuracy: '99% MPPT Eff.', interface: 'VE.Direct / CAN', ingress: 'IP65', role: 'Provides 14-day zero-sun continuous power during prolonged monsoon cloud cover.' },
+  { id: 13, name: 'Hydrostatic Stage Transmitter', model: 'Keller 36XiW', category: 'HYDROLOGICAL', image: hydrostaticImg, param: 'Subsurface Water Table (m)', accuracy: '±0.05% FS', interface: 'RS-485 Modbus', ingress: 'IP68 (30 bar)', role: 'Monitors phreatic surface water table rise behind retaining barriers.' },
+  { id: 14, name: 'Armored NEMA 4X Cabinet', model: 'Fibox ARCA Stainless', category: 'TELECOM, POWER & AI', image: enclosureImg, param: 'Mechanical Equipment Housing', accuracy: 'IK10 Impact', interface: 'Gland Plate', ingress: 'IP67 / NEMA 4X', role: 'Protects sensitive instrumentation from alpine snow, rock impact, and rodents.' },
+  { id: 15, name: 'Ridge Gateway 8K Telephoto View', model: 'Terrain Optical Scene 01', category: 'REMOTE SENSING & LiDAR', image: slopeTerrainImg, param: 'Optical Telephoto Panorama', accuracy: '8K Optical', interface: 'Visible RGB', ingress: 'Alpine Field', role: 'High-resolution field view of summit telemetry station and scarp.' },
+  { id: 16, name: 'Alpine Wide Panoramic Transect', model: 'Terrain Optical Scene 02', category: 'REMOTE SENSING & LiDAR', image: terrainWidePanoramicImg, param: 'Panoramic Talus Catchment', accuracy: 'Ultra-Wide', interface: 'Visible RGB', ingress: 'Alpine Field', role: 'Macro slope stability & whole-catchment debris runout trajectory analysis.' },
+  { id: 17, name: 'Airborne Drone LiDAR 3D DEM', model: 'Terrain LiDAR Scene 03', category: 'REMOTE SENSING & LiDAR', image: terrainDroneLidarImg, param: '3D Elevation Point Cloud', accuracy: '120 pts/m²', interface: 'LiDAR Laser Scan', ingress: 'Aerial Sensor', role: 'Micro-topography contouring and rotational slip mass volumetric estimation.' },
+  { id: 18, name: 'Sentinel-1 DInSAR Phase Map', model: 'Terrain Radar Scene 04', category: 'REMOTE SENSING & LiDAR', image: terrainInsarImg, param: 'Interferometric Phase Fringe', accuracy: '1.5 mm/yr Creep', interface: 'C-Band Radar', ingress: 'Satellite SAR', role: 'Millimeter-scale regional creep velocity and spatial strain field mapping.' },
+  { id: 19, name: 'Thermal Infrared Seepage Survey', model: 'Terrain Thermal Scene 05', category: 'REMOTE SENSING & LiDAR', image: terrainThermalSeepageImg, param: 'LWIR Radiometric Thermogram', accuracy: '< 30 mK NETD', interface: 'FLIR 7.5-14 µm', ingress: 'Thermography', role: 'Identifies cold groundwater emergence points weakening shear band strength.' },
+  { id: 20, name: 'Sentinel-2 Multi-spectral NDVI', model: 'Terrain NDVI Scene 06', category: 'REMOTE SENSING & LiDAR', image: terrainMultispectralNdviImg, param: 'Normalized Veg. Index (NDVI)', accuracy: '10m Spatial Res.', interface: 'B8/B4 Multi-spec', ingress: 'Satellite Optical', role: 'Detects root-shear distress and canopy die-off along crown tension cracks.' },
+  { id: 21, name: 'GNSS RTK Choke-Ring Rover', model: 'Trimble NetR9 Geodetic', category: 'GEOTECHNICAL', image: gnssRtkStationImg, param: '3D Crustal Displacement', accuracy: '±1.2 mm Horiz.', interface: 'NMEA / RTCM3', ingress: 'IP68 Bedrock', role: 'Continuously monitors absolute 3D millimeter-scale tectonic and scarp drift.' },
+  { id: 22, name: 'Laser Distance Scarp Rangefinder', model: 'Leica Disto Pulsed TOF', category: 'GEOTECHNICAL', image: laserDistanceMeterImg, param: 'Reflectorless Scarp Distance', accuracy: '±1.0 mm up to 1.5km', interface: 'RS-485 / 4-20mA', ingress: 'IP67 Armored', role: 'Non-contact optical laser monitoring of inaccessible vertical head scarp walls.' },
+  { id: 23, name: 'Fiber Optic DAS Acoustic Cable', model: 'Silixa iDAS Optical Fiber', category: 'GEOTECHNICAL', image: fiberOpticDasImg, param: 'Distributed Acoustic Strain', accuracy: '1 nε Micro-strain', interface: 'Single-Mode Fiber', ingress: 'Direct Burial', role: 'Continuous 10km spatial strain sensing detecting crack propagation acoustics.' },
+  { id: 24, name: 'In-Place Inclinometer (IPI) String', model: 'Slope Indicator Digital MEMS', category: 'GEOTECHNICAL', image: ipiInclinometerStringImg, param: 'Borehole Shear Deflection', accuracy: '±0.05 mm/m', interface: 'RS-485 Addressable', ingress: 'Submersible 200m', role: 'Chain of wheeled torpedoes inside grooved casing profiling active shear planes.' },
+  { id: 25, name: 'Multi-Rod TDR Soil Waveguide', model: 'Campbell TDR-200 Probe', category: 'HYDROLOGICAL', image: tdrCoaxialProbeImg, param: 'Dielectric Permittivity Ka', accuracy: '±1.0% VWC', interface: 'High-Freq Pulse', ingress: 'Hermetic IP68', role: 'High-frequency pulse reflectometer detecting soil moisture saturation boundaries.' },
+  { id: 26, name: 'Acoustic Emission (AE) Sensor', model: 'PAC R15I-AST Piezo', category: 'GEOTECHNICAL', image: aeRockfallDetectorImg, param: 'High-Frequency AE Hits (kHz)', accuracy: '20 kHz - 1 MHz', interface: 'Piezo Preamplifier', ingress: 'Weather-tight', role: 'Detects ultrasonic micro-cracking inside rock joints hours before rock mass detachment.' },
+  { id: 27, name: 'Flexible Ring-Net Debris Barrier', model: 'Geobrugg VX080 1500 kJ', category: 'HYDROLOGICAL', image: debrisBarrierSensorImg, param: 'Impact Dynamic Retention Load', accuracy: '1,500 kJ Capacity', interface: 'Load Cell Switch', ingress: 'High-Tensile Steel', role: 'Intercepts channelized debris flows and triggers automated highway closure sirens.' },
+];
+
 
 export default function SensorPricingPage() {
   const [items, setItems] = useState(() => {
@@ -740,6 +882,17 @@ export default function SensorPricingPage() {
     thermalHeatmap: false,
   });
 
+  // Terrain Scene & 27-Asset Gallery States
+  const [selectedTerrainSceneId, setSelectedTerrainSceneId] = useState('OPTICAL_RIDGE');
+  const [stationPhotoIndex, setStationPhotoIndex] = useState(0);
+  const [showAtlasModal, setShowAtlasModal] = useState(false);
+  const [atlasCategory, setAtlasCategory] = useState('ALL');
+  const [atlasSearch, setAtlasSearch] = useState('');
+  const [atlasLightboxAsset, setAtlasLightboxAsset] = useState(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [packetNodeFilter, setPacketNodeFilter] = useState('ALL');
+  const [waveformHistory, setWaveformHistory] = useState([42, 48, 55, 62, 70, 78, 86, 95, 108, 118, 126, 134, 138, 140, 142.8]);
+
   const [simStormActive, setSimStormActive] = useState(false);
   const [selectedTerrainStationId, setSelectedTerrainStationId] = useState('ST-03');
   const [packetStreamPaused, setPacketStreamPaused] = useState(false);
@@ -763,6 +916,52 @@ export default function SensorPricingPage() {
     lastUpdate: 'LIVE',
   });
 
+  // Synthesized Web Audio API Tactical Sound Effects
+  const playTacticalAudio = (type) => {
+    if (!audioEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'packet') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.03, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.04);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.04);
+      } else if (type === 'click') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.03);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.03);
+      } else if (type === 'alert') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(650, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(980, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      }
+    } catch (e) {
+      // Audio autoplay policy handled silently
+    }
+  };
+
+  // Reset station photo index when switching stations
+  useEffect(() => {
+    setStationPhotoIndex(0);
+  }, [selectedTerrainStationId]);
+
   // Real-time LoRaWAN Packet stream buffer
   const [packetLogs, setPacketLogs] = useState([
     { id: 48192, time: '04:26:48 UTC', node: 'ST-03 MID-SLOPE', type: 'SDI-12 / VW', hex: '0x8F 0x14 0x2A 0x6E', reading: 'VW_u: 142.8 kPa | VWC: 88.4%', rssi: -68, snr: '+9.4 dB', status: 'CRC_OK' },
@@ -781,6 +980,7 @@ export default function SensorPricingPage() {
         const rainfall = storm 
           ? +(Math.min(95, Math.max(65, prev.rainfall + noise * 4))).toFixed(1)
           : +(Math.min(36, Math.max(22, prev.rainfall + noise * 1.5))).toFixed(1);
+
 
         const porePressure = storm
           ? +(Math.min(210, Math.max(175, prev.porePressure + noise * 3))).toFixed(1)
@@ -924,6 +1124,22 @@ export default function SensorPricingPage() {
   const selectedTerrainStation = useMemo(() => {
     return TERRAIN_STATIONS.find(s => s.id === selectedTerrainStationId) || TERRAIN_STATIONS[2];
   }, [selectedTerrainStationId]);
+
+  const activeTerrainScene = useMemo(() => {
+    return TERRAIN_SCENE_OPTIONS.find(s => s.id === selectedTerrainSceneId) || TERRAIN_SCENE_OPTIONS[0];
+  }, [selectedTerrainSceneId]);
+
+  const filteredAtlasAssets = useMemo(() => {
+    return ALL_FIELD_ASSETS.filter(item => {
+      const matchCat = atlasCategory === 'ALL' || item.category === atlasCategory;
+      const matchSearch = atlasSearch === '' ||
+        item.name.toLowerCase().includes(atlasSearch.toLowerCase()) ||
+        item.model.toLowerCase().includes(atlasSearch.toLowerCase()) ||
+        item.param.toLowerCase().includes(atlasSearch.toLowerCase()) ||
+        item.role.toLowerCase().includes(atlasSearch.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [atlasCategory, atlasSearch]);
 
   // Financial BOM calculation
   const bomSummary = useMemo(() => {
@@ -1742,17 +1958,18 @@ export default function SensorPricingPage() {
       {/* TAB 2: REAL-TIME TERRAIN ANALYTICS & SENSING SCHEMATIC */}
       {activeTab === 'TOPOGRAPHY' && (
         <div className="panel" style={{ marginBottom: '20px' }}>
+          {/* Panel Header & Tactical Command Toolbar */}
           <div className="panel-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
             <div>
               <span className="label-caps" style={{ color: 'var(--cyan)' }}>
                 🏔️ REAL-TIME TERRAIN SENSING & BISHOP STABILITY ANALYTICS
               </span>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
-                FIELD-DEPLOYED TELEMETRY • LORAWAN MESH TOPOLOGY • SUBSURFACE BOREHOLE SHEAR BAND • LIVE FoS PREDICTION
+                27-ASSET FIELD INSTRUMENTATION • 6 TERRAIN SENSOR VIEWS • LORAWAN MESH TOPOLOGY • REAL-TIME FoS PREDICTION
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1772,20 +1989,65 @@ export default function SensorPricingPage() {
                   boxShadow: `0 0 8px ${simStormActive ? 'var(--red)' : 'var(--green)'}`
                 }} />
                 <span style={{ color: simStormActive ? 'var(--red)' : 'var(--green)', fontWeight: 700 }}>
-                  {simStormActive ? 'STORM SURGE MODE' : 'POLLING ACTIVE (2.0s)'}
+                  {simStormActive ? 'STORM SURGE ACTIVE' : 'POLLING ACTIVE (2.0s)'}
                 </span>
                 <span style={{ color: 'var(--text-muted)' }}>•</span>
-                <span style={{ color: '#cbd5e1' }}>14/14 CHANNELS OK</span>
+                <span style={{ color: '#cbd5e1' }}>27 ASSETS CATALOGED</span>
                 <span style={{ color: 'var(--text-muted)' }}>•</span>
                 <span style={{ color: 'var(--cyan)' }}>CRC 100%</span>
               </div>
 
-              {/* Storm Drill Trigger Button */}
+              {/* 27-Asset Field Atlas Button */}
               <button
-                onClick={() => setSimStormActive(!simStormActive)}
+                onClick={() => {
+                  playTacticalAudio('click');
+                  setShowAtlasModal(true);
+                }}
                 className="btn"
                 style={{
-                  background: simStormActive ? 'rgba(255, 59, 92, 0.2)' : 'rgba(255, 176, 32, 0.15)',
+                  background: 'rgba(0, 229, 255, 0.15)',
+                  border: '1px solid var(--cyan)',
+                  color: 'var(--cyan)',
+                  fontWeight: 700,
+                  fontSize: '11px',
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>📚</span> 27-ASSET FIELD ATLAS
+              </button>
+
+              {/* Tactical Audio Toggle */}
+              <button
+                onClick={() => {
+                  setAudioEnabled(!audioEnabled);
+                  if (!audioEnabled) playTacticalAudio('click');
+                }}
+                className="btn"
+                style={{
+                  background: audioEnabled ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${audioEnabled ? 'var(--green)' : 'var(--border-subtle)'}`,
+                  color: audioEnabled ? 'var(--green)' : 'var(--text-muted)',
+                  fontSize: '11px',
+                  padding: '6px 10px'
+                }}
+                title="Toggle Synthesized Web Audio Alerts"
+              >
+                {audioEnabled ? '🔊 AUDIO ON' : '🔇 AUDIO OFF'}
+              </button>
+
+              {/* Storm Drill Trigger Button */}
+              <button
+                onClick={() => {
+                  const nextState = !simStormActive;
+                  setSimStormActive(nextState);
+                  playTacticalAudio(nextState ? 'alert' : 'click');
+                }}
+                className="btn"
+                style={{
+                  background: simStormActive ? 'rgba(255, 59, 92, 0.25)' : 'rgba(255, 176, 32, 0.15)',
                   border: `1px solid ${simStormActive ? 'var(--red)' : 'var(--amber)'}`,
                   color: simStormActive ? 'var(--red)' : 'var(--amber)',
                   fontWeight: 700,
@@ -1803,22 +2065,86 @@ export default function SensorPricingPage() {
           </div>
 
           <div className="panel-body" style={{ padding: '20px' }}>
-            {/* Tactical Layer Toggle Toolbar */}
+            {/* 1. TERRAIN SCENE / SENSOR VIEW SELECTOR (6 REAL MODES) */}
+            <div style={{
+              background: 'rgba(5, 10, 20, 0.75)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              marginBottom: '14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                  🎯 SELECT TERRAIN SCENE / SENSOR VIEW (6 MODES):
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Active: <strong style={{ color: activeTerrainScene.color }}>{activeTerrainScene.name}</strong>
+                </span>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                gap: '8px'
+              }}>
+                {TERRAIN_SCENE_OPTIONS.map(scene => {
+                  const isCur = selectedTerrainSceneId === scene.id;
+                  return (
+                    <button
+                      key={scene.id}
+                      onClick={() => {
+                        playTacticalAudio('click');
+                        setSelectedTerrainSceneId(scene.id);
+                      }}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        background: isCur ? `${scene.color}22` : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${isCur ? scene.color : 'var(--border-subtle)'}`,
+                        color: isCur ? scene.color : 'var(--text-secondary)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                        boxShadow: isCur ? `0 0 14px ${scene.color}33` : 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 700, fontSize: '10px' }}>{scene.tag}</span>
+                        {isCur && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scene.color, boxShadow: `0 0 6px ${scene.color}` }} />}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {scene.name.split('(')[0]}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. Tactical Analytical Layer Toggles & Stability Bar */}
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
               gap: '10px',
-              marginBottom: '16px',
-              padding: '12px 16px',
+              marginBottom: '14px',
+              padding: '10px 14px',
               background: 'rgba(10, 15, 26, 0.6)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '8px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginRight: '4px' }}>
-                  ANALYTIC LAYERS:
+                  ANALYTIC OVERLAYS:
                 </span>
 
                 <button
@@ -1834,7 +2160,7 @@ export default function SensorPricingPage() {
                     color: terrainLayers.optical ? 'var(--cyan)' : 'var(--text-secondary)'
                   }}
                 >
-                  📷 OPTICAL REALITY
+                  📷 SCENE VIEW
                 </button>
 
                 <button
@@ -1936,7 +2262,7 @@ export default function SensorPricingPage() {
               </div>
             </div>
 
-            {/* PHOTOGRAPHIC MOUNTAIN TERRAIN VIEWPORT WITH ANALYTICS OVERLAY */}
+            {/* 3. PHOTOGRAPHIC MOUNTAIN TERRAIN VIEWPORT WITH ANALYTICS OVERLAY */}
             <div
               className={simStormActive ? 'storm-warning-active' : ''}
               style={{
@@ -2004,10 +2330,11 @@ export default function SensorPricingPage() {
                 </div>
               )}
 
-              {/* REAL MOUNTAIN SLOPE PHOTOGRAPH */}
+              {/* REAL MOUNTAIN SLOPE / SCIENTIFIC REMOTE SENSING PHOTOGRAPH */}
               <img
-                src={slopeTerrainImg}
-                alt="Active Mountain Slope Landslide Hazard Sensing Field"
+                src={activeTerrainScene.image}
+                alt={activeTerrainScene.name}
+                className="terrain-image-transition"
                 style={{
                   width: '100%',
                   height: '100%',
@@ -2017,7 +2344,6 @@ export default function SensorPricingPage() {
                     : terrainLayers.optical
                     ? 'brightness(0.85) contrast(1.1)'
                     : 'brightness(0.35) contrast(1.4) grayscale(0.5)',
-                  transition: 'filter 0.5s ease'
                 }}
               />
 
@@ -2100,11 +2426,11 @@ export default function SensorPricingPage() {
                 transition: 'top 0.3s ease'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: 'var(--cyan)', fontWeight: 700 }}>● OPTICAL FIELD TELEMETRY</span>
+                  <span style={{ color: activeTerrainScene.color, fontWeight: 700 }}>● {activeTerrainScene.tag}</span>
                   <span>SLOPE SECTOR 4B (HIMALAYAN TRANSECT)</span>
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  RESOLUTION: 8K LIDAR FUSION • ELEVATION SPAN: 1,920m - 2,240m ASL
+                  {activeTerrainScene.name} • ELEVATION SPAN: 1,920m - 2,240m ASL
                 </div>
               </div>
 
@@ -2140,6 +2466,11 @@ export default function SensorPricingPage() {
                 <div>
                   <span style={{ color: 'var(--text-muted)', fontSize: '9px', display: 'block' }}>CROWN DILATION</span>
                   <span style={{ color: 'var(--amber)', fontWeight: 700 }}>+{liveTerrainTelemetry.crackOpening} mm</span>
+                </div>
+                <div style={{ width: '1px', height: '24px', background: 'var(--border-subtle)' }} />
+                <div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '9px', display: 'block' }}>BISHOP FoS</span>
+                  <span style={{ color: liveTerrainTelemetry.fos < 1.0 ? 'var(--red)' : 'var(--amber)', fontWeight: 800 }}>{liveTerrainTelemetry.fos}</span>
                 </div>
               </div>
 
@@ -2187,13 +2518,13 @@ export default function SensorPricingPage() {
                 {terrainLayers.porePressure && (
                   <g>
                     <path
-                      d="M 630 180 Q 450 250 190 380 L 190 450 Q 480 420 650 240 Z"
+                      d="M 620 180 Q 450 260 180 380 L 180 450 Q 480 430 650 250 Z"
                       fill="url(#saturationGrad)"
                     />
                     {/* Seepage percolation streamline arrows */}
-                    <path d="M 600 200 Q 480 270 240 390" fill="none" stroke="#00e5ff" strokeWidth="1.8" strokeDasharray="5 5" opacity="0.85" />
-                    <path d="M 560 230 Q 440 300 280 410" fill="none" stroke="#00e5ff" strokeWidth="1.4" strokeDasharray="5 5" opacity="0.7" />
-                    <text x="280" y="435" fill="#00e5ff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700" opacity="0.95">
+                    <path d="M 590 200 Q 480 270 240 390" fill="none" stroke="#00e5ff" strokeWidth="1.8" strokeDasharray="5 5" opacity="0.85" />
+                    <path d="M 550 230 Q 440 300 280 410" fill="none" stroke="#00e5ff" strokeWidth="1.4" strokeDasharray="5 5" opacity="0.7" />
+                    <text x="270" y="435" fill="#00e5ff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700" opacity="0.95">
                       SUBSURFACE PORE-WATER SATURATION PLUME (u = {liveTerrainTelemetry.porePressure} kPa • Ru = 0.52)
                     </text>
                   </g>
@@ -2203,7 +2534,7 @@ export default function SensorPricingPage() {
                 {terrainLayers.bishopFos && (
                   <g>
                     <path
-                      d="M 190 375 Q 430 360 630 170"
+                      d="M 180 380 Q 420 370 620 180"
                       fill="none"
                       stroke="#ff3b5c"
                       strokeWidth={simStormActive ? '5' : '3.5'}
@@ -2213,15 +2544,15 @@ export default function SensorPricingPage() {
                     />
                     {/* Failure wedge shaded area */}
                     <path
-                      d="M 190 375 Q 430 360 630 170 L 630 230 L 440 330 L 190 375 Z"
+                      d="M 180 380 Q 420 370 620 180 L 620 230 L 440 330 L 180 380 Z"
                       fill="url(#failureWedgeGrad)"
                     />
-                    <text x="350" y="335" fill="#ff3b5c" fontSize="12" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="1px">
+                    <text x="340" y="340" fill="#ff3b5c" fontSize="12" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="1px">
                       POTENTIAL ROTATIONAL SLIP PLANE (BISHOP FoS = {liveTerrainTelemetry.fos})
                     </text>
                     {/* Shear traction vector arrows */}
-                    {[260, 350, 450, 540].map((ax, idx) => (
-                      <g key={idx} transform={`translate(${ax}, ${345 - idx * 32}) rotate(34)`}>
+                    {[250, 340, 440, 530].map((ax, idx) => (
+                      <g key={idx} transform={`translate(${ax}, ${350 - idx * 34}) rotate(34)`}>
                         <line x1="0" y1="0" x2="-22" y2="0" stroke="#ff3b5c" strokeWidth="2" strokeDasharray="3 2" />
                         <polygon points="-22,0 -16,-4 -16,4" fill="#ff3b5c" />
                       </g>
@@ -2229,8 +2560,8 @@ export default function SensorPricingPage() {
                   </g>
                 )}
 
-                {/* 12m Borehole Inclinometer & Piezometer Stem into Rock */}
-                <g transform="translate(440, 265)">
+                {/* 12m Borehole Inclinometer & Piezometer Stem into Rock at ST-03 */}
+                <g transform="translate(440, 280)">
                   <line x1="0" y1="0" x2="0" y2="120" stroke="#00e5ff" strokeWidth="3" strokeDasharray="4 2" />
                   <rect x="-8" y="0" width="16" height="40" fill="rgba(255, 176, 32, 0.5)" />
                   <circle cx="0" cy="115" r="7" fill="#ff3b5c" stroke="#fff" strokeWidth="1.5" />
@@ -2238,8 +2569,8 @@ export default function SensorPricingPage() {
                   <text x="18" y="118" fill="#ff3b5c" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">12m VW PIEZOMETER</text>
                 </g>
 
-                {/* Tension Head Scarp Fracture Opening */}
-                <g transform="translate(630, 170)">
+                {/* Tension Head Scarp Fracture Opening at ST-02 */}
+                <g transform="translate(620, 180)">
                   <path d="M -15 -10 L 0 0 L 15 -8 L 30 2" stroke="#ff3b5c" strokeWidth="3" fill="none" />
                   <text x="-70" y="-18" fill="#ff3b5c" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">
                     CROWN EXTENSION FISSURE (+{liveTerrainTelemetry.crackOpening}mm)
@@ -2250,42 +2581,66 @@ export default function SensorPricingPage() {
                 {terrainLayers.loraMesh && (
                   <g>
                     {/* Toe to Mid-Slope */}
-                    <path d="M 190 375 Q 315 310 440 265" fill="none" stroke="#00e5ff" strokeWidth="2.5" className="lora-signal-beam" />
+                    <path d="M 180 380 Q 310 320 440 280" fill="none" stroke="#00e5ff" strokeWidth="2.5" className="lora-signal-beam" />
                     {/* Mid-Slope to Crown */}
-                    <path d="M 440 265 Q 535 210 630 170" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
+                    <path d="M 440 280 Q 530 220 620 180" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
                     {/* Crown to Summit Gateway */}
-                    <path d="M 630 170 Q 720 120 810 80" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
+                    <path d="M 620 180 Q 720 135 820 100" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
                     {/* Direct Long-Range Redundant Link (Toe to Gateway) */}
-                    <path d="M 190 375 Q 520 160 810 80" fill="none" stroke="#ffb020" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.5" />
+                    <path d="M 180 380 Q 510 170 820 100" fill="none" stroke="#ffb020" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.5" />
                     {/* Gateway to Satellite Uplink */}
-                    <path d="M 810 80 L 920 30" fill="none" stroke="#00e5ff" strokeWidth="2" strokeDasharray="3 3" opacity="0.85" />
+                    <path d="M 820 100 L 925 35" fill="none" stroke="#00e5ff" strokeWidth="2" strokeDasharray="3 3" opacity="0.85" />
 
                     {/* Traveling Energy Packet Pulses */}
-                    <circle cx={440 + Math.sin(Date.now() / 400) * 80} cy={265 - Math.sin(Date.now() / 400) * 40} r="4" fill="#fff" filter="url(#cyanPulseGlow)" />
-                    <circle cx={630 + Math.cos(Date.now() / 350) * 70} cy={170 - Math.cos(Date.now() / 350) * 35} r="4" fill="#22c55e" filter="url(#cyanPulseGlow)" />
+                    <circle cx={440 + Math.sin(Date.now() / 400) * 80} cy={280 - Math.sin(Date.now() / 400) * 40} r="4" fill="#fff" filter="url(#cyanPulseGlow)" />
+                    <circle cx={620 + Math.cos(Date.now() / 350) * 70} cy={180 - Math.cos(Date.now() / 350) * 35} r="4" fill="#22c55e" filter="url(#cyanPulseGlow)" />
 
-                    {/* Satellite Node Callout at Top Right */}
-                    <g transform="translate(920, 30)">
-                      <circle cx="0" cy="0" r="16" fill="rgba(0, 229, 255, 0.15)" stroke="var(--cyan)" strokeWidth="1.5" />
+                    {/* Satellite Node Callout at Top Right with Pulsing Wave Rings */}
+                    <g transform="translate(925, 35)">
+                      <circle cx="0" cy="0" r="18" fill="none" stroke="var(--cyan)" className="satellite-wave-ring" />
+                      <circle cx="0" cy="0" r="14" fill="rgba(0, 229, 255, 0.15)" stroke="var(--cyan)" strokeWidth="1.5" />
                       <text x="-8" y="5" fontSize="13">🛰️</text>
                       <text x="-32" y="26" fill="var(--cyan)" fontSize="9" fontFamily="var(--font-mono)" fontWeight="700">IRIDIUM SATELLITE</text>
                     </g>
                   </g>
                 )}
 
-                {/* Elevation Contours */}
-                <g opacity="0.75">
-                  <line x1="60" y1="80" x2="160" y2="80" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
-                  <text x="170" y="84" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,240m ASL (SUMMIT RIDGE)</text>
+                {/* Toe Gully Radar Rotating Scanning Cone at ST-04 */}
+                <g transform="translate(180, 380)">
+                  <path
+                    d="M 0 0 L 30 -15 A 35 35 0 0 1 30 15 Z"
+                    fill="rgba(0, 229, 255, 0.25)"
+                    stroke="var(--cyan)"
+                    strokeWidth="1"
+                    className="radar-cone-sweep"
+                  />
+                </g>
 
-                  <line x1="60" y1="170" x2="160" y2="170" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
-                  <text x="170" y="174" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,160m ASL (HEAD SCARP)</text>
+                {/* Elevation Contours - Cleanly aligned on left margin with dark background badges */}
+                <g opacity="0.85">
+                  <g transform="translate(25, 100)">
+                    <rect x="0" y="-10" width="155" height="18" rx="3" fill="rgba(5, 10, 20, 0.85)" stroke="#64748b" strokeWidth="0.75" />
+                    <text x="6" y="3" fill="#cbd5e1" fontSize="9" fontFamily="var(--font-mono)" fontWeight="600">2,240m ASL (SUMMIT RIDGE)</text>
+                    <line x1="155" y1="0" x2="200" y2="0" stroke="#64748b" strokeWidth="1" strokeDasharray="2 3" />
+                  </g>
 
-                  <line x1="60" y1="265" x2="160" y2="265" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
-                  <text x="170" y="269" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,050m ASL (BOREHOLE SHEAR BAND)</text>
+                  <g transform="translate(25, 180)">
+                    <rect x="0" y="-10" width="155" height="18" rx="3" fill="rgba(5, 10, 20, 0.85)" stroke="#64748b" strokeWidth="0.75" />
+                    <text x="6" y="3" fill="#cbd5e1" fontSize="9" fontFamily="var(--font-mono)" fontWeight="600">2,160m ASL (HEAD SCARP)</text>
+                    <line x1="155" y1="0" x2="200" y2="0" stroke="#64748b" strokeWidth="1" strokeDasharray="2 3" />
+                  </g>
 
-                  <line x1="60" y1="375" x2="160" y2="375" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
-                  <text x="170" y="379" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">1,920m ASL (TOE GULLY)</text>
+                  <g transform="translate(25, 280)">
+                    <rect x="0" y="-10" width="155" height="18" rx="3" fill="rgba(5, 10, 20, 0.85)" stroke="#64748b" strokeWidth="0.75" />
+                    <text x="6" y="3" fill="#cbd5e1" fontSize="9" fontFamily="var(--font-mono)" fontWeight="600">2,050m ASL (BOREHOLE SHEAR)</text>
+                    <line x1="155" y1="0" x2="200" y2="0" stroke="#64748b" strokeWidth="1" strokeDasharray="2 3" />
+                  </g>
+
+                  <g transform="translate(25, 380)">
+                    <rect x="0" y="-10" width="155" height="18" rx="3" fill="rgba(5, 10, 20, 0.85)" stroke="#64748b" strokeWidth="0.75" />
+                    <text x="6" y="3" fill="#cbd5e1" fontSize="9" fontFamily="var(--font-mono)" fontWeight="600">1,920m ASL (TOE GULLY)</text>
+                    <line x1="155" y1="0" x2="200" y2="0" stroke="#64748b" strokeWidth="1" strokeDasharray="2 3" />
+                  </g>
                 </g>
               </svg>
 
@@ -2301,12 +2656,15 @@ export default function SensorPricingPage() {
                 return (
                   <div
                     key={st.id}
-                    onClick={() => setSelectedTerrainStationId(st.id)}
+                    onClick={() => {
+                      playTacticalAudio('click');
+                      setSelectedTerrainStationId(st.id);
+                    }}
+                    className="hud-tag-floating"
                     style={{
                       position: 'absolute',
                       left: st.pinPos.left,
                       top: st.pinPos.top,
-                      transform: 'translate(-50%, -50%)',
                       cursor: 'pointer',
                       zIndex: 16,
                       transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -2318,14 +2676,14 @@ export default function SensorPricingPage() {
                       style={{
                         borderColor: st.color,
                         boxShadow: `0 0 14px ${st.color}`,
-                        transform: isSelected ? 'scale(1.2)' : 'scale(1)'
+                        transform: isSelected ? 'scale(1.3)' : 'scale(1)'
                       }}
                     />
 
                     {/* Sensor Pin Icon Button */}
                     <div style={{
-                      width: isSelected ? '42px' : '36px',
-                      height: isSelected ? '42px' : '36px',
+                      width: isSelected ? '44px' : '36px',
+                      height: isSelected ? '44px' : '36px',
                       borderRadius: '50%',
                       background: isSelected ? st.color : 'rgba(10, 15, 26, 0.94)',
                       color: isSelected ? '#000' : '#fff',
@@ -2341,14 +2699,14 @@ export default function SensorPricingPage() {
                       {st.id === 'ST-01' ? '📡' : st.id === 'ST-02' ? '📐' : st.id === 'ST-03' ? '💧' : '🌧️'}
                     </div>
 
-                    {/* Pinned Tactical HUD Callout Tag */}
+                    {/* Pinned Tactical HUD Callout Tag with Glassmorphism */}
                     <div style={{
                       position: 'absolute',
-                      top: st.id === 'ST-01' ? '48px' : '-56px',
+                      top: st.id === 'ST-01' ? '50px' : '-58px',
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      background: 'rgba(5, 10, 20, 0.92)',
-                      backdropFilter: 'blur(8px)',
+                      background: 'rgba(5, 10, 20, 0.94)',
+                      backdropFilter: 'blur(10px)',
                       border: `1px solid ${isSelected ? st.color : 'var(--border-subtle)'}`,
                       boxShadow: isSelected ? `0 0 20px ${st.color}77` : '0 4px 14px rgba(0,0,0,0.7)',
                       borderRadius: '6px',
@@ -2381,7 +2739,7 @@ export default function SensorPricingPage() {
               })}
             </div>
 
-            {/* STATION QUICK SWITCHER TABS */}
+            {/* 4. STATION QUICK SWITCHER CARDS (EVENLY ALIGNED 4-COL GRID) */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -2391,10 +2749,19 @@ export default function SensorPricingPage() {
             }}>
               {TERRAIN_STATIONS.map(st => {
                 const isSelected = selectedTerrainStationId === st.id;
+                const readingSummary =
+                  st.id === 'ST-01' ? `${liveTerrainTelemetry.batteryVoltage}V • ${liveTerrainTelemetry.rssi}dBm` :
+                  st.id === 'ST-02' ? `θ: +${liveTerrainTelemetry.tiltX}° • +${liveTerrainTelemetry.crackOpening}mm` :
+                  st.id === 'ST-03' ? `${liveTerrainTelemetry.porePressure} kPa • ${liveTerrainTelemetry.soilMoisture}%` :
+                  `${liveTerrainTelemetry.rainfall} mm/h • Stage: ${liveTerrainTelemetry.debrisStage}m`;
+
                 return (
                   <div
                     key={st.id}
-                    onClick={() => setSelectedTerrainStationId(st.id)}
+                    onClick={() => {
+                      playTacticalAudio('click');
+                      setSelectedTerrainStationId(st.id);
+                    }}
                     style={{
                       background: isSelected ? 'rgba(0, 229, 255, 0.1)' : 'var(--bg-card)',
                       border: `1px solid ${isSelected ? st.color : 'var(--border-subtle)'}`,
@@ -2402,34 +2769,51 @@ export default function SensorPricingPage() {
                       padding: '12px 14px',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      boxShadow: isSelected ? `0 0 16px ${st.color}33` : 'none'
+                      boxShadow: isSelected ? `0 0 16px ${st.color}33` : 'none',
+                      display: 'flex',
+                      gap: '10px',
+                      alignItems: 'center'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 800, color: st.color, fontFamily: 'var(--font-mono)' }}>{st.id} • {st.altitude}</span>
-                      <span style={{
-                        fontSize: '9px',
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        background: isSelected ? st.color : 'rgba(255,255,255,0.06)',
-                        color: isSelected ? '#000' : 'var(--text-secondary)',
-                        fontWeight: 700
-                      }}>
-                        {isSelected ? 'SELECTED' : 'VIEW'}
-                      </span>
+                    {/* Mini photo thumbnail */}
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      border: `1px solid ${isSelected ? st.color : 'var(--border-subtle)'}`
+                    }}>
+                      <img src={st.hardwarePhotos[0].image} alt={st.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
-                      {st.name}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {st.zone}
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: st.color, fontFamily: 'var(--font-mono)' }}>{st.id} • {st.altitude}</span>
+                        <span style={{
+                          fontSize: '9px',
+                          padding: '1px 5px',
+                          borderRadius: '3px',
+                          background: isSelected ? st.color : 'rgba(255,255,255,0.06)',
+                          color: isSelected ? '#000' : 'var(--text-secondary)',
+                          fontWeight: 700
+                        }}>
+                          {isSelected ? 'ACTIVE' : 'SELECT'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {st.name}
+                      </div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: st.color, fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                        {readingSummary}
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* SELECTED STATION TACTICAL DEEP-DIVE INSPECTOR */}
+            {/* 5. SELECTED STATION TACTICAL DEEP-DIVE INSPECTOR */}
             <div style={{
               background: 'var(--bg-card)',
               border: `1px solid ${selectedTerrainStation.color}`,
@@ -2438,6 +2822,7 @@ export default function SensorPricingPage() {
               boxShadow: `0 0 24px ${selectedTerrainStation.color}22`,
               marginBottom: '20px'
             }}>
+              {/* Header */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -2473,6 +2858,7 @@ export default function SensorPricingPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     onClick={() => {
+                      playTacticalAudio('click');
                       setSpotlightId(selectedTerrainStation.primarySensorId);
                       setActiveTab('CARDS');
                     }}
@@ -2485,26 +2871,39 @@ export default function SensorPricingPage() {
               </div>
 
               {/* 3-Column Tactical Telemetry Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                {/* Column 1: Real Field Hardware Instrumentation Photo */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '20px' }}>
+                {/* Column 1: Real Field Hardware Showcase + Multi-Image Selector */}
                 <div>
-                  <span className="label-caps" style={{ color: 'var(--cyan)', marginBottom: '10px', display: 'block' }}>
-                    📷 DEPLOYED FIELD HARDWARE PHOTOGRAPH
-                  </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span className="label-caps" style={{ color: 'var(--cyan)' }}>
+                      📷 HARDWARE SHOWCASE & FIELD PHOTOS
+                    </span>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      Photo {stationPhotoIndex + 1} of {selectedTerrainStation.hardwarePhotos.length}
+                    </span>
+                  </div>
+
+                  {/* Main Active Hardware Photo */}
                   <div style={{
                     position: 'relative',
                     borderRadius: '8px',
                     overflow: 'hidden',
                     border: '1px solid var(--border-cyan)',
-                    height: '200px',
+                    height: '210px',
                     background: '#07090d',
                     marginBottom: '10px'
                   }}>
                     <img
-                      src={SENSOR_IMAGE_MAP[selectedTerrainStation.primarySensorId]}
-                      alt={selectedTerrainStation.name}
+                      src={selectedTerrainStation.hardwarePhotos[stationPhotoIndex].image}
+                      alt={selectedTerrainStation.hardwarePhotos[stationPhotoIndex].title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
+                    {/* Tactical Corners */}
+                    <div className="tactical-corner tactical-corner-tl" />
+                    <div className="tactical-corner tactical-corner-tr" />
+                    <div className="tactical-corner tactical-corner-bl" />
+                    <div className="tactical-corner tactical-corner-br" />
+
                     <div style={{
                       position: 'absolute',
                       bottom: 0,
@@ -2514,28 +2913,66 @@ export default function SensorPricingPage() {
                       padding: '8px 12px',
                       fontSize: '11px',
                       color: '#fff',
-                      fontFamily: 'var(--font-mono)'
+                      fontFamily: 'var(--font-mono)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
                     }}>
-                      {selectedTerrainStation.sensorTypes[0]}
+                      <span>{selectedTerrainStation.hardwarePhotos[stationPhotoIndex].title}</span>
+                      <span style={{ color: 'var(--cyan)', fontSize: '10px' }}>
+                        {selectedTerrainStation.hardwarePhotos[stationPhotoIndex].model}
+                      </span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Integrated Hardware Cluster:</span>
-                    </div>
-                    <ul style={{ margin: 0, paddingLeft: '18px', color: '#cbd5e1', fontSize: '11px' }}>
-                      {selectedTerrainStation.sensorTypes.map((st, idx) => (
-                        <li key={idx}>{st}</li>
-                      ))}
-                    </ul>
+                  {/* SELECTABLE MULTI-IMAGE THUMBNAIL BAR */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>
+                    {selectedTerrainStation.hardwarePhotos.map((photo, pIdx) => {
+                      const isPhotoActive = stationPhotoIndex === pIdx;
+                      return (
+                        <div
+                          key={pIdx}
+                          onClick={() => {
+                            playTacticalAudio('click');
+                            setStationPhotoIndex(pIdx);
+                          }}
+                          style={{
+                            height: '52px',
+                            borderRadius: '5px',
+                            overflow: 'hidden',
+                            border: `2px solid ${isPhotoActive ? 'var(--cyan)' : 'var(--border-subtle)'}`,
+                            cursor: 'pointer',
+                            position: 'relative',
+                            boxShadow: isPhotoActive ? '0 0 10px var(--cyan)' : 'none',
+                            transition: 'all 0.2s ease'
+                          }}
+                          title={photo.title}
+                        >
+                          <img src={photo.image} alt={photo.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          {isPhotoActive && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: '3px',
+                              background: 'var(--cyan)'
+                            }} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    Role: <strong style={{ color: '#fff' }}>{selectedTerrainStation.hardwarePhotos[stationPhotoIndex].role}</strong>
                   </div>
                 </div>
 
-                {/* Column 2: Live Telemetry Metrics & Dynamic 24h Trend Waveform */}
+                {/* Column 2: Live Telemetry & 24h Real-Time Oscilloscope Waveform Monitor */}
                 <div>
                   <span className="label-caps" style={{ color: 'var(--amber)', marginBottom: '10px', display: 'block' }}>
-                    📈 LIVE TELEMETRY & 24-HOUR TREND WAVEFORM
+                    📈 LIVE TELEMETRY & OSCILLOSCOPE MONITOR
                   </span>
 
                   <div style={{
@@ -2546,7 +2983,7 @@ export default function SensorPricingPage() {
                     marginBottom: '12px'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>PRIMARY METRIC READING:</span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>PRIMARY SENSOR READING:</span>
                       <strong style={{ fontSize: '13px', color: selectedTerrainStation.color, fontFamily: 'var(--font-mono)' }}>
                         {selectedTerrainStation.id === 'ST-01' ? `${liveTerrainTelemetry.batteryVoltage}V (94% SoC)` :
                          selectedTerrainStation.id === 'ST-02' ? `+${liveTerrainTelemetry.crackOpening} mm (Rate: +${liveTerrainTelemetry.crackRate} mm/h)` :
@@ -2555,39 +2992,47 @@ export default function SensorPricingPage() {
                       </strong>
                     </div>
 
-                    {/* Animated SVG Sparkline Waveform */}
-                    <div style={{ height: '70px', width: '100%', position: 'relative' }}>
-                      <svg viewBox="0 0 300 70" style={{ width: '100%', height: '100%' }}>
+                    {/* Animated SVG Real-Time Oscilloscope Waveform */}
+                    <div style={{ height: '75px', width: '100%', position: 'relative', overflow: 'hidden', background: 'rgba(5, 10, 20, 0.6)', borderRadius: '4px' }}>
+                      <div className="oscilloscope-beam" />
+                      <svg viewBox="0 0 300 75" style={{ width: '100%', height: '100%' }}>
                         <defs>
-                          <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={selectedTerrainStation.color} stopOpacity="0.5" />
+                          <linearGradient id="scopeGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={selectedTerrainStation.color} stopOpacity="0.45" />
                             <stop offset="100%" stopColor={selectedTerrainStation.color} stopOpacity="0.0" />
                           </linearGradient>
                         </defs>
+                        {/* Scope Grid */}
+                        <line x1="0" y1="25" x2="300" y2="25" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                        <line x1="0" y1="50" x2="300" y2="50" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                        <line x1="100" y1="0" x2="100" y2="75" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                        <line x1="200" y1="0" x2="200" y2="75" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+
+                        {/* Waveform Path */}
                         <path
                           d={
                             selectedTerrainStation.id === 'ST-03'
-                              ? "M 0 50 Q 50 48 100 45 T 200 35 T 250 20 L 300 12 L 300 70 L 0 70 Z"
+                              ? "M 0 52 Q 50 50 100 46 T 200 34 T 260 20 L 300 14 L 300 75 L 0 75 Z"
                               : selectedTerrainStation.id === 'ST-02'
-                              ? "M 0 55 Q 60 52 120 48 T 220 38 T 260 22 L 300 15 L 300 70 L 0 70 Z"
-                              : "M 0 58 Q 70 55 140 45 T 220 40 T 270 28 L 300 20 L 300 70 L 0 70 Z"
+                              ? "M 0 58 Q 60 54 120 48 T 220 38 T 270 22 L 300 16 L 300 75 L 0 75 Z"
+                              : "M 0 60 Q 70 56 140 46 T 220 42 T 270 28 L 300 20 L 300 75 L 0 75 Z"
                           }
-                          fill="url(#trendGrad)"
+                          fill="url(#scopeGrad)"
                         />
                         <path
                           d={
                             selectedTerrainStation.id === 'ST-03'
-                              ? "M 0 50 Q 50 48 100 45 T 200 35 T 250 20 L 300 12"
+                              ? "M 0 52 Q 50 50 100 46 T 200 34 T 260 20 L 300 14"
                               : selectedTerrainStation.id === 'ST-02'
-                              ? "M 0 55 Q 60 52 120 48 T 220 38 T 260 22 L 300 15"
-                              : "M 0 58 Q 70 55 140 45 T 220 40 T 270 28 L 300 20"
+                              ? "M 0 58 Q 60 54 120 48 T 220 38 T 270 22 L 300 16"
+                              : "M 0 60 Q 70 56 140 46 T 220 42 T 270 28 L 300 20"
                           }
                           fill="none"
                           stroke={selectedTerrainStation.color}
                           strokeWidth="2.5"
                         />
-                        {/* Current peak point */}
-                        <circle cx="300" cy="15" r="4" fill="#fff" stroke={selectedTerrainStation.color} strokeWidth="2" />
+                        {/* Peak Point Pulsing */}
+                        <circle cx="300" cy="14" r="4" fill="#fff" stroke={selectedTerrainStation.color} strokeWidth="2" />
                       </svg>
                     </div>
 
@@ -2599,7 +3044,7 @@ export default function SensorPricingPage() {
                     </div>
                   </div>
 
-                  {/* Diagnostic telemetry parameters */}
+                  {/* Diagnostic telemetry parameter pills */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
                     <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
                       <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '9px' }}>RF SIGNAL LINK</span>
@@ -2672,7 +3117,7 @@ export default function SensorPricingPage() {
               </div>
             </div>
 
-            {/* REAL-TIME LORAWAN TELEMETRY PACKET CONSOLE */}
+            {/* 6. REAL-TIME LORAWAN TELEMETRY PACKET CONSOLE */}
             <div style={{
               background: '#04070d',
               border: '1px solid var(--border-subtle)',
@@ -2700,6 +3145,27 @@ export default function SensorPricingPage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {/* Filter by Node */}
+                  <select
+                    value={packetNodeFilter}
+                    onChange={(e) => setPacketNodeFilter(e.target.value)}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      color: '#cbd5e1',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '10px',
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    <option value="ALL">ALL NODES</option>
+                    <option value="ST-01">ST-01 SUMMIT</option>
+                    <option value="ST-02">ST-02 SCARP</option>
+                    <option value="ST-03">ST-03 BOREHOLE</option>
+                    <option value="ST-04">ST-04 TOE GULLY</option>
+                  </select>
+
                   <button
                     onClick={() => setPacketStreamPaused(!packetStreamPaused)}
                     style={{
@@ -2743,28 +3209,304 @@ export default function SensorPricingPage() {
                 lineHeight: '1.6',
                 background: '#030509'
               }}>
-                {packetLogs.length === 0 ? (
+                {packetLogs
+                  .filter(pkt => packetNodeFilter === 'ALL' || pkt.node.includes(packetNodeFilter))
+                  .length === 0 ? (
                   <div style={{ color: 'var(--text-muted)' }}>Waiting for next telemetry burst...</div>
                 ) : (
-                  packetLogs.map(pkt => (
-                    <div key={pkt.id} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.03)', padding: '2px 0' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>[{pkt.time}]</span>
-                      <span style={{ color: 'var(--cyan)' }}>PKT#{pkt.id}</span>
-                      <span style={{ color: 'var(--amber)', fontWeight: 600 }}>{pkt.node}</span>
-                      <span style={{ color: '#94a3b8' }}>HEX: {pkt.hex}</span>
-                      <span style={{ color: '#fff' }}>&rarr; {pkt.reading}</span>
-                      <span style={{ color: pkt.rssi > -70 ? 'var(--green)' : 'var(--amber)' }}>RSSI: {pkt.rssi}dBm</span>
-                      <span style={{ color: 'var(--green)' }}>SNR: {pkt.snr}</span>
-                      <span style={{
-                        color: pkt.status === 'CRC_OK' ? 'var(--green)' : pkt.status === 'WARN_CREEP' ? 'var(--amber)' : 'var(--red)',
-                        fontWeight: 700
-                      }}>
-                        [{pkt.status}]
-                      </span>
-                    </div>
-                  ))
+                  packetLogs
+                    .filter(pkt => packetNodeFilter === 'ALL' || pkt.node.includes(packetNodeFilter))
+                    .map(pkt => (
+                      <div key={pkt.id} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.03)', padding: '2px 0' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>[{pkt.time}]</span>
+                        <span style={{ color: 'var(--cyan)' }}>PKT#{pkt.id}</span>
+                        <span style={{ color: 'var(--amber)', fontWeight: 600 }}>{pkt.node}</span>
+                        <span style={{ color: '#94a3b8' }}>HEX: {pkt.hex}</span>
+                        <span style={{ color: '#fff' }}>&rarr; {pkt.reading}</span>
+                        <span style={{ color: pkt.rssi > -70 ? 'var(--green)' : 'var(--amber)' }}>RSSI: {pkt.rssi}dBm</span>
+                        <span style={{ color: 'var(--green)' }}>SNR: {pkt.snr}</span>
+                        <span style={{
+                          color: pkt.status === 'CRC_OK' ? 'var(--green)' : pkt.status === 'WARN_CREEP' ? 'var(--amber)' : 'var(--red)',
+                          fontWeight: 700
+                        }}>
+                          [{pkt.status}]
+                        </span>
+                      </div>
+                    ))
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 27-ASSET FIELD INSTRUMENTATION & REMOTE SENSING ATLAS MODAL */}
+      {showAtlasModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(3, 6, 12, 0.88)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '24px'
+        }}>
+          {/* Modal Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '16px',
+            borderBottom: '1px solid var(--border-cyan)',
+            paddingBottom: '14px'
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '20px' }}>📚</span>
+                <h2 style={{ color: '#fff', margin: 0, fontSize: '20px' }}>
+                  27-ASSET FIELD INSTRUMENTATION & REMOTE SENSING ATLAS
+                </h2>
+                <span style={{
+                  background: 'var(--cyan)',
+                  color: '#000',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '2px 8px',
+                  borderRadius: '10px'
+                }}>
+                  {filteredAtlasAssets.length} ASSETS
+                </span>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                Explore authentic field photography of geotechnical sensors, remote sensing imagery, telemetry hubs, and drilling equipment.
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowAtlasModal(false)}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid var(--border-subtle)',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 700,
+                padding: '6px 14px',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              ✕ CLOSE ATLAS
+            </button>
+          </div>
+
+          {/* Search & Category Filter Bar */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {['ALL', 'GEOTECHNICAL', 'REMOTE SENSING & LiDAR', 'METEOROLOGICAL', 'HYDROLOGICAL', 'TELECOM, POWER & AI'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setAtlasCategory(cat)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '5px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: atlasCategory === cat ? 'var(--cyan)' : 'rgba(255,255,255,0.05)',
+                    color: atlasCategory === cat ? '#000' : 'var(--text-secondary)',
+                    border: `1px solid ${atlasCategory === cat ? 'var(--cyan)' : 'var(--border-subtle)'}`,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              placeholder="Search by name, model, parameter, or role..."
+              value={atlasSearch}
+              onChange={(e) => setAtlasSearch(e.target.value)}
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                color: '#fff',
+                fontSize: '12px',
+                width: '280px',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+
+          {/* Grid of 27 Atlas Cards */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '16px',
+            paddingRight: '6px'
+          }}>
+            {filteredAtlasAssets.map(asset => (
+              <div
+                key={asset.id}
+                className="atlas-card-hover"
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                {/* Card Image with zoom action */}
+                <div style={{ position: 'relative', height: '160px', background: '#050811' }}>
+                  <img src={asset.image} alt={asset.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    background: 'rgba(0,0,0,0.7)',
+                    backdropFilter: 'blur(4px)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '9px',
+                    color: 'var(--cyan)',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700
+                  }}>
+                    #{asset.id} • {asset.category}
+                  </div>
+                  <button
+                    onClick={() => setAtlasLightboxAsset(asset)}
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      background: 'rgba(0,0,0,0.7)',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '10px',
+                      padding: '3px 6px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🔍 ZOOM
+                  </button>
+                </div>
+
+                {/* Card Content */}
+                <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>
+                      {asset.name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
+                      {asset.model}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px', lineHeight: '1.4' }}>
+                      {asset.role}
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '3px', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '4px', marginBottom: '10px' }}>
+                      <div><strong style={{ color: 'var(--cyan)' }}>Param:</strong> {asset.param}</div>
+                      <div><strong style={{ color: 'var(--green)' }}>Accuracy:</strong> {asset.accuracy}</div>
+                      <div><strong style={{ color: 'var(--amber)' }}>Ingress:</strong> {asset.ingress}</div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {asset.id >= 15 && asset.id <= 20 ? (
+                      <button
+                        onClick={() => {
+                          const sceneMap = {
+                            15: 'OPTICAL_RIDGE',
+                            16: 'PANORAMIC_TRANSECT',
+                            17: 'LIDAR_DEM',
+                            18: 'INSAR_FRINGES',
+                            19: 'THERMAL_SEEPAGE',
+                            20: 'MULTISPECTRAL_NDVI',
+                          };
+                          setSelectedTerrainSceneId(sceneMap[asset.id]);
+                          setShowAtlasModal(false);
+                          playTacticalAudio('click');
+                        }}
+                        className="btn btn-primary"
+                        style={{ flex: 1, justifyContent: 'center', fontSize: '11px', padding: '5px' }}
+                      >
+                        SET AS TERRAIN VIEW
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (asset.id <= 14) {
+                            setSpotlightId(asset.id);
+                            setActiveTab('CARDS');
+                            setShowAtlasModal(false);
+                          }
+                          playTacticalAudio('click');
+                        }}
+                        className="btn btn-primary"
+                        style={{ flex: 1, justifyContent: 'center', fontSize: '11px', padding: '5px' }}
+                      >
+                        INSPECT HARDWARE
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* FULLSCREEN LIGHTBOX FOR 8K ASSETS */}
+      {atlasLightboxAsset && (
+        <div
+          onClick={() => setAtlasLightboxAsset(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.92)',
+            zIndex: 10000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '30px',
+            cursor: 'zoom-out'
+          }}
+        >
+          <div style={{ position: 'relative', maxWidth: '1000px', maxHeight: '80vh', textAlign: 'center' }}>
+            <img
+              src={atlasLightboxAsset.image}
+              alt={atlasLightboxAsset.name}
+              style={{ maxWidth: '100%', maxHeight: '72vh', objectFit: 'contain', borderRadius: '8px', border: '1px solid var(--border-cyan)' }}
+            />
+            <div style={{ marginTop: '12px', color: '#fff', fontSize: '14px', fontWeight: 700 }}>
+              {atlasLightboxAsset.name} ({atlasLightboxAsset.model})
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--cyan)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+              {atlasLightboxAsset.param} • {atlasLightboxAsset.accuracy} • {atlasLightboxAsset.ingress}
             </div>
           </div>
         </div>

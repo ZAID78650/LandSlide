@@ -1588,5 +1588,66 @@ select.form-input {
   animation: terminalBlink 1s step-start infinite;
 }
 
+@keyframes radarSweep360 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-cone-sweep {
+  transform-origin: center center;
+  animation: radarSweep360 4s linear infinite;
+}
+
+@keyframes satelliteWavePulse {
+  0% { transform: scale(0.3); opacity: 1; stroke-width: 3; }
+  100% { transform: scale(2.2); opacity: 0; stroke-width: 0.5; }
+}
+
+.satellite-wave-ring {
+  transform-origin: center center;
+  animation: satelliteWavePulse 2.4s ease-out infinite;
+}
+
+@keyframes oscilloscopeBeam {
+  0% { left: 0%; opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.oscilloscope-beam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+  box-shadow: 0 0 10px 2px var(--cyan);
+  pointer-events: none;
+  animation: oscilloscopeBeam 3s linear infinite;
+}
+
+@keyframes tagFloatSubtle {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -54%); }
+}
+
+.hud-tag-floating {
+  animation: tagFloatSubtle 4s ease-in-out infinite;
+}
+
+.terrain-image-transition {
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atlas-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.atlas-card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.25);
+  border-color: var(--cyan) !important;
+}
+
+
 
 
