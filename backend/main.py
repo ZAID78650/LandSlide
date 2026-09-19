@@ -52,6 +52,12 @@ img_dir = os.path.join(flood_dir, "Image")
 if os.path.exists(img_dir):
     app.mount("/flood-images", StaticFiles(directory=img_dir), name="flood_images")
 
+# Mount real sensor photos directory
+sensors_static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "public", "sensors")
+if os.path.exists(sensors_static_dir):
+    app.mount("/sensors", StaticFiles(directory=sensors_static_dir), name="sensors")
+
+
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")

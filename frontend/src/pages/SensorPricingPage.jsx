@@ -30,7 +30,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount level on a 2-inch stainless mast at 1.5m above ground, clear of vegetation with an unobstructed 45° inverted sky cone.",
     schematic: "rain_gauge",
-    imageUrl: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/rain_gauge.jpg"
   },
   {
     id: 2,
@@ -52,7 +52,7 @@ const DEFAULT_CATALOG = [
     default_qty: 2,
     installation_guide: "Lower into a 76mm rotary borehole across the estimated slip surface. Embed in clean Ottawa silica sand filter and cap with bentonite pellet seals.",
     schematic: "piezometer",
-    imageUrl: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/piezometer.jpg"
   },
   {
     id: 3,
@@ -74,7 +74,7 @@ const DEFAULT_CATALOG = [
     default_qty: 2,
     installation_guide: "Anchor rigidly into competent bedrock or reinforced concrete footing using 3-point leveling plate aligned orthogonal to scarp strike.",
     schematic: "tiltmeter",
-    imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/tiltmeter.jpg"
   },
   {
     id: 4,
@@ -96,7 +96,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Slurry-less installation: auger a tapered hole to 1.2m and press probe directly into undisturbed soil profile for zero-void soil contact.",
     schematic: "soil_moisture",
-    imageUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/soil_moisture.jpg"
   },
   {
     id: 5,
@@ -118,7 +118,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Anchor expanding rock bolts into firm rock on opposite sides of tension crack; mount telescopic gauge with swivel bearings aligned across fracture.",
     schematic: "crackmeter",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/crackmeter.jpg"
   },
   {
     id: 6,
@@ -140,7 +140,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Bury spike firmly into undisturbed hillside soil or anchor directly into bedrock with dental plaster / epoxy.",
     schematic: "geophone",
-    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/geophone.jpg"
   },
   {
     id: 7,
@@ -162,7 +162,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount cantilevered on bridge girder or overhead gully cable 3 to 5 meters above high-water mark with clear downward acoustic path.",
     schematic: "ultrasonic",
-    imageUrl: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/ultrasonic.jpg"
   },
   {
     id: 8,
@@ -184,7 +184,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount at top of 3m station mast clear of surrounding thermal radiation sources and wind turbulence.",
     schematic: "weather_station",
-    imageUrl: "https://images.unsplash.com/photo-1590055531615-f16d36ffe8ec?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/weather_station.jpg"
   },
   {
     id: 9,
@@ -206,7 +206,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount on mast above snowline; install 5.8 dBi fiberglass omnidirectional collinear antenna with surge arrestor.",
     schematic: "lora_node",
-    imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/lora_node.jpg"
   },
   {
     id: 10,
@@ -228,7 +228,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Install at high-elevation repeater mast with unobstructed valley line-of-sight to sensor nodes and cell tower.",
     schematic: "gateway",
-    imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/gateway.jpg"
   },
   {
     id: 11,
@@ -250,7 +250,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "House inside central weatherproof junction box with silicone sealing gasket and silica gel desiccator pack.",
     schematic: "edge_compute",
-    imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/edge_compute.jpg"
   },
   {
     id: 12,
@@ -272,7 +272,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount solar panel facing south at 35° tilt angle; secure battery inside vented lower equipment chest protected from direct sun.",
     schematic: "solar_power",
-    imageUrl: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/solar_power.jpg"
   },
   {
     id: 13,
@@ -294,7 +294,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Lower into slotted PVC standpipe to 2m below minimum expected dry-season water table; clamp cable at wellhead with Kevlar strain relief.",
     schematic: "hydrostatic",
-    imageUrl: "https://images.unsplash.com/photo-1581092162384-8987c1d64718?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/hydrostatic.jpg"
   },
   {
     id: 14,
@@ -316,7 +316,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Drive 2.5m copper-bonded earth grounding rod to achieve <5 Ohm resistance; anchor guyed mast with triple 6mm stainless steel wire ropes.",
     schematic: "enclosure",
-    imageUrl: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=600&q=80"
+    imageUrl: "/sensors/enclosure.jpg"
   }
 ];
 
