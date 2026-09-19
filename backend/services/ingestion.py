@@ -123,9 +123,16 @@ def evaluate_and_alert(db: Session, loc, agentic_data=None):
             level_map = {"CRITICAL": "RED", "HIGH": "ORANGE", "ELEVATED": "AMBER", "MODERATE": "GREEN", "LOW": "GREEN"}
             db_level = level_map.get(risk["overall_level"], "AMBER")
             
+            reasons_list = []
+            pt_key = risk["primary_threat"].lower()
+            if pt_key in risk.get("hazards", {}) and "reasons" in risk["hazards"][pt_key]:
+                reasons_list = risk["hazards"][pt_key]["reasons"]
+
+            reasons_text = ", ".join(reasons_list) if reasons_list else risk.get("explanation", "Critical geotechnical threshold exceeded.")
+
             alert = models.Alert(
                 title=f"[{loc['name']}] {risk['overall_level']} {risk['primary_threat'].upper()} RISK DETECTED",
-                message=f"Automated risk fusion engine detected {risk['overall_level']} {risk['primary_threat']} risk due to: " + ", ".join(risk["hazards"][risk["primary_threat"].lower()]["reasons"]),
+                message=f"Automated risk fusion engine detected {risk['overall_level']} {risk['primary_threat']} risk: {reasons_text}",
                 level=db_level,
                 source="RiskFusionEngine",
                 created_at=datetime.now(timezone.utc),
@@ -192,5 +199,8 @@ async def virtual_sensor_loop():
         await asyncio.sleep(300)
 
 def start_background_ingestion():
-    loop = asyncio.get_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.get_event_loop()
     loop.create_task(virtual_sensor_loop())

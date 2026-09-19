@@ -19,3 +19,5 @@ geoalchemy2==0.14.7
 google-auth==2.29.0
 requests==2.31.0
 h5py==3.11.0
+python-docx>=1.1.0
+reportlab>=4.0.0
