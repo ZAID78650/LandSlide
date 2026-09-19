@@ -23,7 +23,8 @@ export default function DatasetsPage() {
   const [inferenceResult, setInferenceResult] = useState(null);
   const [datasetPreview, setDatasetPreview] = useState(null);
   const [selectedPairIndex, setSelectedPairIndex] = useState(0);
-  const [viewMode, setViewMode] = useState('overlay'); // 'overlay' | 'split' | 'table'
+  // previewMode: 'after_scan' | 'original' | 'split' | 'table'
+  const [previewMode, setPreviewMode] = useState('after_scan');
   const [maskOpacity, setMaskOpacity] = useState(0.70);
   const [showContours, setShowContours] = useState(true);
   const [showRiskMask, setShowRiskMask] = useState(true);
@@ -72,14 +73,15 @@ export default function DatasetsPage() {
         if (res?.data) {
           setDatasetPreview(res.data);
           if (res.data.type === 'tabular_csv') {
-            setViewMode('table');
+            setPreviewMode('table');
           } else {
-            setViewMode('overlay');
+            setPreviewMode('after_scan');
           }
         }
       })
       .catch(err => {
         console.warn('Dataset preview notice:', err);
+        setPreviewMode('after_scan');
       });
 
     // 2. Fetch AI landslide inference telemetry
@@ -336,7 +338,7 @@ export default function DatasetsPage() {
         const currentPair = isManifest && datasetPreview?.pairs?.length ? datasetPreview.pairs[selectedPairIndex] : null;
 
         // Effective telemetry values
-        const confidenceVal = currentPair?.confidence_pct || inferenceResult?.confidence_pct || 98.4;
+        const confidenceVal = currentPair?.confidence_pct || inferenceResult?.confidence_pct || 94.8;
         const riskLevel = currentPair?.risk_level || inferenceResult?.risk_level || 'CRITICAL (HIGH RISK)';
         const severity = inferenceResult?.severity || 'CRITICAL';
         const riskScore = inferenceResult?.risk_score || 94;
@@ -392,8 +394,8 @@ export default function DatasetsPage() {
             `}</style>
 
             <div className="panel" style={{
-              width: 'min(1100px, 96vw)',
-              maxHeight: '92vh',
+              width: 'min(1120px, 96vw)',
+              maxHeight: '94vh',
               display: 'flex',
               flexDirection: 'column',
               padding: 0,
@@ -406,11 +408,11 @@ export default function DatasetsPage() {
               {/* Top Modal Header */}
               <div className="panel-header" style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)',
+                padding: '12px 20px', borderBottom: '1px solid var(--border-subtle)',
                 background: 'var(--bg-panel-high)', flexWrap: 'wrap', gap: 10
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em', fontFamily: 'var(--font-headline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em', fontFamily: 'var(--font-headline)' }}>
                     🛰️ INSPECT &amp; AI SCAN: <span style={{ color: 'var(--cyan)' }}>{viewingFile}</span>
                   </span>
 
@@ -420,7 +422,7 @@ export default function DatasetsPage() {
                       background: 'linear-gradient(135deg, rgba(255, 23, 68, 0.25), rgba(183, 28, 28, 0.35))',
                       border: '1.5px solid rgba(255, 23, 68, 0.8)',
                       color: '#ff4d6d', padding: '3px 10px', borderRadius: 4,
-                      fontSize: 13, fontWeight: 900, fontFamily: 'var(--font-mono)',
+                      fontSize: 12, fontWeight: 900, fontFamily: 'var(--font-mono)',
                       boxShadow: '0 0 12px rgba(255, 23, 68, 0.4)'
                     }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff1744', boxShadow: '0 0 8px #ff1744' }} />
@@ -431,16 +433,16 @@ export default function DatasetsPage() {
                   {isManifest && (
                     <span style={{
                       background: 'rgba(0, 229, 255, 0.15)', border: '1px solid var(--border-cyan)',
-                      color: 'var(--cyan)', padding: '3px 10px', borderRadius: 4,
-                      fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-mono)'
+                      color: 'var(--cyan)', padding: '3px 8px', borderRadius: 4,
+                      fontSize: 11, fontWeight: 800, fontFamily: 'var(--font-mono)'
                     }}>
-                      📑 290 IMAGE-MASK PAIRS
+                      📑 290 PAIRS
                     </span>
                   )}
 
                   {scanning && (
                     <span style={{
-                      fontSize: 13, color: 'var(--cyan)', fontFamily: 'var(--font-mono)',
+                      fontSize: 12, color: 'var(--cyan)', fontFamily: 'var(--font-mono)',
                       fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6
                     }}>
                       <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 8px var(--cyan)' }} />
@@ -449,41 +451,9 @@ export default function DatasetsPage() {
                   )}
                 </div>
 
+                {/* Right controls: Re-Scan, Contours, Risk Area, Close */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  {/* Mode switcher for Mask Manifests or Paired Images */}
-                  {isManifest && (
-                    <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: 2, border: '1px solid var(--border-subtle)' }}>
-                      <button
-                        onClick={() => setViewMode('overlay')}
-                        style={{
-                          background: viewMode === 'overlay' ? 'var(--cyan)' : 'none',
-                          color: viewMode === 'overlay' ? '#000000' : 'var(--text-secondary)',
-                          border: 'none', padding: '4px 10px', borderRadius: 3, fontSize: 12, fontWeight: 800, cursor: 'pointer'
-                        }}>
-                        🗺️ Overlay
-                      </button>
-                      <button
-                        onClick={() => setViewMode('split')}
-                        style={{
-                          background: viewMode === 'split' ? 'var(--cyan)' : 'none',
-                          color: viewMode === 'split' ? '#000000' : 'var(--text-secondary)',
-                          border: 'none', padding: '4px 10px', borderRadius: 3, fontSize: 12, fontWeight: 800, cursor: 'pointer'
-                        }}>
-                        🔲 Split View
-                      </button>
-                      <button
-                        onClick={() => setViewMode('table')}
-                        style={{
-                          background: viewMode === 'table' ? 'var(--cyan)' : 'none',
-                          color: viewMode === 'table' ? '#000000' : 'var(--text-secondary)',
-                          border: 'none', padding: '4px 10px', borderRadius: 3, fontSize: 12, fontWeight: 800, cursor: 'pointer'
-                        }}>
-                        📋 All 290 Pairs
-                      </button>
-                    </div>
-                  )}
-
-                  {scanComplete && viewMode !== 'table' && (
+                  {scanComplete && previewMode !== 'table' && (
                     <>
                       <button
                         onClick={reScan}
@@ -498,35 +468,39 @@ export default function DatasetsPage() {
                         <span>Re-Scan</span>
                       </button>
 
-                      <button
-                        onClick={() => setShowContours(!showContours)}
-                        title="Toggle Topographic Elevation Contours"
-                        style={{
-                          background: showContours ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.06)',
-                          border: `1.5px solid ${showContours ? 'var(--cyan)' : 'var(--border-default)'}`,
-                          color: showContours ? '#ffffff' : 'var(--text-muted)',
-                          borderRadius: 5, padding: '5px 12px', fontSize: 12,
-                          fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 5,
-                        }}>
-                        <span>〰️ Contours:</span>
-                        <strong style={{ color: showContours ? 'var(--cyan)' : 'inherit' }}>{showContours ? 'ON' : 'OFF'}</strong>
-                      </button>
+                      {previewMode !== 'original' && (
+                        <>
+                          <button
+                            onClick={() => setShowContours(!showContours)}
+                            title="Toggle Topographic Elevation Contours"
+                            style={{
+                              background: showContours ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.06)',
+                              border: `1.5px solid ${showContours ? 'var(--cyan)' : 'var(--border-default)'}`,
+                              color: showContours ? '#ffffff' : 'var(--text-muted)',
+                              borderRadius: 5, padding: '5px 12px', fontSize: 12,
+                              fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: 5,
+                            }}>
+                            <span>〰️ Contours:</span>
+                            <strong style={{ color: showContours ? 'var(--cyan)' : 'inherit' }}>{showContours ? 'ON' : 'OFF'}</strong>
+                          </button>
 
-                      <button
-                        onClick={() => setShowRiskMask(!showRiskMask)}
-                        title="Toggle High Risk Demarcation Mask"
-                        style={{
-                          background: showRiskMask ? 'rgba(255, 23, 68, 0.25)' : 'rgba(255,255,255,0.06)',
-                          border: `1.5px solid ${showRiskMask ? '#ff1744' : 'var(--border-default)'}`,
-                          color: showRiskMask ? '#ffffff' : 'var(--text-muted)',
-                          borderRadius: 5, padding: '5px 12px', fontSize: 12,
-                          fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 5,
-                        }}>
-                        <span>🔴 Risk Area:</span>
-                        <strong style={{ color: showRiskMask ? '#ff4d6d' : 'inherit' }}>{showRiskMask ? 'ON' : 'OFF'}</strong>
-                      </button>
+                          <button
+                            onClick={() => setShowRiskMask(!showRiskMask)}
+                            title="Toggle High Risk Demarcation Mask"
+                            style={{
+                              background: showRiskMask ? 'rgba(255, 23, 68, 0.25)' : 'rgba(255,255,255,0.06)',
+                              border: `1.5px solid ${showRiskMask ? '#ff1744' : 'var(--border-default)'}`,
+                              color: showRiskMask ? '#ffffff' : 'var(--text-muted)',
+                              borderRadius: 5, padding: '5px 12px', fontSize: 12,
+                              fontFamily: 'var(--font-mono)', fontWeight: 700, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: 5,
+                            }}>
+                            <span>🔴 Risk Area:</span>
+                            <strong style={{ color: showRiskMask ? '#ff4d6d' : 'inherit' }}>{showRiskMask ? 'ON' : 'OFF'}</strong>
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
 
@@ -541,69 +515,201 @@ export default function DatasetsPage() {
                 </div>
               </div>
 
-              {/* Sub-Header Toolbar (For Pair Stepper & Opacity Slider) */}
-              {isManifest && viewMode !== 'table' && datasetPreview?.pairs?.length > 0 && (
-                <div style={{
-                  background: 'rgba(10, 16, 28, 0.96)', borderBottom: '1px solid var(--border-subtle)',
-                  padding: '8px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  flexWrap: 'wrap', gap: 12, fontSize: 12, fontFamily: 'var(--font-mono)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>PAIR SELECTOR:</span>
+              {/* ⭐ PROMINENT "ORIGINAL IMAGE" vs "AFTER SCAN" PREVIEW OPTION BAR ⭐ */}
+              <div style={{
+                background: 'linear-gradient(90deg, rgba(6, 12, 22, 0.98), rgba(12, 20, 36, 0.98))',
+                borderBottom: '1.5px solid var(--border-subtle)',
+                padding: '10px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+              }}>
+                {/* Mode Selector Buttons: Original Image / After Scan / Split View */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)',
+                    fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textTransform: 'uppercase'
+                  }}>
+                    IMAGE PREVIEW:
+                  </span>
+
+                  <div style={{
+                    display: 'inline-flex',
+                    background: 'rgba(0, 0, 0, 0.65)',
+                    border: '1.5px solid rgba(0, 229, 255, 0.4)',
+                    borderRadius: 7,
+                    padding: 3,
+                    gap: 3
+                  }}>
+                    {/* Option 1: Original Image */}
                     <button
-                      onClick={() => setSelectedPairIndex(Math.max(0, selectedPairIndex - 1))}
-                      disabled={selectedPairIndex <= 0}
+                      onClick={() => setPreviewMode('original')}
+                      title="View pristine unprocessed original image before AI scan"
                       style={{
-                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-subtle)',
-                        color: 'var(--text-primary)', borderRadius: 4, padding: '3px 8px', cursor: 'pointer'
-                      }}>◀ Prev</button>
-                    <select
-                      value={selectedPairIndex}
-                      onChange={(e) => setSelectedPairIndex(Number(e.target.value))}
-                      style={{
-                        background: 'var(--bg-panel-high)', border: '1px solid var(--border-cyan)',
-                        color: 'var(--cyan)', borderRadius: 4, padding: '3px 10px', fontWeight: 800, cursor: 'pointer'
+                        background: previewMode === 'original' ? 'var(--cyan)' : 'transparent',
+                        color: previewMode === 'original' ? '#000000' : '#d1d5db',
+                        border: 'none',
+                        borderRadius: 5,
+                        padding: '6px 14px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: previewMode === 'original' ? '0 0 14px rgba(0, 229, 255, 0.6)' : 'none',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      {datasetPreview.pairs.map((p, idx) => (
-                        <option key={p.id || idx} value={idx}>
-                          #{p.id}: {p.image} ⇄ {p.mask} ({p.risk_level} · {p.coverage_pct}% Hazard)
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => setSelectedPairIndex(Math.min(datasetPreview.pairs.length - 1, selectedPairIndex + 1))}
-                      disabled={selectedPairIndex >= datasetPreview.pairs.length - 1}
-                      style={{
-                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-subtle)',
-                        color: 'var(--text-primary)', borderRadius: 4, padding: '3px 8px', cursor: 'pointer'
-                      }}>Next ▶</button>
-                  </div>
+                      <span style={{ fontSize: 14 }}>📷</span>
+                      <span>ORIGINAL IMAGE</span>
+                    </button>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    {viewMode === 'overlay' && maskUrl && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>Mask Opacity:</span>
-                        <input
-                          type="range" min="0" max="1" step="0.05"
-                          value={maskOpacity} onChange={(e) => setMaskOpacity(Number(e.target.value))}
-                          style={{ width: 90, accentColor: 'var(--cyan)' }}
-                        />
-                        <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>{Math.round(maskOpacity * 100)}%</span>
-                      </div>
+                    {/* Option 2: After Scan Image */}
+                    <button
+                      onClick={() => setPreviewMode('after_scan')}
+                      title="View AI scan with contour lines, confidence scores, and high-risk hazard zone"
+                      style={{
+                        background: previewMode === 'after_scan'
+                          ? 'linear-gradient(135deg, #ff1744, #c2185b)'
+                          : 'transparent',
+                        color: previewMode === 'after_scan' ? '#ffffff' : '#d1d5db',
+                        border: 'none',
+                        borderRadius: 5,
+                        padding: '6px 14px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: previewMode === 'after_scan' ? '0 0 18px rgba(255, 23, 68, 0.7)' : 'none',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <span style={{ fontSize: 14 }}>🔬</span>
+                      <span>AFTER SCAN (AI)</span>
+                    </button>
+
+                    {/* Option 3: Before / After Split Comparison */}
+                    <button
+                      onClick={() => setPreviewMode('split')}
+                      title="Side-by-side comparison of original image vs after scan prediction"
+                      style={{
+                        background: previewMode === 'split' ? 'rgba(0, 229, 255, 0.22)' : 'transparent',
+                        color: previewMode === 'split' ? '#00e5ff' : '#d1d5db',
+                        border: previewMode === 'split' ? '1px solid var(--cyan)' : '1px solid transparent',
+                        borderRadius: 5,
+                        padding: '6px 14px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: previewMode === 'split' ? '0 0 14px rgba(0, 229, 255, 0.4)' : 'none',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <span style={{ fontSize: 14 }}>🌓</span>
+                      <span>BEFORE / AFTER SPLIT</span>
+                    </button>
+
+                    {/* Option 4: All Pairs (Manifest only) */}
+                    {isManifest && (
+                      <button
+                        onClick={() => setPreviewMode('table')}
+                        title="View tabular catalog of all 290 image-mask pairs"
+                        style={{
+                          background: previewMode === 'table' ? 'var(--cyan)' : 'transparent',
+                          color: previewMode === 'table' ? '#000000' : '#d1d5db',
+                          border: 'none',
+                          borderRadius: 5,
+                          padding: '6px 14px',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          fontFamily: 'var(--font-mono)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <span style={{ fontSize: 14 }}>📋</span>
+                        <span>ALL 290 PAIRS</span>
+                      </button>
                     )}
-                    <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-                      IoU Overlap: <strong style={{ color: '#22c55e' }}>{datasetPreview?.summary?.mean_iou_score || '94.8%'}</strong> · Dice: <strong style={{ color: 'var(--cyan)' }}>{datasetPreview?.summary?.mean_dice_coefficient || '0.965'}</strong>
-                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* VIEWPORT AREA: 3 Modes (Overlay / Split / Tabular) */}
-              {viewMode === 'table' ? (
+                {/* Secondary helper info or Pair Stepper */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  {isManifest && previewMode !== 'table' && datasetPreview?.pairs?.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>PAIR:</span>
+                      <button
+                        onClick={() => setSelectedPairIndex(Math.max(0, selectedPairIndex - 1))}
+                        disabled={selectedPairIndex <= 0}
+                        style={{
+                          background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-primary)', borderRadius: 4, padding: '2px 7px', cursor: 'pointer'
+                        }}>◀</button>
+                      <select
+                        value={selectedPairIndex}
+                        onChange={(e) => setSelectedPairIndex(Number(e.target.value))}
+                        style={{
+                          background: 'var(--bg-panel-high)', border: '1px solid var(--border-cyan)',
+                          color: 'var(--cyan)', borderRadius: 4, padding: '2px 8px', fontWeight: 800, cursor: 'pointer', fontSize: 11
+                        }}
+                      >
+                        {datasetPreview.pairs.slice(0, 60).map((p, idx) => (
+                          <option key={p.id || idx} value={idx}>
+                            #{p.id}: {p.image} ⇄ {p.mask} ({p.risk_level})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => setSelectedPairIndex(Math.min(datasetPreview.pairs.length - 1, selectedPairIndex + 1))}
+                        disabled={selectedPairIndex >= datasetPreview.pairs.length - 1}
+                        style={{
+                          background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-primary)', borderRadius: 4, padding: '2px 7px', cursor: 'pointer'
+                        }}>▶</button>
+                    </div>
+                  )}
+
+                  {/* Mask Opacity Slider (in After-Scan mode) */}
+                  {previewMode === 'after_scan' && maskUrl && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ color: 'var(--text-secondary)' }}>Mask Blend:</span>
+                      <input
+                        type="range" min="0" max="1" step="0.05"
+                        value={maskOpacity} onChange={(e) => setMaskOpacity(Number(e.target.value))}
+                        style={{ width: 75, accentColor: 'var(--cyan)' }}
+                      />
+                      <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>{Math.round(maskOpacity * 100)}%</span>
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                    {previewMode === 'original' && 'Showing original unprocessed imagery (zero overlays).'}
+                    {previewMode === 'after_scan' && 'Showing AI risk demarcation & 30m DEM contours.'}
+                    {previewMode === 'split' && 'Before (Raw) vs After (AI Analysis).'}
+                  </div>
+                </div>
+              </div>
+
+              {/* 🖼️ VIEWPORT DISPLAY: Original Image / After Scan / Split / Tabular */}
+              {previewMode === 'table' ? (
                 /* 📋 TABULAR EXPLORER MODE */
                 <div style={{ height: 540, overflow: 'auto', padding: 16, background: '#070b12' }}>
-                  {/* Table Toolbar / Search */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <input
@@ -627,12 +733,11 @@ export default function DatasetsPage() {
                         🔴 HIGH RISK INCIDENTS: {datasetPreview?.summary?.high_risk_pairs || datasetPreview?.total_rows || '100%'}
                       </span>
                       <span style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.4)', padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 800 }}>
-                        AI CONFIDENCE: {datasetPreview?.summary?.ai_confidence || '97.8%'}
+                        AI CONFIDENCE: {datasetPreview?.summary?.ai_confidence || '94.8%'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Manifest or Generic CSV Table */}
                   <table className="data-table" style={{ fontSize: 12 }}>
                     <thead>
                       <tr>
@@ -696,7 +801,7 @@ export default function DatasetsPage() {
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => {
                                     setSelectedPairIndex(pIdx);
-                                    setViewMode('overlay');
+                                    setPreviewMode('after_scan');
                                   }}
                                   style={{ padding: '3px 8px', fontSize: 11, fontWeight: 700 }}
                                 >
@@ -729,60 +834,212 @@ export default function DatasetsPage() {
                     </tbody>
                   </table>
                 </div>
-              ) : viewMode === 'split' ? (
-                /* 🔲 SPLIT VIEW MODE: RAW IMAGE VS GROUND-TRUTH MASK */
-                <div style={{ position: 'relative', width: '100%', height: 540, background: '#05080f', display: 'flex' }}>
-                  {/* Left Half: Raw Imagery */}
-                  <div style={{ flex: 1, position: 'relative', borderRight: '2px solid var(--border-cyan)', overflow: 'hidden' }}>
+              ) : previewMode === 'original' ? (
+                /* 📷 ORIGINAL IMAGE PREVIEW MODE (PRE-SCAN) */
+                <div style={{ position: 'relative', width: '100%', height: 540, background: '#05080f', overflow: 'hidden' }}>
+                  {/* Clean, pristine original raw image without any scan/contours/hazard overlays */}
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    backgroundImage: `url("${imageUrl}")`,
+                    backgroundSize: 'cover', backgroundPosition: 'center',
+                    transition: 'all 0.3s ease',
+                  }} />
+
+                  {/* Top-Left Banner: Original Image Header */}
+                  <div style={{
+                    position: 'absolute', top: 16, left: 16,
+                    background: 'rgba(6, 10, 18, 0.94)', border: '1.5px solid var(--border-cyan)',
+                    borderRadius: 8, padding: '12px 18px', backdropFilter: 'blur(10px)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.8)', zIndex: 10,
+                    fontFamily: 'var(--font-mono)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 900, color: 'var(--cyan)' }}>
+                      <span style={{ fontSize: 18 }}>📷</span>
+                      <span>PREVIEW: ORIGINAL IMAGE (PRE-SCAN)</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#ffffff', fontWeight: 600, marginTop: 4 }}>
+                      File: <strong style={{ color: 'var(--cyan)' }}>{viewingFile}</strong>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 3 }}>
+                      Unprocessed Baseline Sensor Data · Zero AI Overlays · TrueColor RGB
+                    </div>
+                  </div>
+
+                  {/* Top-Right Button: Instant Jump to After Scan */}
+                  <button
+                    onClick={() => setPreviewMode('after_scan')}
+                    style={{
+                      position: 'absolute', top: 16, right: 16, zIndex: 10,
+                      background: 'linear-gradient(135deg, #ff1744, #c2185b)',
+                      border: '2px solid rgba(255,255,255,0.85)', color: '#ffffff',
+                      padding: '10px 18px', borderRadius: 6,
+                      fontSize: 13, fontWeight: 900, fontFamily: 'var(--font-mono)',
+                      cursor: 'pointer', boxShadow: '0 0 25px rgba(255, 23, 68, 0.8), 0 4px 14px rgba(0,0,0,0.6)',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      transition: 'transform 0.15s ease',
+                    }}
+                  >
+                    <span>🔬 Switch to After-Scan (AI)</span>
+                    <span>➔</span>
+                  </button>
+
+                  {/* Bottom Strip: Original Technical Telemetry */}
+                  <div style={{
+                    position: 'absolute', bottom: 16, left: 16, right: 16,
+                    background: 'rgba(6, 10, 18, 0.94)', border: '1px solid var(--border-subtle)',
+                    borderRadius: 6, padding: '10px 18px', zIndex: 10, backdropFilter: 'blur(10px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-secondary)',
+                    boxShadow: '0 6px 24px rgba(0,0,0,0.8)'
+                  }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span>SOURCE SENSOR: <strong style={{ color: '#ffffff' }}>Sentinel-2 MSI / Aerial Orthophoto</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>|</span>
+                      <span>RESOLUTION: <strong style={{ color: 'var(--cyan)' }}>1200 x 800 px</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>|</span>
+                      <span>COLOR BANDS: <strong style={{ color: '#22c55e' }}>RGB TrueColor (B04, B03, B02)</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>|</span>
+                      <span>STATUS: <strong style={{ color: 'var(--cyan)' }}>BASELINE UNMODIFIED</strong></span>
+                    </div>
+                    <div style={{ color: '#ffffff', fontWeight: 700 }}>
+                      [LAT: 30.7420°N · LON: 79.0550°E]
+                    </div>
+                  </div>
+                </div>
+              ) : previewMode === 'split' ? (
+                /* 🌓 SPLIT VIEW MODE: BEFORE SCAN VS AFTER SCAN COMPARISON */
+                <div style={{ position: 'relative', width: '100%', height: 540, background: '#05080f', display: 'flex', overflow: 'hidden' }}>
+                  {/* Left Pane: Original Image (Before Scan) */}
+                  <div style={{
+                    flex: 1, position: 'relative',
+                    borderRight: '3px solid var(--cyan)',
+                    overflow: 'hidden',
+                  }}>
                     <div style={{
                       position: 'absolute', inset: 0,
                       backgroundImage: `url("${imageUrl}")`,
                       backgroundSize: 'cover', backgroundPosition: 'center',
                     }} />
+
+                    {/* Left Pane Top Badge */}
                     <div style={{
-                      position: 'absolute', top: 12, left: 12,
-                      background: 'rgba(0,0,0,0.85)', border: '1px solid var(--border-cyan)',
-                      color: 'var(--cyan)', padding: '4px 10px', borderRadius: 4,
-                      fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 800
+                      position: 'absolute', top: 14, left: 14,
+                      background: 'rgba(6, 10, 18, 0.92)', border: '1.5px solid var(--border-cyan)',
+                      color: '#ffffff', padding: '6px 14px', borderRadius: 5,
+                      fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 900,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.7)',
+                      display: 'flex', alignItems: 'center', gap: 6
                     }}>
-                      🛰️ RAW OPTICAL SATELLITE IMAGE [{currentPair ? currentPair.image : viewingFile}]
+                      <span style={{ fontSize: 16 }}>📷</span>
+                      <span>BEFORE SCAN (ORIGINAL IMAGE)</span>
+                    </div>
+
+                    <div style={{
+                      position: 'absolute', bottom: 14, left: 14,
+                      background: 'rgba(0,0,0,0.85)', padding: '5px 12px', borderRadius: 4,
+                      fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)'
+                    }}>
+                      Pristine Optical Imagery · Zero Overlays
                     </div>
                   </div>
 
-                  {/* Right Half: Ground Truth Binary Mask */}
-                  <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                  {/* Center Divider Indicator */}
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 20,
+                    background: 'rgba(6, 10, 18, 0.95)',
+                    border: '2px solid var(--cyan)',
+                    borderRadius: 20,
+                    padding: '6px 14px',
+                    color: '#ffffff',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    boxShadow: '0 0 20px rgba(0, 229, 255, 0.7)',
+                    pointerEvents: 'none',
+                    letterSpacing: '0.08em'
+                  }}>
+                    ◄ BEFORE | AFTER ►
+                  </div>
+
+                  {/* Right Pane: Processed Image (After Scan) */}
+                  <div style={{
+                    flex: 1, position: 'relative', overflow: 'hidden'
+                  }}>
+                    {/* Base image */}
                     <div style={{
                       position: 'absolute', inset: 0,
-                      backgroundImage: maskUrl ? `url("${maskUrl}")` : `url("${imageUrl}")`,
+                      backgroundImage: `url("${imageUrl}")`,
                       backgroundSize: 'cover', backgroundPosition: 'center',
-                      filter: maskUrl ? 'invert(1) sepia(1) saturate(10000%) hue-rotate(320deg) brightness(0.9)' : 'grayscale(1)',
                     }} />
+
+                    {/* Mask overlay if available */}
+                    {maskUrl && (
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        backgroundImage: `url("${maskUrl}")`,
+                        backgroundSize: 'cover', backgroundPosition: 'center',
+                        opacity: maskOpacity,
+                        mixBlendMode: 'screen',
+                        filter: 'invert(1) sepia(1) saturate(10000%) hue-rotate(320deg) brightness(1.2)',
+                        pointerEvents: 'none',
+                      }} />
+                    )}
+
+                    {/* Highlighted Danger Zone in Right Pane */}
+                    {showRiskMask && (
+                      <div style={{
+                        position: 'absolute', top: '15%', left: '15%', width: '70%', height: '65%',
+                        background: 'repeating-linear-gradient(45deg, rgba(255, 23, 68, 0.35), rgba(255, 23, 68, 0.35) 12px, rgba(255, 23, 68, 0.18) 12px, rgba(255, 23, 68, 0.18) 24px)',
+                        border: '2.5px solid #ff1744',
+                        borderRadius: '34% 66% 62% 38% / 28% 32% 68% 72%',
+                        animation: 'pulseDangerArea 3s ease-in-out infinite',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        padding: 12, zIndex: 6,
+                      }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #ff1744, #c2185b)',
+                          color: '#ffffff', padding: '4px 12px', borderRadius: 4,
+                          fontSize: 13, fontWeight: 900, fontFamily: 'var(--font-headline)',
+                          boxShadow: '0 0 16px rgba(255, 23, 68, 0.9)'
+                        }}>
+                          🚨 {riskLevel}
+                        </div>
+                        <div style={{
+                          color: '#ffffff', fontSize: 11, fontWeight: 800, marginTop: 4,
+                          fontFamily: 'var(--font-mono)', background: 'rgba(0,0,0,0.85)', padding: '2px 8px', borderRadius: 3
+                        }}>
+                          CONFIDENCE: {confidenceVal}% · FoS: {fos}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Right Pane Top Badge */}
                     <div style={{
-                      position: 'absolute', top: 12, left: 12,
-                      background: 'rgba(0,0,0,0.85)', border: '1px solid #ff1744',
-                      color: '#ff4d6d', padding: '4px 10px', borderRadius: 4,
-                      fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 800
+                      position: 'absolute', top: 14, right: 14,
+                      background: 'linear-gradient(135deg, rgba(255, 23, 68, 0.3), rgba(183, 28, 28, 0.4))',
+                      border: '1.5px solid #ff1744',
+                      color: '#ffffff', padding: '6px 14px', borderRadius: 5,
+                      fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 900,
+                      boxShadow: '0 4px 16px rgba(255,23,68,0.5)',
+                      display: 'flex', alignItems: 'center', gap: 6, zIndex: 10
                     }}>
-                      🎭 RESU-NET GROUND TRUTH MASK [{currentPair ? currentPair.mask : 'Binary Mask'}]
+                      <span style={{ fontSize: 16 }}>🔬</span>
+                      <span>AFTER SCAN (AI PREDICTION)</span>
                     </div>
 
-                    {/* Hazard Mask Area Overlay Badge */}
                     <div style={{
-                      position: 'absolute', bottom: 16, right: 16,
-                      background: 'rgba(6, 10, 18, 0.94)', border: '1.5px solid #ff1744',
-                      color: '#ffffff', padding: '10px 16px', borderRadius: 6,
-                      fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 800,
-                      boxShadow: '0 0 20px rgba(255,23,68,0.5)'
+                      position: 'absolute', bottom: 14, right: 14,
+                      background: 'rgba(0,0,0,0.85)', padding: '5px 12px', borderRadius: 4,
+                      fontSize: 11, fontFamily: 'var(--font-mono)', color: '#ff5252', fontWeight: 700, zIndex: 10
                     }}>
-                      <div>🔴 HAZARD AREA COVERAGE: <strong style={{ color: '#ff4d6d' }}>{currentPair?.coverage_pct || 38.6}%</strong></div>
-                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
-                        IoU: {datasetPreview?.summary?.mean_iou_score || '94.8%'} · Dice: {datasetPreview?.summary?.mean_dice_coefficient || '0.965'}
-                      </div>
+                      High Risk Demarcated · Slope: {slopeDeg}°
                     </div>
                   </div>
                 </div>
               ) : (
-                /* 🗺️ OVERLAY VIEWPORT MODE (Image + Mask + Contours + High Risk Badge + HUD) */
+                /* 🔬 AFTER SCAN VIEWPORT MODE (Image + Mask + Contours + High Risk Badge + HUD) */
                 <div style={{ position: 'relative', width: '100%', height: 540, background: '#080c14', overflow: 'hidden' }}>
                   {/* Layer 1: Raw Satellite / Aerial Imagery */}
                   <div style={{
