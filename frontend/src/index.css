@@ -1529,4 +1529,64 @@ select.form-input {
   animation: reticleRotate 20s linear infinite;
 }
 
+@keyframes pulseExpand {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.sensor-ping-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  margin-left: -14px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseExpand 2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@keyframes slipHazardGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 59, 92, 0.8)); opacity: 0.95; }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 59, 92, 1)); opacity: 1; }
+}
+
+.slip-surface-hazard {
+  animation: slipHazardGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes flowDash {
+  to { stroke-dashoffset: -40; }
+}
+
+.lora-signal-beam {
+  stroke-dasharray: 6 4;
+  animation: flowDash 1.2s linear infinite;
+}
+
+@keyframes warningStrobeGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 92, 0.4); border-color: rgba(255, 59, 92, 0.4); }
+  50% { box-shadow: 0 0 25px 6px rgba(255, 59, 92, 0.8); border-color: rgba(255, 59, 92, 1); }
+}
+
+.storm-warning-active {
+  animation: warningStrobeGlow 1s ease-in-out infinite;
+}
+
+@keyframes terminalBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.term-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  background: var(--cyan);
+  vertical-align: middle;
+  animation: terminalBlink 1s step-start infinite;
+}
+
+
 

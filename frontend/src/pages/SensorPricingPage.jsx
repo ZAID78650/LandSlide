@@ -15,6 +15,7 @@ import edgeComputeImg from '../assets/sensors/edge_compute.jpg';
 import solarPowerImg from '../assets/sensors/solar_power.jpg';
 import hydrostaticImg from '../assets/sensors/hydrostatic.jpg';
 import enclosureImg from '../assets/sensors/enclosure.jpg';
+import slopeTerrainImg from '../assets/sensors/slope_terrain.jpg';
 
 // Guaranteed image mapping dictionary by ID
 const SENSOR_IMAGE_MAP = {
@@ -617,6 +618,82 @@ function SensorVisual({ item, viewMode = 'PHOTO', onToggleMode, onInspect }) {
   );
 }
 
+// Tactical Mountain Slope Stations with Geotechnical Instrumentation
+const TERRAIN_STATIONS = [
+  {
+    id: 'ST-01',
+    name: 'Summit Ridge Telemetry Gateway',
+    zone: 'SUMMIT CREST (STABLE BEDROCK)',
+    altitude: '2,240m ASL',
+    slopeAngle: '12° Crest Flat',
+    coords: '31.1072°N, 77.1768°E',
+    pinPos: { left: '81%', top: '16%' },
+    svgPos: { x: 810, y: 80 },
+    color: 'var(--cyan)',
+    statusText: 'ONLINE • MESH ROOT',
+    primarySensorId: 10, // 4G Gateway
+    secondarySensorId: 12, // Solar System
+    sensorTypes: ['4G LTE-M / Iridium Satellite Gateway', '50W Solar PV + MPPT', '12V LiFePO4 Smart Battery'],
+    geotechnicalSignificance: 'Acts as the redundant master telemetry root. Collects Sub-GHz LoRa packets from down-slope sensor clusters and relays real-time geotechnical warnings to the Cloud Civil Defense dashboard via satellite fallback if terrestrial fiber is severed.',
+    governingPhysics: 'Line-of-Sight Fresnel Zone Clearance (915 MHz) & Monocrystalline PV Photovoltaic Autonomy with 14-day zero-sun buffer.',
+    alertThreshold: 'Loss of Gateway Heartbeat > 5 min -> Automatic Alert Trigger'
+  },
+  {
+    id: 'ST-02',
+    name: 'Crown Scarp Tension Crackmeter & Tilt',
+    zone: 'HEAD SCARP EXTENSION ZONE',
+    altitude: '2,160m ASL',
+    slopeAngle: '44° Steep Rock Scarp',
+    coords: '31.1061°N, 77.1752°E',
+    pinPos: { left: '63%', top: '34%' },
+    svgPos: { x: 630, y: 170 },
+    color: 'var(--amber)',
+    statusText: 'WARNING • ACTIVE DILATION',
+    primarySensorId: 5, // Crackmeter
+    secondarySensorId: 3, // Tiltmeter
+    sensorTypes: ['Quartz Vibrating Wire Crackmeter', 'Biaxial MEMS Inclinometer', 'Micro-Seismic Geophone'],
+    geotechnicalSignificance: 'Monitors progressive tensile opening of the detachment crown scarp. Creep acceleration here indicates tensile failure of the upper soil mass, preconditioning the slope for sudden rotational or planar slide release.',
+    governingPhysics: "Saito's Creep Rupture Model (1969): Rate of crack opening acceleration d²w/dt² inversely models remaining time to catastrophic slope detachment: tr = t0 + C/(dw/dt).",
+    alertThreshold: 'Extension > 2.0 mm/day or Angular Tilt > 1.5° -> Tertiary Creep Alarm'
+  },
+  {
+    id: 'ST-03',
+    name: 'Mid-Slope Borehole Shear Plane & Piezometer',
+    zone: 'CRITICAL ROTATIONAL SHEAR BAND',
+    altitude: '2,050m ASL',
+    slopeAngle: '38° Colluvial Slope',
+    coords: '31.1048°N, 77.1734°E',
+    pinPos: { left: '44%', top: '53%' },
+    svgPos: { x: 440, y: 265 },
+    color: 'var(--red)',
+    statusText: 'CRITICAL • HIGH PORE PRESSURE',
+    primarySensorId: 2, // Vibrating Wire Piezometer
+    secondarySensorId: 4, // Soil Moisture TDR
+    sensorTypes: ['12m Deep Vibrating Wire Piezometer', 'In-Place Borehole Inclinometer', 'Multi-depth TDR Soil Moisture Array'],
+    geotechnicalSignificance: 'Directly penetrates the active slip surface at 8.2m depth. Measures pore-water pressure buildup and deep shear displacement. This is the single most critical station governing total slope collapse.',
+    governingPhysics: "Terzaghi's Principle of Effective Stress: σ' = σ - u. High pore pressure (u) cancels normal clamping stress across the shear plane, drastically dropping available shear resistance τ = c' + σ' tan φ'.",
+    alertThreshold: 'Pore-Water Pressure > 135 kPa or Shear Slip > 10 mm -> EVACUATION RED ALERT'
+  },
+  {
+    id: 'ST-04',
+    name: 'Toe Gully Inflow & Debris Flow Radar',
+    zone: 'COLLUVIUM ACCUMULATION & DISCHARGE GULLY',
+    altitude: '1,920m ASL',
+    slopeAngle: '22° Valley Channel',
+    coords: '31.1025°N, 77.1710°E',
+    pinPos: { left: '19%', top: '75%' },
+    svgPos: { x: 190, y: 375 },
+    color: 'var(--cyan)',
+    statusText: 'MONITORING • MONSOON RUNOFF',
+    primarySensorId: 1, // Rain Gauge
+    secondarySensorId: 7, // Ultrasonic Debris Level
+    sensorTypes: ['Dual-Tipping Bucket Rain Gauge', 'High-Frequency Ultrasonic Debris Radar', 'Hydrostatic Stage Sensor'],
+    geotechnicalSignificance: 'Monitors precipitation intensity (mm/hr) and flash flood debris surge in the toe channel. Seepage breakout at the toe signals slope saturation and rapid liquefactive mudflow transformation.',
+    governingPhysics: 'Caine (1980) & Guzzetti Intensity-Duration (I-D) Empirical Threshold: I = 14.82 * D^(-0.39). Exceeding this boundary initiates mass debris mobilization.',
+    alertThreshold: 'Precipitation Intensity > 25 mm/hr or Channel Surge > 3.0m -> Flash Mudflow Siren'
+  }
+];
+
 export default function SensorPricingPage() {
   const [items, setItems] = useState(() => {
     // Merge DEFAULT_CATALOG with guaranteed bundled images
@@ -652,6 +729,128 @@ export default function SensorPricingPage() {
   const [batteryAh, setBatteryAh] = useState(20);
   const [cableLengthMeters, setCableLengthMeters] = useState(120);
 
+  // Real-time Terrain Analytics & Field Simulation States
+  const [terrainLayers, setTerrainLayers] = useState({
+    optical: true,
+    sensorPins: true,
+    bishopFos: true,
+    porePressure: true,
+    loraMesh: true,
+    lidarScan: true,
+    thermalHeatmap: false,
+  });
+
+  const [simStormActive, setSimStormActive] = useState(false);
+  const [selectedTerrainStationId, setSelectedTerrainStationId] = useState('ST-03');
+  const [packetStreamPaused, setPacketStreamPaused] = useState(false);
+
+  // Dynamic real-time fluctuating sensor telemetry
+  const [liveTerrainTelemetry, setLiveTerrainTelemetry] = useState({
+    rainfall: 28.4,
+    rainCumulative: 214.2,
+    porePressure: 142.8,
+    soilMoisture: 88.4,
+    tiltX: 1.84,
+    tiltY: -0.22,
+    crackOpening: 2.38,
+    crackRate: 0.18,
+    debrisStage: 3.42,
+    seismicNoise: 14.2,
+    fos: 1.08,
+    batteryVoltage: 13.41,
+    solarWatts: 38.2,
+    rssi: -68,
+    lastUpdate: 'LIVE',
+  });
+
+  // Real-time LoRaWAN Packet stream buffer
+  const [packetLogs, setPacketLogs] = useState([
+    { id: 48192, time: '04:26:48 UTC', node: 'ST-03 MID-SLOPE', type: 'SDI-12 / VW', hex: '0x8F 0x14 0x2A 0x6E', reading: 'VW_u: 142.8 kPa | VWC: 88.4%', rssi: -68, snr: '+9.4 dB', status: 'CRC_OK' },
+    { id: 48193, time: '04:26:50 UTC', node: 'ST-02 SCARP', type: 'RS-485 / MEMS', hex: '0x3E 0x01 0xB4 0x90', reading: 'θx: +1.84° | Δw: 2.38mm', rssi: -72, snr: '+8.1 dB', status: 'WARN_CREEP' },
+    { id: 48194, time: '04:26:52 UTC', node: 'ST-04 TOE GULLY', type: 'PULSE / 4-20mA', hex: '0x11 0x02 0x1C 0x55', reading: 'Rain: 28.4 mm/h | Stage: 3.42m', rssi: -64, snr: '+11.2 dB', status: 'CRC_OK' },
+    { id: 48195, time: '04:26:54 UTC', node: 'ST-01 GATEWAY', type: '4G LTE-M MQTT', hex: '0xAA 0x55 0x00 0xFF', reading: 'Uplink Cloud Broker: ACK (16ms)', rssi: -58, snr: '+14.0 dB', status: 'CLOUD_SYNC' },
+  ]);
+
+  // Telemetry fluctuation polling engine
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveTerrainTelemetry(prev => {
+        const storm = simStormActive;
+        const noise = (Math.random() - 0.5);
+
+        const rainfall = storm 
+          ? +(Math.min(95, Math.max(65, prev.rainfall + noise * 4))).toFixed(1)
+          : +(Math.min(36, Math.max(22, prev.rainfall + noise * 1.5))).toFixed(1);
+
+        const porePressure = storm
+          ? +(Math.min(210, Math.max(175, prev.porePressure + noise * 3))).toFixed(1)
+          : +(Math.min(148, Math.max(138, prev.porePressure + noise * 0.8))).toFixed(1);
+
+        const soilMoisture = storm ? +(Math.min(99.4, 94.0 + noise * 1)).toFixed(1) : +(Math.min(91, Math.max(85, prev.soilMoisture + noise * 0.5))).toFixed(1);
+
+        const crackOpening = storm ? +(prev.crackOpening + 0.04).toFixed(2) : +(2.38 + Math.sin(Date.now() / 8000) * 0.05).toFixed(2);
+        const tiltX = storm ? +(prev.tiltX + 0.03).toFixed(2) : +(1.84 + Math.sin(Date.now() / 10000) * 0.03).toFixed(2);
+        
+        const debrisStage = storm ? +(Math.min(6.5, Math.max(4.8, prev.debrisStage + noise * 0.2))).toFixed(2) : +(Math.min(3.8, Math.max(3.1, prev.debrisStage + noise * 0.05))).toFixed(2);
+        const seismicNoise = storm ? +(Math.min(65, Math.max(38, prev.seismicNoise + noise * 3))).toFixed(1) : +(Math.min(17, Math.max(11, prev.seismicNoise + noise * 0.6))).toFixed(1);
+
+        // Bishop Factor of Safety decreases dynamically as pore pressure spikes
+        const fos = storm 
+          ? +(0.81 + noise * 0.03).toFixed(2)
+          : +(1.08 + Math.sin(Date.now() / 6000) * 0.02).toFixed(2);
+
+        const batteryVoltage = +(13.4 + noise * 0.06).toFixed(2);
+        const solarWatts = storm ? +(12.4 + noise * 2).toFixed(1) : +(38.2 + noise * 1.8).toFixed(1);
+        const rssi = Math.round(-68 + noise * 4);
+
+        return {
+          rainfall,
+          rainCumulative: +(prev.rainCumulative + (rainfall / 3600)).toFixed(2),
+          porePressure,
+          soilMoisture,
+          tiltX,
+          tiltY: -0.22,
+          crackOpening,
+          crackRate: storm ? 1.45 : 0.18,
+          debrisStage,
+          seismicNoise,
+          fos,
+          batteryVoltage,
+          solarWatts,
+          rssi,
+          lastUpdate: new Date().toLocaleTimeString(),
+        };
+      });
+
+      if (!packetStreamPaused) {
+        setPacketLogs(prev => {
+          const nowStr = new Date().toISOString().substring(11, 19) + ' UTC';
+          const nodes = [
+            { node: 'ST-03 MID-SLOPE', type: 'SDI-12 / VW', prefix: 'VW_u: 142.8 kPa', rssi: -68 },
+            { node: 'ST-02 SCARP', type: 'RS-485 / MEMS', prefix: 'θx: +1.84° / 2.38mm', rssi: -72 },
+            { node: 'ST-04 TOE GULLY', type: 'PULSE / 4-20mA', prefix: 'Rain: 28.4 mm/h', rssi: -64 },
+            { node: 'ST-01 GATEWAY', type: 'LTE-M UPLINK', prefix: 'MQTT_PUB CLOUD_ACK', rssi: -58 }
+          ];
+          const chosen = nodes[Math.floor(Math.random() * nodes.length)];
+          const newPkt = {
+            id: (prev[0]?.id || 48200) + 1,
+            time: nowStr,
+            node: chosen.node,
+            type: chosen.type,
+            hex: '0x' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0'),
+            reading: chosen.prefix,
+            rssi: chosen.rssi + Math.round((Math.random() - 0.5) * 6),
+            snr: `+${(8 + Math.random() * 5).toFixed(1)} dB`,
+            status: simStormActive ? 'STORM_BURST' : 'CRC_OK'
+          };
+          return [newPkt, ...prev.slice(0, 14)];
+        });
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [simStormActive, packetStreamPaused]);
+
   // Clear stale old localStorage that had no image assets
   useEffect(() => {
     try {
@@ -660,6 +859,7 @@ export default function SensorPricingPage() {
       // ignore
     }
   }, []);
+
 
   const handleToggleCardVisual = (id, newMode) => {
     setCardVisualModes(prev => ({ ...prev, [id]: newMode }));
@@ -720,6 +920,10 @@ export default function SensorPricingPage() {
   const spotlightItem = useMemo(() => {
     return items.find(i => i.id === spotlightId) || items[0];
   }, [items, spotlightId]);
+
+  const selectedTerrainStation = useMemo(() => {
+    return TERRAIN_STATIONS.find(s => s.id === selectedTerrainStationId) || TERRAIN_STATIONS[2];
+  }, [selectedTerrainStationId]);
 
   // Financial BOM calculation
   const bomSummary = useMemo(() => {
@@ -1124,7 +1328,18 @@ export default function SensorPricingPage() {
               gap: '6px'
             }}
           >
-            <span>🗺️</span> TOPOGRAPHY & WIRING SCHEMATIC
+            <span>⛰️</span> REAL-TIME TERRAIN ANALYTICS
+            <span style={{
+              background: activeTab === 'TOPOGRAPHY' ? 'rgba(0,0,0,0.25)' : 'rgba(255,59,92,0.2)',
+              color: activeTab === 'TOPOGRAPHY' ? '#000' : 'var(--red)',
+              fontSize: '10px',
+              padding: '1px 6px',
+              borderRadius: '10px',
+              fontWeight: 800,
+              letterSpacing: '0.5px'
+            }}>
+              ● LIVE
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('AUTONOMY')}
@@ -1524,101 +1739,1032 @@ export default function SensorPricingPage() {
         </div>
       )}
 
-      {/* TAB 2: TOPOGRAPHY & WIRING SCHEMATIC */}
+      {/* TAB 2: REAL-TIME TERRAIN ANALYTICS & SENSING SCHEMATIC */}
       {activeTab === 'TOPOGRAPHY' && (
         <div className="panel" style={{ marginBottom: '20px' }}>
-          <div className="panel-header">
-            <span className="label-caps">TOPOGRAPHIC SLOPE CROSS-SECTION & TELEMETRY TOPOLOGY</span>
-            <span style={{ fontSize: '11px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
-              LIVE BUS & RF SIGNAL PATH (SDI-12 • RS-485 • LoRaWAN • 4G SATELLITE)
-            </span>
-          </div>
-          <div className="panel-body" style={{ padding: '24px' }}>
-            <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-              This interactive topographic model illustrates the precise spatial deployment of instruments along a 40° vulnerable mountain slope.
-              Sensors at the slope toe and head scarp feed via SDI-12 / RS-485 into the central low-power Edge Node, which relays encrypted telemetry over 15km LoRaWAN to the ridge gateway.
+          <div className="panel-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+            <div>
+              <span className="label-caps" style={{ color: 'var(--cyan)' }}>
+                🏔️ REAL-TIME TERRAIN SENSING & BISHOP STABILITY ANALYTICS
+              </span>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
+                FIELD-DEPLOYED TELEMETRY • LORAWAN MESH TOPOLOGY • SUBSURFACE BOREHOLE SHEAR BAND • LIVE FoS PREDICTION
+              </div>
             </div>
 
-            <div style={{ width: '100%', height: '420px', background: '#07090d', borderRadius: '8px', border: '1px solid var(--border-subtle)', position: 'relative', overflow: 'hidden' }}>
-              <svg viewBox="0 0 900 400" style={{ width: '100%', height: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(0, 229, 255, 0.08)',
+                border: '1px solid var(--border-cyan)',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)'
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: simStormActive ? 'var(--red)' : 'var(--green)',
+                  boxShadow: `0 0 8px ${simStormActive ? 'var(--red)' : 'var(--green)'}`
+                }} />
+                <span style={{ color: simStormActive ? 'var(--red)' : 'var(--green)', fontWeight: 700 }}>
+                  {simStormActive ? 'STORM SURGE MODE' : 'POLLING ACTIVE (2.0s)'}
+                </span>
+                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                <span style={{ color: '#cbd5e1' }}>14/14 CHANNELS OK</span>
+                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                <span style={{ color: 'var(--cyan)' }}>CRC 100%</span>
+              </div>
+
+              {/* Storm Drill Trigger Button */}
+              <button
+                onClick={() => setSimStormActive(!simStormActive)}
+                className="btn"
+                style={{
+                  background: simStormActive ? 'rgba(255, 59, 92, 0.2)' : 'rgba(255, 176, 32, 0.15)',
+                  border: `1px solid ${simStormActive ? 'var(--red)' : 'var(--amber)'}`,
+                  color: simStormActive ? 'var(--red)' : 'var(--amber)',
+                  fontWeight: 700,
+                  fontSize: '11px',
+                  padding: '6px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>{simStormActive ? '✓' : '⛈️'}</span>
+                {simStormActive ? 'RESTORE NORMAL SENSING' : 'DRILL: TRIGGER MONSOON SURGE'}
+              </button>
+            </div>
+          </div>
+
+          <div className="panel-body" style={{ padding: '20px' }}>
+            {/* Tactical Layer Toggle Toolbar */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '16px',
+              padding: '12px 16px',
+              background: 'rgba(10, 15, 26, 0.6)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginRight: '4px' }}>
+                  ANALYTIC LAYERS:
+                </span>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, optical: !p.optical }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.optical ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.optical ? 'var(--cyan)' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.optical ? 'var(--cyan)' : 'var(--text-secondary)'
+                  }}
+                >
+                  📷 OPTICAL REALITY
+                </button>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, bishopFos: !p.bishopFos }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.bishopFos ? 'rgba(255, 59, 92, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.bishopFos ? 'var(--red)' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.bishopFos ? 'var(--red)' : 'var(--text-secondary)'
+                  }}
+                >
+                  🔬 BISHOP SLIP ARC ({liveTerrainTelemetry.fos})
+                </button>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, porePressure: !p.porePressure }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.porePressure ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.porePressure ? 'var(--cyan)' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.porePressure ? 'var(--cyan)' : 'var(--text-secondary)'
+                  }}
+                >
+                  💧 PORE PRESSURE PLUME ({liveTerrainTelemetry.porePressure} kPa)
+                </button>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, loraMesh: !p.loraMesh }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.loraMesh ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.loraMesh ? 'var(--green)' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.loraMesh ? 'var(--green)' : 'var(--text-secondary)'
+                  }}
+                >
+                  ⚡ LoRaWAN 868MHz MESH
+                </button>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, lidarScan: !p.lidarScan }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.lidarScan ? 'rgba(255, 176, 32, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.lidarScan ? 'var(--amber)' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.lidarScan ? 'var(--amber)' : 'var(--text-secondary)'
+                  }}
+                >
+                  🎯 LiDAR CV RETICLE
+                </button>
+
+                <button
+                  onClick={() => setTerrainLayers(p => ({ ...p, sensorPins: !p.sensorPins }))}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: terrainLayers.sensorPins ? 'rgba(217, 70, 239, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${terrainLayers.sensorPins ? '#d946ef' : 'var(--border-subtle)'}`,
+                    color: terrainLayers.sensorPins ? '#d946ef' : 'var(--text-secondary)'
+                  }}
+                >
+                  📍 HUD PIN CALLOUTS
+                </button>
+              </div>
+
+              {/* Real-time Global FoS Assessment */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>SLOPE STABILITY:</span>
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-mono)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  background: liveTerrainTelemetry.fos < 1.0 ? 'rgba(255, 59, 92, 0.25)' : liveTerrainTelemetry.fos <= 1.15 ? 'rgba(255, 176, 32, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+                  color: liveTerrainTelemetry.fos < 1.0 ? 'var(--red)' : liveTerrainTelemetry.fos <= 1.15 ? 'var(--amber)' : 'var(--green)',
+                  border: `1px solid ${liveTerrainTelemetry.fos < 1.0 ? 'var(--red)' : liveTerrainTelemetry.fos <= 1.15 ? 'var(--amber)' : 'var(--green)'}`
+                }}>
+                  FoS = {liveTerrainTelemetry.fos} ({liveTerrainTelemetry.fos < 1.0 ? 'FAILURE IMMINENT' : liveTerrainTelemetry.fos <= 1.15 ? 'METASTABLE / CRITICAL' : 'STABLE'})
+                </span>
+              </div>
+            </div>
+
+            {/* PHOTOGRAPHIC MOUNTAIN TERRAIN VIEWPORT WITH ANALYTICS OVERLAY */}
+            <div
+              className={simStormActive ? 'storm-warning-active' : ''}
+              style={{
+                width: '100%',
+                height: '520px',
+                background: '#04070e',
+                borderRadius: '10px',
+                border: `1px solid ${simStormActive ? 'var(--red)' : 'var(--border-cyan)'}`,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: simStormActive ? '0 0 30px rgba(255, 59, 92, 0.4)' : '0 8px 32px rgba(0, 229, 255, 0.15)',
+                transition: 'border-color 0.3s ease, box-shadow 0.3s ease'
+              }}
+            >
+              {/* Tactical Corners */}
+              <div className="tactical-corner tactical-corner-tl" />
+              <div className="tactical-corner tactical-corner-tr" />
+              <div className="tactical-corner tactical-corner-bl" />
+              <div className="tactical-corner tactical-corner-br" />
+
+              {/* Storm Mode Flash Warning Banner */}
+              {simStormActive && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(90deg, rgba(255, 59, 92, 0.95), rgba(185, 28, 28, 0.95))',
+                  color: '#fff',
+                  padding: '10px 18px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  zIndex: 25,
+                  boxShadow: '0 4px 20px rgba(255, 59, 92, 0.6)',
+                  animation: 'warningStrobeGlow 1s infinite'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '16px' }}>🚨</span>
+                    <span>[LEVEL-4 EMERGENCY] CRITICAL FoS BREACH ({liveTerrainTelemetry.fos}) • TERTIARY BOREHOLE SHEAR ACCELERATION DETECTED</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ background: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', color: '#ff3b5c' }}>
+                      SIRENS & CELL BROADCAST ACTIVE
+                    </span>
+                    <button
+                      onClick={() => setSimStormActive(false)}
+                      style={{
+                        background: '#fff',
+                        color: '#b91c1c',
+                        border: 'none',
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '11px'
+                      }}
+                    >
+                      RESET DRILL
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* REAL MOUNTAIN SLOPE PHOTOGRAPH */}
+              <img
+                src={slopeTerrainImg}
+                alt="Active Mountain Slope Landslide Hazard Sensing Field"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: simStormActive
+                    ? 'brightness(0.65) contrast(1.3) saturate(1.1) hue-rotate(-12deg)'
+                    : terrainLayers.optical
+                    ? 'brightness(0.85) contrast(1.1)'
+                    : 'brightness(0.35) contrast(1.4) grayscale(0.5)',
+                  transition: 'filter 0.5s ease'
+                }}
+              />
+
+              {/* Dark Vignette & Edge Shading for Maximum Overlay Legibility */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(ellipse at 50% 50%, rgba(5, 10, 20, 0.15) 0%, rgba(3, 6, 12, 0.8) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2
+              }} />
+
+              {/* Storm Rain Streak Overlay (Simulated Weather) */}
+              {simStormActive && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'repeating-linear-gradient(115deg, rgba(0, 229, 255, 0.08) 0px, rgba(0, 229, 255, 0.08) 2px, transparent 2px, transparent 18px)',
+                  pointerEvents: 'none',
+                  zIndex: 3
+                }} />
+              )}
+
+              {/* Sweeping LiDAR Scan Line */}
+              {terrainLayers.lidarScan && (
+                <div className="sensor-scan-line" style={{ zIndex: 10 }} />
+              )}
+
+              {/* High-Tech Optical Spatial Reticle HUD at Bottom */}
+              {terrainLayers.lidarScan && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '16px',
+                  left: '16px',
+                  background: 'rgba(5, 10, 20, 0.88)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid var(--border-cyan)',
+                  borderRadius: '6px',
+                  padding: '8px 14px',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  zIndex: 12,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.7)'
+                }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--amber)', boxShadow: '0 0 8px var(--amber)' }} />
+                  <span>🎯 CV LiDAR SCANNER: <strong>ACTIVE SWEEP</strong></span>
+                  <span style={{ color: 'var(--cyan)' }}>LAT: 31.1048°N</span>
+                  <span style={{ color: 'var(--cyan)' }}>LON: 77.1734°E</span>
+                  <span style={{ color: 'var(--green)' }}>REFLECTANCE: 94.2%</span>
+                  <span style={{ color: simStormActive ? 'var(--red)' : 'var(--amber)' }}>
+                    KINEMATIC DISPLACEMENT: {simStormActive ? '+4.8 mm/hr (TERTIARY)' : '+0.42 mm/day (CREEP)'}
+                  </span>
+                </div>
+              )}
+
+              {/* Top-Left Geographic Position Callout */}
+              <div style={{
+                position: 'absolute',
+                top: simStormActive ? '48px' : '16px',
+                left: '16px',
+                background: 'rgba(5, 10, 20, 0.85)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--text-secondary)',
+                zIndex: 12,
+                transition: 'top 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: 'var(--cyan)', fontWeight: 700 }}>● OPTICAL FIELD TELEMETRY</span>
+                  <span>SLOPE SECTOR 4B (HIMALAYAN TRANSECT)</span>
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  RESOLUTION: 8K LIDAR FUSION • ELEVATION SPAN: 1,920m - 2,240m ASL
+                </div>
+              </div>
+
+              {/* Top-Right Real-time Sensor Metric Ticker Over Photo */}
+              <div style={{
+                position: 'absolute',
+                top: simStormActive ? '48px' : '16px',
+                right: '16px',
+                background: 'rgba(5, 10, 20, 0.85)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                zIndex: 12,
+                transition: 'top 0.3s ease'
+              }}>
+                <div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '9px', display: 'block' }}>RAIN INTENSITY</span>
+                  <span style={{ color: 'var(--cyan)', fontWeight: 700 }}>{liveTerrainTelemetry.rainfall} mm/h</span>
+                </div>
+                <div style={{ width: '1px', height: '24px', background: 'var(--border-subtle)' }} />
+                <div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '9px', display: 'block' }}>PORE PRESSURE (u)</span>
+                  <span style={{ color: 'var(--red)', fontWeight: 700 }}>{liveTerrainTelemetry.porePressure} kPa</span>
+                </div>
+                <div style={{ width: '1px', height: '24px', background: 'var(--border-subtle)' }} />
+                <div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '9px', display: 'block' }}>CROWN DILATION</span>
+                  <span style={{ color: 'var(--amber)', fontWeight: 700 }}>+{liveTerrainTelemetry.crackOpening} mm</span>
+                </div>
+              </div>
+
+              {/* SVG ANALYTICAL & TELEMETRY LAYER OVER REAL IMAGE */}
+              <svg
+                viewBox="0 0 1000 500"
+                preserveAspectRatio="none"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  zIndex: 5
+                }}
+              >
                 <defs>
-                  <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#080d1a" />
-                    <stop offset="100%" stopColor="#0f172a" />
+                  <filter id="hazardGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter id="cyanPulseGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <linearGradient id="saturationGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.45" />
+                    <stop offset="60%" stopColor="#0284c7" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#0369a1" stopOpacity="0.06" />
                   </linearGradient>
-                  <linearGradient id="mountainGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#1e293b" />
-                    <stop offset="100%" stopColor="#0f172a" />
+                  <linearGradient id="failureWedgeGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#ff3b5c" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#ff3b5c" stopOpacity="0.04" />
                   </linearGradient>
                 </defs>
 
-                <rect width="900" height="400" fill="url(#skyGrad)" />
+                {/* Subsurface Pore-Water Saturation Plume */}
+                {terrainLayers.porePressure && (
+                  <g>
+                    <path
+                      d="M 630 180 Q 450 250 190 380 L 190 450 Q 480 420 650 240 Z"
+                      fill="url(#saturationGrad)"
+                    />
+                    {/* Seepage percolation streamline arrows */}
+                    <path d="M 600 200 Q 480 270 240 390" fill="none" stroke="#00e5ff" strokeWidth="1.8" strokeDasharray="5 5" opacity="0.85" />
+                    <path d="M 560 230 Q 440 300 280 410" fill="none" stroke="#00e5ff" strokeWidth="1.4" strokeDasharray="5 5" opacity="0.7" />
+                    <text x="280" y="435" fill="#00e5ff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700" opacity="0.95">
+                      SUBSURFACE PORE-WATER SATURATION PLUME (u = {liveTerrainTelemetry.porePressure} kPa • Ru = 0.52)
+                    </text>
+                  </g>
+                )}
 
-                <path d="M 50 40 Q 80 15 120 40 Q 150 20 180 40 Q 200 60 170 80 L 60 80 Z" fill="rgba(74, 85, 104, 0.5)" />
-                <path d="M 450 30 Q 480 10 520 30 Q 550 15 580 35 Q 600 55 570 70 L 460 70 Z" fill="rgba(74, 85, 104, 0.4)" />
-                {[70, 90, 110, 130, 150, 480, 500, 530, 550].map((rx, idx) => (
-                  <line key={idx} x1={rx} y1="85" x2={rx - 10} y2="125" stroke="#00e5ff" strokeWidth="1.5" strokeDasharray="3 4" opacity="0.6" />
-                ))}
+                {/* Bishop Critical Slip Surface Hazard Arc */}
+                {terrainLayers.bishopFos && (
+                  <g>
+                    <path
+                      d="M 190 375 Q 430 360 630 170"
+                      fill="none"
+                      stroke="#ff3b5c"
+                      strokeWidth={simStormActive ? '5' : '3.5'}
+                      strokeDasharray="10 5"
+                      className="slip-surface-hazard"
+                      filter="url(#hazardGlow)"
+                    />
+                    {/* Failure wedge shaded area */}
+                    <path
+                      d="M 190 375 Q 430 360 630 170 L 630 230 L 440 330 L 190 375 Z"
+                      fill="url(#failureWedgeGrad)"
+                    />
+                    <text x="350" y="335" fill="#ff3b5c" fontSize="12" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="1px">
+                      POTENTIAL ROTATIONAL SLIP PLANE (BISHOP FoS = {liveTerrainTelemetry.fos})
+                    </text>
+                    {/* Shear traction vector arrows */}
+                    {[260, 350, 450, 540].map((ax, idx) => (
+                      <g key={idx} transform={`translate(${ax}, ${345 - idx * 32}) rotate(34)`}>
+                        <line x1="0" y1="0" x2="-22" y2="0" stroke="#ff3b5c" strokeWidth="2" strokeDasharray="3 2" />
+                        <polygon points="-22,0 -16,-4 -16,4" fill="#ff3b5c" />
+                      </g>
+                    ))}
+                  </g>
+                )}
 
-                <path
-                  d="M 0 350 L 180 340 L 320 280 L 500 170 L 680 90 L 780 80 L 900 70 L 900 400 L 0 400 Z"
-                  fill="url(#mountainGrad)"
-                  stroke="#334155"
-                  strokeWidth="2"
-                />
-
-                <path
-                  d="M 220 330 Q 450 320 640 100"
-                  fill="none"
-                  stroke="#ff3b5c"
-                  strokeWidth="3"
-                  strokeDasharray="6 3"
-                />
-                <text x="400" y="300" fill="#ff3b5c" fontSize="11" fontFamily="monospace" fontWeight="bold">
-                  POTENTIAL ROTATIONAL SLIP SURFACE (SHEAR BAND)
-                </text>
-
-                {/* Ridge Station */}
-                <g transform="translate(750, 40)">
-                  <line x1="0" y1="40" x2="0" y2="0" stroke="#8a9ab5" strokeWidth="3" />
-                  <circle cx="0" cy="0" r="8" fill="#00e5ff" />
-                  <line x1="0" y1="0" x2="-25" y2="15" stroke="#ffb020" strokeWidth="2.5" />
-                  <rect x="-35" y="10" width="20" height="12" rx="2" fill="rgba(255, 176, 32, 0.4)" stroke="#ffb020" strokeWidth="1.5" />
-                  <text x="-40" y="-8" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">RIDGE SATELLITE GATEWAY + 50W PV</text>
+                {/* 12m Borehole Inclinometer & Piezometer Stem into Rock */}
+                <g transform="translate(440, 265)">
+                  <line x1="0" y1="0" x2="0" y2="120" stroke="#00e5ff" strokeWidth="3" strokeDasharray="4 2" />
+                  <rect x="-8" y="0" width="16" height="40" fill="rgba(255, 176, 32, 0.5)" />
+                  <circle cx="0" cy="115" r="7" fill="#ff3b5c" stroke="#fff" strokeWidth="1.5" />
+                  <text x="18" y="30" fill="#ffb020" fontSize="10" fontFamily="var(--font-mono)">0-1.2m TDR VWC</text>
+                  <text x="18" y="118" fill="#ff3b5c" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">12m VW PIEZOMETER</text>
                 </g>
 
-                {/* Head Scarp */}
-                <g transform="translate(630, 90)">
-                  <circle cx="0" cy="0" r="7" fill="#ff3b5c" />
-                  <rect x="-15" y="-22" width="30" height="14" rx="2" fill="rgba(255, 59, 92, 0.3)" stroke="#ff3b5c" strokeWidth="1" />
-                  <text x="-80" y="-28" fill="#ff3b5c" fontSize="10" fontFamily="monospace" fontWeight="bold">CRACKMETER + BIAXIAL TILT</text>
+                {/* Tension Head Scarp Fracture Opening */}
+                <g transform="translate(630, 170)">
+                  <path d="M -15 -10 L 0 0 L 15 -8 L 30 2" stroke="#ff3b5c" strokeWidth="3" fill="none" />
+                  <text x="-70" y="-18" fill="#ff3b5c" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">
+                    CROWN EXTENSION FISSURE (+{liveTerrainTelemetry.crackOpening}mm)
+                  </text>
                 </g>
 
-                {/* Mid-Slope Borehole */}
-                <g transform="translate(480, 180)">
-                  <line x1="0" y1="0" x2="0" y2="110" stroke="#00e5ff" strokeWidth="2.5" strokeDasharray="3 2" />
-                  <rect x="-12" y="-24" width="24" height="20" rx="3" fill="#1e293b" stroke="#00e5ff" strokeWidth="1.5" />
-                  <circle cx="0" cy="-14" r="3" fill="#22c55e" />
-                  <rect x="-4" y="10" width="8" height="35" fill="rgba(255, 176, 32, 0.6)" />
-                  <circle cx="0" cy="95" r="6" fill="#ff3b5c" stroke="#fff" strokeWidth="1" />
-                  <text x="15" y="25" fill="#ffb020" fontSize="9" fontFamily="monospace">0-1.2m TDR VWC</text>
-                  <text x="15" y="100" fill="#ff3b5c" fontSize="9" fontFamily="monospace">12m VW PIEZOMETER (PORE WATER)</text>
-                  <text x="-120" y="-30" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">BOREHOLE INCLINOMETER STATION</text>
-                </g>
+                {/* LoRaWAN 868MHz Mesh Topology & Wireless Signal Paths */}
+                {terrainLayers.loraMesh && (
+                  <g>
+                    {/* Toe to Mid-Slope */}
+                    <path d="M 190 375 Q 315 310 440 265" fill="none" stroke="#00e5ff" strokeWidth="2.5" className="lora-signal-beam" />
+                    {/* Mid-Slope to Crown */}
+                    <path d="M 440 265 Q 535 210 630 170" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
+                    {/* Crown to Summit Gateway */}
+                    <path d="M 630 170 Q 720 120 810 80" fill="none" stroke="#22c55e" strokeWidth="2.5" className="lora-signal-beam" />
+                    {/* Direct Long-Range Redundant Link (Toe to Gateway) */}
+                    <path d="M 190 375 Q 520 160 810 80" fill="none" stroke="#ffb020" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.5" />
+                    {/* Gateway to Satellite Uplink */}
+                    <path d="M 810 80 L 920 30" fill="none" stroke="#00e5ff" strokeWidth="2" strokeDasharray="3 3" opacity="0.85" />
 
-                {/* Toe of Slope */}
-                <g transform="translate(200, 330)">
-                  <line x1="0" y1="0" x2="0" y2="-25" stroke="#8a9ab5" strokeWidth="2.5" />
-                  <polygon points="0,-25 -10,-40 10,-40" fill="rgba(0, 229, 255, 0.4)" stroke="#00e5ff" strokeWidth="1.5" />
-                  <text x="-90" y="-46" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">RAIN GAUGE + DEBRIS LEVEL</text>
-                </g>
+                    {/* Traveling Energy Packet Pulses */}
+                    <circle cx={440 + Math.sin(Date.now() / 400) * 80} cy={265 - Math.sin(Date.now() / 400) * 40} r="4" fill="#fff" filter="url(#cyanPulseGlow)" />
+                    <circle cx={630 + Math.cos(Date.now() / 350) * 70} cy={170 - Math.cos(Date.now() / 350) * 35} r="4" fill="#22c55e" filter="url(#cyanPulseGlow)" />
 
-                <path d="M 480 160 Q 610 80 750 40" fill="none" stroke="#22c55e" strokeWidth="2" strokeDasharray="5 5" opacity="0.8" />
-                <path d="M 200 300 Q 470 120 750 40" fill="none" stroke="#00e5ff" strokeWidth="2" strokeDasharray="5 5" opacity="0.6" />
-                <text x="540" y="75" fill="#22c55e" fontSize="9" fontFamily="monospace" transform="rotate(-15, 540, 75)">
-                  15KM LoRaWAN SUB-GHz RF TELEMETRY
-                </text>
+                    {/* Satellite Node Callout at Top Right */}
+                    <g transform="translate(920, 30)">
+                      <circle cx="0" cy="0" r="16" fill="rgba(0, 229, 255, 0.15)" stroke="var(--cyan)" strokeWidth="1.5" />
+                      <text x="-8" y="5" fontSize="13">🛰️</text>
+                      <text x="-32" y="26" fill="var(--cyan)" fontSize="9" fontFamily="var(--font-mono)" fontWeight="700">IRIDIUM SATELLITE</text>
+                    </g>
+                  </g>
+                )}
+
+                {/* Elevation Contours */}
+                <g opacity="0.75">
+                  <line x1="60" y1="80" x2="160" y2="80" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
+                  <text x="170" y="84" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,240m ASL (SUMMIT RIDGE)</text>
+
+                  <line x1="60" y1="170" x2="160" y2="170" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
+                  <text x="170" y="174" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,160m ASL (HEAD SCARP)</text>
+
+                  <line x1="60" y1="265" x2="160" y2="265" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
+                  <text x="170" y="269" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">2,050m ASL (BOREHOLE SHEAR BAND)</text>
+
+                  <line x1="60" y1="375" x2="160" y2="375" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
+                  <text x="170" y="379" fill="#94a3b8" fontSize="10" fontFamily="var(--font-mono)">1,920m ASL (TOE GULLY)</text>
+                </g>
               </svg>
+
+              {/* INTERACTIVE SENSOR HOTSPOT PINS & LIVE HUD BADGES OVER REAL IMAGE */}
+              {terrainLayers.sensorPins && TERRAIN_STATIONS.map((st) => {
+                const isSelected = selectedTerrainStationId === st.id;
+                const valDisplay =
+                  st.id === 'ST-01' ? `${liveTerrainTelemetry.batteryVoltage}V • ${liveTerrainTelemetry.rssi}dBm` :
+                  st.id === 'ST-02' ? `θ: +${liveTerrainTelemetry.tiltX}° • Δw: +${liveTerrainTelemetry.crackOpening}mm` :
+                  st.id === 'ST-03' ? `u: ${liveTerrainTelemetry.porePressure} kPa • VWC: ${liveTerrainTelemetry.soilMoisture}%` :
+                  `${liveTerrainTelemetry.rainfall} mm/h • Stage: ${liveTerrainTelemetry.debrisStage}m`;
+
+                return (
+                  <div
+                    key={st.id}
+                    onClick={() => setSelectedTerrainStationId(st.id)}
+                    style={{
+                      position: 'absolute',
+                      left: st.pinPos.left,
+                      top: st.pinPos.top,
+                      transform: 'translate(-50%, -50%)',
+                      cursor: 'pointer',
+                      zIndex: 16,
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                    {/* Outer Expanding Ping Ring Animation */}
+                    <div
+                      className="sensor-ping-ring"
+                      style={{
+                        borderColor: st.color,
+                        boxShadow: `0 0 14px ${st.color}`,
+                        transform: isSelected ? 'scale(1.2)' : 'scale(1)'
+                      }}
+                    />
+
+                    {/* Sensor Pin Icon Button */}
+                    <div style={{
+                      width: isSelected ? '42px' : '36px',
+                      height: isSelected ? '42px' : '36px',
+                      borderRadius: '50%',
+                      background: isSelected ? st.color : 'rgba(10, 15, 26, 0.94)',
+                      color: isSelected ? '#000' : '#fff',
+                      border: `2px solid ${st.color}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '15px',
+                      boxShadow: `0 0 18px ${st.color}`,
+                      transition: 'all 0.2s ease'
+                    }}>
+                      {st.id === 'ST-01' ? '📡' : st.id === 'ST-02' ? '📐' : st.id === 'ST-03' ? '💧' : '🌧️'}
+                    </div>
+
+                    {/* Pinned Tactical HUD Callout Tag */}
+                    <div style={{
+                      position: 'absolute',
+                      top: st.id === 'ST-01' ? '48px' : '-56px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: 'rgba(5, 10, 20, 0.92)',
+                      backdropFilter: 'blur(8px)',
+                      border: `1px solid ${isSelected ? st.color : 'var(--border-subtle)'}`,
+                      boxShadow: isSelected ? `0 0 20px ${st.color}77` : '0 4px 14px rgba(0,0,0,0.7)',
+                      borderRadius: '6px',
+                      padding: '5px 10px',
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '2px',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: st.color, fontFamily: 'var(--font-mono)' }}>{st.id}</span>
+                        <span style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: 600 }}>{st.name.split(' ')[0]}</span>
+                        <span style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: st.color,
+                          boxShadow: `0 0 6px ${st.color}`
+                        }} />
+                      </div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                        {valDisplay}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* STATION QUICK SWITCHER TABS */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '12px',
+              marginTop: '16px',
+              marginBottom: '20px'
+            }}>
+              {TERRAIN_STATIONS.map(st => {
+                const isSelected = selectedTerrainStationId === st.id;
+                return (
+                  <div
+                    key={st.id}
+                    onClick={() => setSelectedTerrainStationId(st.id)}
+                    style={{
+                      background: isSelected ? 'rgba(0, 229, 255, 0.1)' : 'var(--bg-card)',
+                      border: `1px solid ${isSelected ? st.color : 'var(--border-subtle)'}`,
+                      borderRadius: '8px',
+                      padding: '12px 14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? `0 0 16px ${st.color}33` : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: st.color, fontFamily: 'var(--font-mono)' }}>{st.id} • {st.altitude}</span>
+                      <span style={{
+                        fontSize: '9px',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        background: isSelected ? st.color : 'rgba(255,255,255,0.06)',
+                        color: isSelected ? '#000' : 'var(--text-secondary)',
+                        fontWeight: 700
+                      }}>
+                        {isSelected ? 'SELECTED' : 'VIEW'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
+                      {st.name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {st.zone}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* SELECTED STATION TACTICAL DEEP-DIVE INSPECTOR */}
+            <div style={{
+              background: 'var(--bg-card)',
+              border: `1px solid ${selectedTerrainStation.color}`,
+              borderRadius: '10px',
+              padding: '20px',
+              boxShadow: `0 0 24px ${selectedTerrainStation.color}22`,
+              marginBottom: '20px'
+            }}>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderBottom: '1px solid var(--border-subtle)',
+                paddingBottom: '14px',
+                marginBottom: '18px',
+                gap: '12px'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: selectedTerrainStation.color,
+                      color: '#000',
+                      fontWeight: 800,
+                      fontSize: '11px',
+                      fontFamily: 'var(--font-mono)'
+                    }}>
+                      {selectedTerrainStation.id}
+                    </span>
+                    <h3 style={{ color: '#fff', margin: 0, fontSize: '16px' }}>
+                      {selectedTerrainStation.name}
+                    </h3>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                    ZONE: {selectedTerrainStation.zone} • ALTITUDE: {selectedTerrainStation.altitude} • COORDS: {selectedTerrainStation.coords}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => {
+                      setSpotlightId(selectedTerrainStation.primarySensorId);
+                      setActiveTab('CARDS');
+                    }}
+                    className="btn btn-primary"
+                    style={{ fontSize: '12px', padding: '6px 14px' }}
+                  >
+                    <span>🔍</span> SPOTLIGHT SENSOR IN HARDWARE BOM
+                  </button>
+                </div>
+              </div>
+
+              {/* 3-Column Tactical Telemetry Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                {/* Column 1: Real Field Hardware Instrumentation Photo */}
+                <div>
+                  <span className="label-caps" style={{ color: 'var(--cyan)', marginBottom: '10px', display: 'block' }}>
+                    📷 DEPLOYED FIELD HARDWARE PHOTOGRAPH
+                  </span>
+                  <div style={{
+                    position: 'relative',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border-cyan)',
+                    height: '200px',
+                    background: '#07090d',
+                    marginBottom: '10px'
+                  }}>
+                    <img
+                      src={SENSOR_IMAGE_MAP[selectedTerrainStation.primarySensorId]}
+                      alt={selectedTerrainStation.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                      padding: '8px 12px',
+                      fontSize: '11px',
+                      color: '#fff',
+                      fontFamily: 'var(--font-mono)'
+                    }}>
+                      {selectedTerrainStation.sensorTypes[0]}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                      <span>Integrated Hardware Cluster:</span>
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: '18px', color: '#cbd5e1', fontSize: '11px' }}>
+                      {selectedTerrainStation.sensorTypes.map((st, idx) => (
+                        <li key={idx}>{st}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Column 2: Live Telemetry Metrics & Dynamic 24h Trend Waveform */}
+                <div>
+                  <span className="label-caps" style={{ color: 'var(--amber)', marginBottom: '10px', display: 'block' }}>
+                    📈 LIVE TELEMETRY & 24-HOUR TREND WAVEFORM
+                  </span>
+
+                  <div style={{
+                    background: 'rgba(0,0,0,0.35)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    padding: '14px',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>PRIMARY METRIC READING:</span>
+                      <strong style={{ fontSize: '13px', color: selectedTerrainStation.color, fontFamily: 'var(--font-mono)' }}>
+                        {selectedTerrainStation.id === 'ST-01' ? `${liveTerrainTelemetry.batteryVoltage}V (94% SoC)` :
+                         selectedTerrainStation.id === 'ST-02' ? `+${liveTerrainTelemetry.crackOpening} mm (Rate: +${liveTerrainTelemetry.crackRate} mm/h)` :
+                         selectedTerrainStation.id === 'ST-03' ? `${liveTerrainTelemetry.porePressure} kPa (Ru = 0.52)` :
+                         `${liveTerrainTelemetry.rainfall} mm/hr (Stage: ${liveTerrainTelemetry.debrisStage}m)`}
+                      </strong>
+                    </div>
+
+                    {/* Animated SVG Sparkline Waveform */}
+                    <div style={{ height: '70px', width: '100%', position: 'relative' }}>
+                      <svg viewBox="0 0 300 70" style={{ width: '100%', height: '100%' }}>
+                        <defs>
+                          <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={selectedTerrainStation.color} stopOpacity="0.5" />
+                            <stop offset="100%" stopColor={selectedTerrainStation.color} stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d={
+                            selectedTerrainStation.id === 'ST-03'
+                              ? "M 0 50 Q 50 48 100 45 T 200 35 T 250 20 L 300 12 L 300 70 L 0 70 Z"
+                              : selectedTerrainStation.id === 'ST-02'
+                              ? "M 0 55 Q 60 52 120 48 T 220 38 T 260 22 L 300 15 L 300 70 L 0 70 Z"
+                              : "M 0 58 Q 70 55 140 45 T 220 40 T 270 28 L 300 20 L 300 70 L 0 70 Z"
+                          }
+                          fill="url(#trendGrad)"
+                        />
+                        <path
+                          d={
+                            selectedTerrainStation.id === 'ST-03'
+                              ? "M 0 50 Q 50 48 100 45 T 200 35 T 250 20 L 300 12"
+                              : selectedTerrainStation.id === 'ST-02'
+                              ? "M 0 55 Q 60 52 120 48 T 220 38 T 260 22 L 300 15"
+                              : "M 0 58 Q 70 55 140 45 T 220 40 T 270 28 L 300 20"
+                          }
+                          fill="none"
+                          stroke={selectedTerrainStation.color}
+                          strokeWidth="2.5"
+                        />
+                        {/* Current peak point */}
+                        <circle cx="300" cy="15" r="4" fill="#fff" stroke={selectedTerrainStation.color} strokeWidth="2" />
+                      </svg>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                      <span>-24 HOURS</span>
+                      <span>-12 HOURS</span>
+                      <span>-6 HOURS</span>
+                      <span style={{ color: selectedTerrainStation.color, fontWeight: 700 }}>NOW ({liveTerrainTelemetry.lastUpdate})</span>
+                    </div>
+                  </div>
+
+                  {/* Diagnostic telemetry parameters */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '9px' }}>RF SIGNAL LINK</span>
+                      <span style={{ color: 'var(--cyan)' }}>RSSI {liveTerrainTelemetry.rssi} dBm (SNR +9.4dB)</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '9px' }}>POWER HARVEST</span>
+                      <span style={{ color: 'var(--green)' }}>{liveTerrainTelemetry.solarWatts}W MPPT (13.4V)</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '9px' }}>INTERFACE PROTOCOL</span>
+                      <span style={{ color: '#cbd5e1' }}>SDI-12 v1.4 / RS-485</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '9px' }}>INGRESS RATING</span>
+                      <span style={{ color: 'var(--green)' }}>IP68 Hermetic (50 bar)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 3: Geotechnical Collapse Physics & Early Warning Role */}
+                <div>
+                  <span className="label-caps" style={{ color: 'var(--green)', marginBottom: '10px', display: 'block' }}>
+                    🔬 GEOTECHNICAL PHYSICS & EARLY WARNING ROLE
+                  </span>
+
+                  <div style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    padding: '14px',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ fontSize: '11px', color: 'var(--cyan)', fontWeight: 700, marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>
+                      GOVERNING GEOMECHANICAL LAW:
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#cbd5e1',
+                      fontStyle: 'italic',
+                      background: 'rgba(0, 229, 255, 0.05)',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      borderLeft: '3px solid var(--cyan)',
+                      marginBottom: '10px'
+                    }}>
+                      {selectedTerrainStation.governingPhysics}
+                    </div>
+
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      {selectedTerrainStation.geotechnicalSignificance}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: 'rgba(255, 59, 92, 0.08)',
+                    border: '1px solid rgba(255, 59, 92, 0.3)',
+                    borderRadius: '6px',
+                    padding: '10px 12px',
+                    fontSize: '11px'
+                  }}>
+                    <div style={{ color: 'var(--red)', fontWeight: 700, marginBottom: '2px', fontFamily: 'var(--font-mono)' }}>
+                      ⚠️ AUTOMATED EARLY WARNING THRESHOLD:
+                    </div>
+                    <div style={{ color: '#e2e8f0' }}>
+                      {selectedTerrainStation.alertThreshold}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* REAL-TIME LORAWAN TELEMETRY PACKET CONSOLE */}
+            <div style={{
+              background: '#04070d',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                background: 'rgba(10, 15, 26, 0.9)',
+                padding: '10px 16px',
+                borderBottom: '1px solid var(--border-subtle)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="term-cursor" />
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                    LIVE LoRaWAN & SDI-12 PACKET STREAM TERMINAL
+                  </span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    (SUBSCRIBED: /topo/sensors/live/#)
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => setPacketStreamPaused(!packetStreamPaused)}
+                    style={{
+                      background: packetStreamPaused ? 'var(--amber)' : 'rgba(255,255,255,0.06)',
+                      color: packetStreamPaused ? '#000' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '10px',
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    {packetStreamPaused ? '▶ RESUME' : '⏸ PAUSE'}
+                  </button>
+                  <button
+                    onClick={() => setPacketLogs([])}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '10px',
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-mono)'
+                    }}
+                  >
+                    CLEAR
+                  </button>
+                </div>
+              </div>
+
+              {/* Console log rows */}
+              <div style={{
+                padding: '12px 16px',
+                maxHeight: '160px',
+                overflowY: 'auto',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                lineHeight: '1.6',
+                background: '#030509'
+              }}>
+                {packetLogs.length === 0 ? (
+                  <div style={{ color: 'var(--text-muted)' }}>Waiting for next telemetry burst...</div>
+                ) : (
+                  packetLogs.map(pkt => (
+                    <div key={pkt.id} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.03)', padding: '2px 0' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>[{pkt.time}]</span>
+                      <span style={{ color: 'var(--cyan)' }}>PKT#{pkt.id}</span>
+                      <span style={{ color: 'var(--amber)', fontWeight: 600 }}>{pkt.node}</span>
+                      <span style={{ color: '#94a3b8' }}>HEX: {pkt.hex}</span>
+                      <span style={{ color: '#fff' }}>&rarr; {pkt.reading}</span>
+                      <span style={{ color: pkt.rssi > -70 ? 'var(--green)' : 'var(--amber)' }}>RSSI: {pkt.rssi}dBm</span>
+                      <span style={{ color: 'var(--green)' }}>SNR: {pkt.snr}</span>
+                      <span style={{
+                        color: pkt.status === 'CRC_OK' ? 'var(--green)' : pkt.status === 'WARN_CREEP' ? 'var(--amber)' : 'var(--red)',
+                        fontWeight: 700
+                      }}>
+                        [{pkt.status}]
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
