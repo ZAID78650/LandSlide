@@ -1648,6 +1648,51 @@ select.form-input {
   border-color: var(--cyan) !important;
 }
 
+@keyframes energyFlowPulse {
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.energy-flow-active {
+  stroke-dasharray: 6 6;
+  animation: energyFlowPulse 1.2s linear infinite;
+}
+
+.energy-flow-reverse {
+  stroke-dasharray: 6 6;
+  animation: energyFlowPulse 1.2s linear infinite reverse;
+}
+
+@keyframes sunGlowPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px #ffb020); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 16px #ffea79); }
+}
+
+.sun-glow-anim {
+  animation: sunGlowPulse 3s ease-in-out infinite;
+}
+
+@keyframes batteryChargeFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.battery-charge-gradient {
+  background: linear-gradient(90deg, #22c55e, #00e5ff, #22c55e);
+  background-size: 200% 100%;
+  animation: batteryChargeFlow 2s linear infinite;
+}
+
+@keyframes mpptTrackingPulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(0, 229, 255, 0.85); }
+}
+
+.mppt-tracking-active {
+  animation: mpptTrackingPulse 2s ease-in-out infinite;
+}
+
+
 
 
 

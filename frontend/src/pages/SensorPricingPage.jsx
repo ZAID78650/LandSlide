@@ -79,6 +79,19 @@ const SIMULATED_TELEMETRY = {
   12: { value: '13.4V • 94% SoC', status: 'MPPT HARVESTING', color: '#22c55e', metric: 'SOLAR BATTERY' },
   13: { value: '11.85 m Head', status: 'WATER TABLE RISE', color: '#00e5ff', metric: 'GROUNDWATER HEAD' },
   14: { value: 'IP67 • IK10', status: 'SURGE GROUNDED', color: '#22c55e', metric: 'CABINET & MAST' },
+  15: { value: '8K Telephoto • Clear', status: 'OPTICAL ACTIVE', color: '#00e5ff', metric: 'SCARP SURFACE RGB' },
+  16: { value: '3.4 GigaPixel • 180°', status: 'PANORAMIC STITCH', color: '#00e5ff', metric: 'TALUS SLOPE TRANSECT' },
+  17: { value: '142 pts/m² • DEM', status: 'POINT CLOUD ACQUIRED', color: '#00e5ff', metric: 'AIRBORNE LIDAR ELEV' },
+  18: { value: '-4.2 mm/yr Creep', status: 'INSAR PHASE DETECT', color: '#ffb020', metric: 'SAR INTERFEROGRAM' },
+  19: { value: 'ΔT = -4.8°C Seep', status: 'THERMAL ANOMALY', color: '#00e5ff', metric: 'LWIR HYDRO-SEEPAGE' },
+  20: { value: 'NDVI 0.38 (Drop)', status: 'CANOPY DIE-OFF', color: '#ffb020', metric: 'MULTISPECTRAL VEG' },
+  21: { value: 'ΔE: +3.2mm, ΔN: -1.1mm', status: 'TECTONIC DRIFT', color: '#ff3b5c', metric: 'GNSS RTK 3D DISPL' },
+  22: { value: '418.294 m (-1.8mm)', status: 'SCARP RETRACTION', color: '#ffb020', metric: 'LASER DISTOMETER' },
+  23: { value: '48 nε @ 2.4kHz', status: 'MICRO-FRACTURE', color: '#ff3b5c', metric: 'DAS FIBER STRAIN' },
+  24: { value: 'Profile: 8.4mm @ 9m', status: 'SHEAR BULGE', color: '#ff3b5c', metric: 'IPI INCLINOMETER' },
+  25: { value: 'Ka = 34.2 (82% VWC)', status: 'SATURATION FRONT', color: '#ffb020', metric: 'TDR COAXIAL PROBE' },
+  26: { value: '42 AE Hits/min', status: 'CRACK ACOUSTIC', color: '#ff3b5c', metric: 'ULTRASONIC AE RATE' },
+  27: { value: '68.4 kN Retention', status: 'DEBRIS IMPACT', color: '#ffb020', metric: 'RING-NET LOAD CELL' },
 };
 
 // Currency definitions
@@ -398,6 +411,292 @@ const DEFAULT_CATALOG = [
     installation_guide: "Drive 2.5m copper-bonded earth grounding rod to achieve <5 Ohm resistance; anchor guyed mast with triple 6mm stainless steel wire ropes.",
     schematic: "enclosure",
     imageUrl: enclosureImg
+  },
+  {
+    id: 15,
+    name: "Ridge Gateway 8K Telephoto Optical Sentry",
+    model: "NEXUS-CAM 8K Optical Telephoto PTZ",
+    category: "REMOTE SENSING",
+    purpose: "Automated optical head scarp telephoto surveillance and visual crack tracking",
+    measured_param: "Visible RGB Surface Spectrum, Photogrammetric Deformation (mm)",
+    why_this_sensor: "Provides continuous high-resolution optical ground truth of the head scarp face. Computer vision algorithms cross-validate crack opening displacements against physical crackmeter telemetry.",
+    suitability_and_benefits: "Optical zoom up to 30x with heated anti-fog lens element. Solar-powered low-light CMOS sensor captures high-contrast rock joints even under dense monsoon cloud cover.",
+    price_inr: 45000,
+    price_usd: 540,
+    accuracy: "8K Ultra-HD (0.5mm surface pixel resolution at 500m)",
+    interface: "RTSP / 4G LTE-M / Ethernet",
+    power: "12V DC, 4.5W active",
+    ingress: "IP67 Heated Dome",
+    operating_range: "-30°C to +65°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Mount on summit telemetry mast with uninterrupted line of sight across opposite canyon headwall.",
+    schematic: "enclosure",
+    imageUrl: slopeTerrainImg
+  },
+  {
+    id: 16,
+    name: "Alpine Wide Panoramic Transect Camera",
+    model: "Gigapixel Talus Slopemaster G-360",
+    category: "REMOTE SENSING",
+    purpose: "Macro catchment-scale slope transect & debris runout corridor mapping",
+    measured_param: "180° Panoramic Surface Displacement, Colluvial Talus Geometry",
+    why_this_sensor: "Captures the complete geological context spanning crest tension cracks to the valley toe deposition fan, identifying incipient rockfall paths before runout occurs.",
+    suitability_and_benefits: "Seamless automated multi-tile gigapixel stitching. Ruggedized marine-grade aluminum housing with internal desiccator and solar deflector shield.",
+    price_inr: 52000,
+    price_usd: 620,
+    accuracy: "Ultra-Wide Panoramic 120 Megapixel",
+    interface: "Ethernet / Fiber / 4G",
+    power: "12V DC, 6.0W",
+    ingress: "IP67 Stainless Mount",
+    operating_range: "-35°C to +70°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Install across the opposing valley shoulder on concrete footing providing 180° panoramic coverage of the slope catchment.",
+    schematic: "enclosure",
+    imageUrl: terrainWidePanoramicImg
+  },
+  {
+    id: 17,
+    name: "Airborne Drone LiDAR 3D DEM Scanner",
+    model: "DJI Zenmuse L2 / Riegl VUX-1 LiDAR Scanner",
+    category: "REMOTE SENSING",
+    purpose: "Penetrates dense mountain forest canopy to generate bare-earth Digital Elevation Models",
+    measured_param: "3D Elevation Point Cloud, Volumetric Mass Balance (m³), Micro-Topography",
+    why_this_sensor: "Traditional optical imagery cannot penetrate dense pine forest canopies. Multi-echo pulsed laser LiDAR filters foliage to reveal hidden historical slip scarps, tension benches, and graben trenches.",
+    suitability_and_benefits: "Shoots 240,000 pulses/sec with up to 5 returns per pulse. Differential DEM subtraction reveals micro-subsidence before physical fissures crack the topsoil.",
+    price_inr: 125000,
+    price_usd: 1500,
+    accuracy: "±2 cm Absolute Vertical Accuracy, 140 pts/m²",
+    interface: "LAS / GeoTIFF / LASzip Cloud API",
+    power: "UAV Dock 24V / Periodic Mission",
+    ingress: "IP54 Rugged Pod",
+    operating_range: "-20°C to +50°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Program autonomous flight grid 80m AGL with 70% sidelap; tie survey into RTK base station benchmarks.",
+    schematic: "ultrasonic",
+    imageUrl: terrainDroneLidarImg
+  },
+  {
+    id: 18,
+    name: "Sentinel-1 DInSAR Phase Map Processor",
+    model: "ESA Copernicus Sentinel-1 C-Band InSAR Engine",
+    category: "REMOTE SENSING",
+    purpose: "Satellite radar interferometry measuring millimeter-scale slope creep across square kilometers",
+    measured_param: "Line-of-Sight (LOS) Displacement Velocity (mm/yr), Interferometric Coherence",
+    why_this_sensor: "Constrains regional tectonic and landslide slip kinematics over entire mountain valleys without requiring dangerous physical climbing across crumbling cliffs.",
+    suitability_and_benefits: "All-weather day-and-night C-band synthetic aperture radar penetrates clouds, fog, and torrential monsoon downpours. 6-day revisit interval provides consistent temporal baselines.",
+    price_inr: 32000,
+    price_usd: 385,
+    accuracy: "±1.5 mm/yr Line-of-Sight Velocity",
+    interface: "REST Cloud API / GeoJSON",
+    power: "Cloud SaaS (0W Field Load)",
+    ingress: "Spaceborne C-Band SAR",
+    operating_range: "Global Orbital Coverage",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Calibrate satellite ascending and descending orbital tracks against on-site corner cube radar reflectors.",
+    schematic: "geophone",
+    imageUrl: terrainInsarImg
+  },
+  {
+    id: 19,
+    name: "Thermal Infrared Ground Seepage Camera",
+    model: "FLIR Vue Pro R 640 LWIR Radiometric Imager",
+    category: "REMOTE SENSING",
+    purpose: "Detects hidden groundwater seepage emergence zones and saturated slip plane outcrops",
+    measured_param: "Long-Wave Infrared Surface Temperature (7.5-14 μm), Thermal Seepage Anomaly (°C)",
+    why_this_sensor: "Subterranean groundwater in mountains is significantly colder or warmer than sun-baked rock. Thermal radiometric thermography reveals localized spring emergence zones where pore-water pressure is highest.",
+    suitability_and_benefits: "Radiometric calibration records temperature data in every pixel with 40 mK thermal sensitivity. Uncooled VOx microbolometer requires minimal power and zero cryocooling maintenance.",
+    price_inr: 68000,
+    price_usd: 815,
+    accuracy: "< 40 mK NETD, ±2°C Radiometric",
+    interface: "RS-232 / USB / HDMI / 4-20mA",
+    power: "5V DC, 2.1W",
+    ingress: "IP66 Sealed Aluminum",
+    operating_range: "-20°C to +50°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Orient sensor facing colluvial slope toe at 45° depression angle; log predawn thermal baselines before sunrise solar heating.",
+    schematic: "enclosure",
+    imageUrl: terrainThermalSeepageImg
+  },
+  {
+    id: 20,
+    name: "Sentinel-2 Multi-spectral NDVI Canopy Stress Analyzer",
+    model: "ESA Copernicus Sentinel-2 B4/B8 Red-Edge Analytics",
+    category: "REMOTE SENSING",
+    purpose: "Detects pre-failure root shear stress and vegetation die-off along crown tension cracks",
+    measured_param: "Normalized Difference Vegetation Index (NDVI), Canopy Chlorophyll Absorption",
+    why_this_sensor: "As an incipient landslide begins shearing, root systems of trees and shrubs are severed meters below ground weeks before catastrophic detachment, causing localized NDVI drops.",
+    suitability_and_benefits: "13 spectral bands including dedicated red-edge and NIR bands. Free public orbital revisit with automated cloud-masking algorithms.",
+    price_inr: 24000,
+    price_usd: 288,
+    accuracy: "10m Spatial Resolution, 0.01 NDVI index",
+    interface: "Cloud GeoTIFF / STAC API",
+    power: "Cloud SaaS (0W Field Load)",
+    ingress: "Spaceborne Optical",
+    operating_range: "Global Orbital Revisit",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Automated ingestion pipeline processes 10m Red/NIR tiles upon satellite overpass every 5 days.",
+    schematic: "weather_station",
+    imageUrl: terrainMultispectralNdviImg
+  },
+  {
+    id: 21,
+    name: "Dual-Frequency GNSS RTK Rover Pillar",
+    model: "Trimble NetR9 / Leica GR30 Choke-Ring Geodetic Station",
+    category: "GEOTECHNICAL",
+    purpose: "Continuous millimeter-precision 3D absolute surface displacement tracking",
+    measured_param: "3D Displacement Vectors (ΔEast, ΔNorth, ΔUp in mm), Velocity (mm/day)",
+    why_this_sensor: "Monitors absolute surface movement of the unstable rock slab anchored directly into bedrock. Provides the definitive benchmark for all relative geotechnical sensors.",
+    suitability_and_benefits: "Choke-ring ground plane suppresses multipath reflections from wet rocks and snow. Dual-frequency GPS, GLONASS, Galileo, and BeiDou tracking delivers reliable centimeter positioning in seconds.",
+    price_inr: 95000,
+    price_usd: 1140,
+    accuracy: "±1.2 mm + 0.5 ppm Horizontal, ±2.5 mm Vertical",
+    interface: "NMEA-0183 / RTCM 3.2 / RS-232 / Ethernet",
+    power: "9-36V DC, 3.2W average",
+    ingress: "IP68 Submersible Mast Enclosure",
+    operating_range: "-40°C to +65°C",
+    required: false,
+    default_qty: 1,
+    installation_guide: "Drill 4 expansion rock anchors into competent bedrock crest; grout stainless geodetic pillar with leveling tribrach.",
+    schematic: "tiltmeter",
+    imageUrl: gnssRtkStationImg
+  },
+  {
+    id: 22,
+    name: "Long-Range Laser Distance Scarp Rangefinder",
+    model: "Leica Disto TOF-1000 / Dimetix D-Series Industrial",
+    category: "GEOTECHNICAL",
+    purpose: "Non-contact continuous distance monitoring of dangerous vertical scarp walls",
+    measured_param: "Line-of-Sight Distance (0.2m to 1,500m), Retraction Rate (mm/hr)",
+    why_this_sensor: "Vertical scarp faces are too dangerous for technicians to bolt sensors directly onto. This long-range pulsed laser sits safely across the canyon and shoots a laser beam to track wall bulging.",
+    suitability_and_benefits: "Eye-safe Class 2 laser measures natural rough rock surfaces without retro-reflective prisms up to 500m. Built-in optical heating window prevents alpine icing and condensation.",
+    price_inr: 48000,
+    price_usd: 575,
+    accuracy: "±1.0 mm at 100m distance, 0.1 mm resolution",
+    interface: "RS-422 / RS-485 / 4-20mA / Modbus",
+    power: "10-30V DC, 1.8W (with heater 12W)",
+    ingress: "IP67 Stainless Housing",
+    operating_range: "-40°C to +60°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Anchor to stable bedrock opposite the scarp; align optical sighting scope to targeted shear slab face.",
+    schematic: "ultrasonic",
+    imageUrl: laserDistanceMeterImg
+  },
+  {
+    id: 23,
+    name: "Distributed Acoustic & Strain (DAS) Fiber Optic Cable",
+    model: "Silixa iDAS / OptaSense High-Definition DAS Optical Unit",
+    category: "GEOTECHNICAL",
+    purpose: "Continuous optical backscatter strain & micro-crack acoustic emission along 10km route",
+    measured_param: "Micro-strain (με), Acoustic Energy (0-10 kHz), Shear Location (±1m)",
+    why_this_sensor: "Acts as thousands of virtual geophones and strain gauges along a single standard telecommunication fiber optic cable trenched across an entire mountain slope or railway lifeline.",
+    suitability_and_benefits: "Completely immune to lightning, electromagnetic interference, and moisture corrosion. A single interrogator interrogates 10km of cable with sub-meter spatial resolution.",
+    price_inr: 165000,
+    price_usd: 1980,
+    accuracy: "1 nε Micro-strain resolution, 1m spatial channel",
+    interface: "Gigabit Ethernet / Optical SC-APC",
+    power: "12-24V DC, 18W (Interrogator Node)",
+    ingress: "Armored Steel Direct Burial (IP68)",
+    operating_range: "-40°C to +85°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Trench single-mode armored fiber cable 0.5m deep across scarp strike in serpentine geometry; couple directly with sand-bentonite backfill.",
+    schematic: "crackmeter",
+    imageUrl: fiberOpticDasImg
+  },
+  {
+    id: 24,
+    name: "In-Place Inclinometer (IPI) Wheeled Sensor String",
+    model: "Slope Indicator Digital MEMS IPI / Durham Geo Digitilt",
+    category: "GEOTECHNICAL",
+    purpose: "Automated continuous subsurface horizontal deflection profile inside grooved casing",
+    measured_param: "Lateral Borehole Deflection Profile (mm), Slip Surface Depth (m)",
+    why_this_sensor: "Traditional manual inclinometer probes require a technician to lower a probe down a borehole weekly. An IPI string stays permanently installed in the borehole, logging continuous movement every minute.",
+    suitability_and_benefits: "Articulated stainless steel gauge segments with precision wheeled carriages link together on a single multi-drop digital bus. Detects shear plane location down to 0.1m depth accuracy.",
+    price_inr: 58000,
+    price_usd: 695,
+    accuracy: "±0.05 mm/m, 0.001 mm resolution",
+    interface: "RS-485 Modbus RTU / SDI-12",
+    power: "12V DC, 15 mA active per segment",
+    ingress: "IP68 Submersible (20 bar)",
+    operating_range: "-20°C to +75°C",
+    required: false,
+    default_qty: 1,
+    installation_guide: "Assemble wheeled sensor segments with 1m spacing rods; lower into keyway-aligned inclinometer casing across suspected shear band.",
+    schematic: "tiltmeter",
+    imageUrl: ipiInclinometerStringImg
+  },
+  {
+    id: 25,
+    name: "Multi-Rod TDR Soil Dielectric & Shear Waveguide",
+    model: "Campbell Scientific TDR200 / coaxial shear cable",
+    category: "HYDROLOGY",
+    purpose: "Measures soil dielectric permittivity (Ka) and detects subsurface shear cable severance",
+    measured_param: "Apparent Dielectric Permittivity, Coaxial Cable Impedance Reflection",
+    why_this_sensor: "Transmits picosecond rise-time electromagnetic pulses down a subterranean waveguide. If the slip plane shears, the coaxial cable is crimped or sheared, immediately reflecting the pulse and pin-pointing the exact failure depth.",
+    suitability_and_benefits: "Simultaneously tracks high-precision volumetric soil moisture and physical slip plane shear tearing. Unaffected by high electrical conductivity in salty clays.",
+    price_inr: 34000,
+    price_usd: 408,
+    accuracy: "±1.5% VWC, 0.5 cm shear location accuracy",
+    interface: "SDI-12 / RS-232 / USB",
+    power: "12V DC, 85 mA active during pulse",
+    ingress: "IP68 Submersible Sensor Head",
+    operating_range: "-30°C to +70°C",
+    required: false,
+    default_qty: 1,
+    installation_guide: "Grout RG-8 foam coaxial cable in 50mm borehole with brittle cement-bentonite mix; connect to surface TDR reflectometer pulse tester.",
+    schematic: "soil_moisture",
+    imageUrl: tdrCoaxialProbeImg
+  },
+  {
+    id: 26,
+    name: "Acoustic Emission (AE) Rockfall Micro-Cracking Detector",
+    model: "Physical Acoustics PAC R15I-AST 150kHz Resonant Piezo",
+    category: "GEOTECHNICAL",
+    purpose: "Captures ultrasonic emissions from micro-cracking inside brittle rock joints prior to detachment",
+    measured_param: "AE Ringdown Counts, Energy (MARSE), Amplitude (0-100 dBae), Frequency (150 kHz)",
+    why_this_sensor: "Before a large rock slab detaches from a cliff face, microscopic crystalline bonds shear, producing ultrasonic acoustic bursts (100-300 kHz) hours or days in advance.",
+    suitability_and_benefits: "Integral low-noise preamplifier drives signals over 200m coax cable without attenuation. Auto-sensor testing (AST) electronically verifies sensor bond coupling to rock face remotely.",
+    price_inr: 26000,
+    price_usd: 312,
+    accuracy: "150 kHz Resonant Peak, > 80 dB Dynamic Range",
+    interface: "Differential BNC / 24-bit DSP Core",
+    power: "12-24V DC, 20 mA",
+    ingress: "IP67 Weather-tight Stainless Case",
+    operating_range: "-40°C to +85°C",
+    required: false,
+    default_qty: 0,
+    installation_guide: "Bond sensor face to smooth dressed rock surface with high-acoustic-impedance epoxy; protect with silicone weather shield.",
+    schematic: "geophone",
+    imageUrl: aeRockfallDetectorImg
+  },
+  {
+    id: 27,
+    name: "Flexible Ring-Net Debris Barrier Instrumented Load Cell",
+    model: "Geobrugg VX080 1500 kJ / Rockfall Net Retaining Sentry",
+    category: "HYDROLOGY",
+    purpose: "Monitors dynamic tension load on retaining ring-nets during debris flow surges and boulder impacts",
+    measured_param: "Guy Wire Cable Tension (0-300 kN), Debris Flow Mass Retained (Tonnes)",
+    why_this_sensor: "Heavy rainfall washes boulders and slurry into gully channels. Steel ring-net barriers catch the torrent; instrumented load cells measure impact force in real time and warn when barrier capacity is near 100% full.",
+    suitability_and_benefits: "High-tensile stainless steel compression/tension load pin with redundant dual strain gauge bridges. Withstands 200% mechanical overload without permanent calibration shift.",
+    price_inr: 39000,
+    price_usd: 468,
+    accuracy: "±0.5% Full Scale (±1.5 kN)",
+    interface: "4-20mA / CANopen / RS-485",
+    power: "10-30V DC, 25 mA active",
+    ingress: "IP68 Submersible Galvanized Stainless",
+    operating_range: "-40°C to +80°C",
+    required: false,
+    default_qty: 1,
+    installation_guide: "Install shackle load pin directly into top support cable anchor clevis; run armored signal conduit to bank telemetry node.",
+    schematic: "crackmeter",
+    imageUrl: debrisBarrierSensorImg
   }
 ];
 
@@ -419,13 +718,13 @@ const DEPLOYMENT_PRESETS = {
     title: "Critical Highway / Rail Sentry",
     badge: "TIER 3 • INFRASTRUCTURE LIFELINE",
     desc: "High-frequency AI telemetry for highway rock cuts and railway avalanche/landslide zones. Includes geophone acoustic emissions, debris flow radar, and dual-SIM gateway.",
-    quantities: { 1: 1, 2: 1, 3: 2, 5: 1, 6: 1, 7: 1, 8: 1, 9: 2, 10: 1, 11: 1, 12: 2, 14: 1 }
+    quantities: { 1: 1, 2: 1, 3: 2, 5: 1, 6: 1, 7: 1, 8: 1, 9: 2, 10: 1, 11: 1, 12: 2, 14: 1, 22: 1, 26: 1, 27: 1 }
   },
   FULL: {
     title: "Full Multi-Hazard Mission Critical Array",
     badge: "TIER 4 • COMPREHENSIVE 360°",
-    desc: "Complete 14-component instrumentation suite capturing surface meteorology, subsurface hydrodynamics, seismic acoustic emissions, and redundant telemetry.",
-    quantities: { 1: 1, 2: 2, 3: 2, 4: 2, 5: 1, 6: 1, 7: 1, 8: 1, 9: 2, 10: 1, 11: 1, 12: 2, 13: 1, 14: 1 }
+    desc: "Complete 27-asset multi-hazard instrumentation suite capturing surface meteorology, subsurface hydrodynamics, seismic acoustic emissions, GNSS RTK, and remote sensing.",
+    quantities: { 1: 1, 2: 2, 3: 2, 4: 2, 5: 1, 6: 1, 7: 1, 8: 1, 9: 2, 10: 1, 11: 1, 12: 2, 13: 1, 14: 1, 21: 1, 22: 1, 24: 1, 25: 1, 26: 1, 27: 1 }
   }
 };
 
@@ -871,6 +1170,21 @@ export default function SensorPricingPage() {
   const [batteryAh, setBatteryAh] = useState(20);
   const [cableLengthMeters, setCableLengthMeters] = useState(120);
 
+  // Real-World Power & Environmental Adaptation States
+  const [powerScenario, setPowerScenario] = useState('MONSOON'); // 'MONSOON' | 'CLEARSKY' | 'SUBZERO' | 'CYCLONE' | 'CUSTOM'
+  const [cloudCoverPct, setCloudCoverPct] = useState(90);
+  const [ambientTempC, setAmbientTempC] = useState(18);
+  const [snowDustLossPct, setSnowDustLossPct] = useState(5);
+  const [panelTiltDeg, setPanelTiltDeg] = useState(35);
+  const [aiAdaptivePowerShedding, setAiAdaptivePowerShedding] = useState(true);
+  const [simHour, setSimHour] = useState(12.0); // 12:00 PM Solar Noon Peak
+  const [simSpeed, setSimSpeed] = useState(1); // 0 = pause, 1 = 1x, 10 = 10x, 60 = 60x
+  const [liveBatterySoc, setLiveBatterySoc] = useState(88.4);
+  const [showDiagnosticsPanel, setShowDiagnosticsPanel] = useState(false);
+  const [zeroCalibrated, setZeroCalibrated] = useState(false);
+  const [spotlightThumbCategory, setSpotlightThumbCategory] = useState('ALL');
+
+
   // Real-time Terrain Analytics & Field Simulation States
   const [terrainLayers, setTerrainLayers] = useState({
     optical: true,
@@ -1178,32 +1492,169 @@ export default function SensorPricingPage() {
     };
   }, [items, quantities, cableLengthMeters]);
 
-  // Power simulation
+  // Comprehensive Real-World Power Simulation & Autonomy Model
   const powerAutonomy = useMemo(() => {
-    let baseWhPerDay = 24.0;
-    const pollsPerDay = (24 * 60) / Math.max(1, samplingRateMin);
-    let sensorWhPerDay = 0;
+    // Temperature Derating Factor on LiFePO4 Battery Capacity
+    let tempDerateFactor = 1.0;
+    if (ambientTempC < 0) {
+      tempDerateFactor = Math.max(0.55, 0.90 - Math.abs(ambientTempC) * 0.025);
+    } else if (ambientTempC < 20) {
+      tempDerateFactor = 0.90 + (ambientTempC / 20) * 0.10;
+    } else if (ambientTempC > 45) {
+      tempDerateFactor = Math.max(0.85, 1.0 - (ambientTempC - 45) * 0.015);
+    }
 
+    // Nominal and Usable Battery Energy (12.8V LiFePO4 nominal)
+    const nominalBatteryWh = batteryAh * 12.8;
+    const usableBatteryWh = nominalBatteryWh * 0.90 * tempDerateFactor; // 90% Depth of Discharge
+
+    // Standard Polling Consumption without AI Shedding
+    const standardPollsPerDay = (24 * 60) / Math.max(1, samplingRateMin);
+    let standardSensorWh = 0;
     items.forEach(item => {
       const qty = quantities[item.id] || 0;
       if (qty > 0) {
-        sensorWhPerDay += qty * pollsPerDay * 0.00025;
+        const drawPerPollWh = item.category === 'REMOTE SENSING' ? 0.0012 : 0.00035;
+        standardSensorWh += qty * standardPollsPerDay * drawPerPollWh;
       }
     });
 
-    const totalDailyWh = baseWhPerDay + sensorWhPerDay;
-    const batteryWhCapacity = batteryAh * 12 * 0.85;
-    const autonomyDays = (batteryWhCapacity / totalDailyWh).toFixed(1);
-    const dailySolarHarvestWh = pvWatts * 4.2 * 0.8;
+    // Base Station Quiescent Draw (ESP32-S3 + LoRaWAN receiver + 4G Cat-M standby)
+    const standardBaseWhPerDay = 32.0; 
+    const standardTotalDailyWh = standardBaseWhPerDay + standardSensorWh;
+    const autonomyDaysStandard = (usableBatteryWh / standardTotalDailyWh).toFixed(1);
+
+    // AI Adaptive Power-Shedding Mode:
+    const adaptivePollsPerDay = (24 * 60) / 15; // 15 min interval
+    const adaptiveSensorWh = standardSensorWh * (adaptivePollsPerDay / standardPollsPerDay) * 0.45;
+    const adaptiveBaseWhPerDay = 11.5; // Ultra-low-power LoRaWAN Class A only
+    const adaptiveTotalDailyWh = adaptiveBaseWhPerDay + adaptiveSensorWh;
+    const autonomyDaysAdaptive = (usableBatteryWh / adaptiveTotalDailyWh).toFixed(1);
+
+    // Solar Generation Model based on Cloud Cover, Snow/Dust Soiling, and Tilt
+    const cloudTransmission = Math.max(0.08, 1 - (cloudCoverPct / 100) * 0.88);
+    const soilingTransmission = Math.max(0.40, 1 - (snowDustLossPct / 100));
+    const effectivePeakSunHours = 5.2 * cloudTransmission * soilingTransmission;
+    const mpptEfficiency = 0.986; // Victron BlueSolar / SmartSolar MPPT efficiency
+    const dailySolarHarvestWh = pvWatts * effectivePeakSunHours * mpptEfficiency;
+
+    // Instantaneous values at current simHour
+    const isDaylight = simHour >= 6.0 && simHour <= 18.0;
+    const sunAngleFactor = isDaylight ? Math.sin((Math.PI * (simHour - 6.0)) / 12.0) : 0;
+    const instantIrradianceWm2 = Math.max(0, Math.round(1000 * Math.pow(sunAngleFactor, 1.1) * cloudTransmission * soilingTransmission));
+    
+    // Instantaneous PV Watts
+    const cellTempC = ambientTempC + (instantIrradianceWm2 * 0.025);
+    const tempLoss = 1 - 0.0038 * Math.max(0, cellTempC - 25);
+    const instantPvWatts = Math.max(0, (pvWatts * (instantIrradianceWm2 / 1000) * tempLoss * mpptEfficiency)).toFixed(1);
+
+    // Instantaneous Load Watts
+    const isSheddingActive = aiAdaptivePowerShedding && liveBatterySoc < 35;
+    const instantLoadWatts = isSheddingActive ? (0.75).toFixed(1) : (1.45 + (60 / samplingRateMin) * 0.03).toFixed(1);
+
+    // Net Power Balance & Battery Current
+    const netPowerWatts = (parseFloat(instantPvWatts) - parseFloat(instantLoadWatts)).toFixed(1);
+    
+    // Battery Operating Voltage along LiFePO4 curve
+    const socRatio = Math.max(0.01, Math.min(1.0, liveBatterySoc / 100));
+    const battV = (10.2 + 2.6 * Math.pow(socRatio, 0.22) + 0.8 * Math.pow(socRatio, 4)).toFixed(2);
+    const battCurrentAmps = (parseFloat(netPowerWatts) / parseFloat(battV)).toFixed(2);
+
+    // MPPT Tracking Mode
+    let mpptMode = 'NIGHT_STANDBY';
+    if (parseFloat(instantPvWatts) > 0.8) {
+      if (liveBatterySoc < 85) mpptMode = 'BULK_MPPT';
+      else if (liveBatterySoc < 98) mpptMode = 'ABSORPTION_CV';
+      else mpptMode = 'FLOAT_TRICKLE';
+    }
+
+    // 24-Hour Profile for Area Chart
+    const profile24h = [];
+    for (let h = 0; h < 24; h += 1) {
+      const inDay = h >= 6 && h <= 18;
+      const angle = inDay ? Math.sin((Math.PI * (h - 6)) / 12) : 0;
+      const irr = Math.max(0, 1000 * Math.pow(angle, 1.1) * cloudTransmission * soilingTransmission);
+      const pvGen = Math.max(0, pvWatts * (irr / 1000) * 0.98);
+      const load = isSheddingActive ? 0.75 : (1.45 + (60 / samplingRateMin) * 0.03);
+      profile24h.push({
+        hour: `${String(h).padStart(2, '0')}:00`,
+        hNum: h,
+        solarGen: parseFloat(pvGen.toFixed(1)),
+        loadDraw: parseFloat(load.toFixed(1)),
+        net: parseFloat((pvGen - load).toFixed(1))
+      });
+    }
+
+    const currentAutonomyDays = aiAdaptivePowerShedding ? autonomyDaysAdaptive : autonomyDaysStandard;
 
     return {
-      totalDailyWh: totalDailyWh.toFixed(1),
-      batteryWhCapacity: batteryWhCapacity.toFixed(0),
-      autonomyDays,
+      nominalBatteryWh: nominalBatteryWh.toFixed(0),
+      usableBatteryWh: usableBatteryWh.toFixed(0),
+      tempDerateFactor: tempDerateFactor.toFixed(2),
+      standardTotalDailyWh: standardTotalDailyWh.toFixed(1),
+      adaptiveTotalDailyWh: adaptiveTotalDailyWh.toFixed(1),
+      totalDailyWh: (aiAdaptivePowerShedding ? adaptiveTotalDailyWh : standardTotalDailyWh).toFixed(1),
+      autonomyDaysStandard,
+      autonomyDaysAdaptive,
+      autonomyDays: currentAutonomyDays,
       dailySolarHarvestWh: dailySolarHarvestWh.toFixed(0),
-      isAdequate: dailySolarHarvestWh >= totalDailyWh * 1.5
+      effectivePeakSunHours: effectivePeakSunHours.toFixed(1),
+      instantIrradianceWm2,
+      instantPvWatts,
+      instantLoadWatts,
+      netPowerWatts,
+      battV,
+      battCurrentAmps,
+      mpptMode,
+      profile24h,
+      isAdequate: parseFloat(dailySolarHarvestWh) >= parseFloat(standardTotalDailyWh) * 1.3
     };
-  }, [items, quantities, samplingRateMin, pvWatts, batteryAh]);
+  }, [items, quantities, samplingRateMin, pvWatts, batteryAh, ambientTempC, cloudCoverPct, snowDustLossPct, simHour, aiAdaptivePowerShedding, liveBatterySoc]);
+
+  // Diurnal Simulation Clock & Battery Dynamics Engine
+  useEffect(() => {
+    if (activeTab !== 'AUTONOMY' || simSpeed === 0) return;
+    const timer = setInterval(() => {
+      setSimHour(prev => {
+        const next = (prev + (simSpeed * 0.04)) % 24;
+        return parseFloat(next.toFixed(2));
+      });
+      setLiveBatterySoc(prev => {
+        const isCharging = parseFloat(powerAutonomy.netPowerWatts) > 0;
+        const delta = isCharging ? 0.08 : -0.04;
+        const nextSoc = Math.max(12, Math.min(100, prev + delta));
+        return parseFloat(nextSoc.toFixed(1));
+      });
+    }, 400);
+    return () => clearInterval(timer);
+  }, [activeTab, simSpeed, powerAutonomy.netPowerWatts]);
+
+  const applyPowerScenario = (scenario) => {
+    setPowerScenario(scenario);
+    playTacticalAudio('click');
+    if (scenario === 'MONSOON') {
+      setCloudCoverPct(92);
+      setAmbientTempC(18);
+      setSnowDustLossPct(5);
+      setSamplingRateMin(1);
+    } else if (scenario === 'CLEARSKY') {
+      setCloudCoverPct(10);
+      setAmbientTempC(34);
+      setSnowDustLossPct(2);
+      setSamplingRateMin(5);
+    } else if (scenario === 'SUBZERO') {
+      setCloudCoverPct(75);
+      setAmbientTempC(-14);
+      setSnowDustLossPct(55);
+      setSamplingRateMin(15);
+    } else if (scenario === 'CYCLONE') {
+      setCloudCoverPct(100);
+      setAmbientTempC(22);
+      setSnowDustLossPct(15);
+      setSamplingRateMin(1);
+    }
+  };
+
 
   const handleExportCSV = () => {
     const headers = ["ID", "Sensor/Component", "Model", "Category", "Required", "Unit Price (INR)", "Quantity", "Total (INR)", "Accuracy", "Interface", "Purpose"];
@@ -1396,54 +1847,183 @@ export default function SensorPricingPage() {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   className="btn btn-primary"
-                  onClick={() => setInspectModalItem(spotlightItem)}
+                  onClick={() => { playTacticalAudio('click'); setInspectModalItem(spotlightItem); }}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <span>🔍</span> Inspect Full Technical Datasheet
                 </button>
                 <button
                   className="btn"
-                  onClick={() => handleQuantityChange(spotlightItem.id, 1)}
+                  onClick={() => {
+                    playTacticalAudio('click');
+                    setShowDiagnosticsPanel(!showDiagnosticsPanel);
+                  }}
+                  style={{
+                    background: showDiagnosticsPanel ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.06)',
+                    border: showDiagnosticsPanel ? '1px solid var(--cyan)' : '1px solid var(--border-default)',
+                    color: showDiagnosticsPanel ? 'var(--cyan)' : 'var(--text-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>🔬</span> {showDiagnosticsPanel ? 'Hide Live Diagnostics' : 'Live Signal & Diagnostics'}
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => { playTacticalAudio('click'); handleQuantityChange(spotlightItem.id, 1); }}
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-default)' }}
                 >
                   + Add 1 Unit to BOM ({quantities[spotlightItem.id] || 0} in cart)
                 </button>
               </div>
+
+              {/* Collapsible Live Instrument Diagnostics Panel */}
+              {showDiagnosticsPanel && (
+                <div style={{
+                  marginTop: '14px',
+                  background: 'rgba(4, 7, 12, 0.85)',
+                  border: '1px solid var(--cyan)',
+                  borderRadius: '6px',
+                  padding: '12px 16px',
+                  boxShadow: '0 4px 16px rgba(0, 229, 255, 0.15)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                      REAL-TIME TRANSDUCER TEST-BENCH • {spotlightItem.model}
+                    </span>
+                    <span className="chip chip-green" style={{ fontSize: '9px' }}>STATUS: NOMINAL (PASS)</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 180px', gap: '14px', alignItems: 'center' }}>
+                    {/* Live Oscilloscope Trace */}
+                    <div style={{ height: '54px', background: '#020406', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.3)', position: 'relative', overflow: 'hidden' }}>
+                      <div className="oscilloscope-beam" />
+                      <svg viewBox="0 0 300 50" style={{ width: '100%', height: '100%' }}>
+                        <path
+                          d="M 0 25 Q 25 10 50 25 T 100 25 T 150 25 T 200 25 T 250 25 T 300 25"
+                          fill="none"
+                          stroke="#00e5ff"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      <div style={{ position: 'absolute', bottom: '2px', left: '6px', fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        SNR: 48.4 dB • JITTER: 0.04%
+                      </div>
+                    </div>
+
+                    {/* Calibration & Zero Drift Controls */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <button
+                        onClick={() => {
+                          playTacticalAudio('alert');
+                          setZeroCalibrated(true);
+                          setTimeout(() => setZeroCalibrated(false), 2500);
+                        }}
+                        className="btn"
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '10px',
+                          background: zeroCalibrated ? 'rgba(34, 197, 94, 0.2)' : 'rgba(0, 229, 255, 0.1)',
+                          border: zeroCalibrated ? '1px solid #22c55e' : '1px solid var(--cyan)',
+                          color: zeroCalibrated ? '#22c55e' : 'var(--cyan)',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {zeroCalibrated ? '✓ ZERO OFFSET LOCKED' : '⚡ ZERO-DRIFT CALIBRATE'}
+                      </button>
+                      <span style={{ fontSize: '9px', color: 'var(--text-secondary)', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
+                        BUS: {spotlightItem.interface || 'RS-485 / Modbus'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Bottom Thumbnail Strip for All 14 Sensors */}
+          {/* Bottom Thumbnail Strip for All 27 Sensors with Category Filters */}
           <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {['ALL', 'GEOTECHNICAL', 'REMOTE SENSING', 'HYDROLOGY', 'METEOROLOGICAL', 'TELECOM, POWER & AI'].map(cat => {
+                  const isSel = spotlightThumbCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => { playTacticalAudio('click'); setSpotlightThumbCategory(cat); }}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '3px',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer',
+                        border: isSel ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                        background: isSel ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.03)',
+                        color: isSel ? 'var(--cyan)' : 'var(--text-secondary)'
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                SHOWING {spotlightThumbCategory === 'ALL' ? items.length : items.filter(i => spotlightThumbCategory === 'TELECOM, POWER & AI' ? ['COMMUNICATION', 'COMPUTE', 'POWER', 'HOUSING'].includes(i.category) : i.category.includes(spotlightThumbCategory)).length} OF {items.length} INSTRUMENTS
+              </span>
+            </div>
+
             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
-              {items.map(item => {
-                const isSelected = item.id === spotlightId;
-                const thumbImg = SENSOR_IMAGE_MAP[item.id] || item.imageUrl;
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setSpotlightId(item.id)}
-                    style={{
-                      flexShrink: 0,
-                      width: '68px',
-                      height: '52px',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      border: isSelected ? '2px solid var(--cyan)' : '1px solid var(--border-subtle)',
-                      boxShadow: isSelected ? '0 0 10px rgba(0, 229, 255, 0.5)' : 'none',
-                      opacity: isSelected ? 1 : 0.65,
-                      transition: 'all 0.2s ease',
-                      position: 'relative'
-                    }}
-                    title={item.name}
-                  >
-                    <img src={thumbImg} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                );
-              })}
+              {items
+                .filter(item => {
+                  if (spotlightThumbCategory === 'ALL') return true;
+                  if (spotlightThumbCategory === 'TELECOM, POWER & AI') return ['COMMUNICATION', 'COMPUTE', 'POWER', 'HOUSING'].includes(item.category);
+                  return item.category.includes(spotlightThumbCategory);
+                })
+                .map(item => {
+                  const isSelected = item.id === spotlightId;
+                  const thumbImg = SENSOR_IMAGE_MAP[item.id] || item.imageUrl;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => { playTacticalAudio('click'); setSpotlightId(item.id); }}
+                      style={{
+                        flexShrink: 0,
+                        width: '74px',
+                        height: '56px',
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: isSelected ? '2px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                        boxShadow: isSelected ? '0 0 12px rgba(0, 229, 255, 0.6)' : 'none',
+                        opacity: isSelected ? 1 : 0.65,
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
+                      }}
+                      title={`${item.id}. ${item.name}`}
+                    >
+                      <img src={thumbImg} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{
+                        position: 'absolute',
+                        top: '2px',
+                        left: '2px',
+                        background: 'rgba(0,0,0,0.8)',
+                        padding: '1px 4px',
+                        borderRadius: '2px',
+                        fontSize: '8px',
+                        color: isSelected ? 'var(--cyan)' : '#fff',
+                        fontWeight: 700,
+                        fontFamily: 'var(--font-mono)'
+                      }}>
+                        #{item.id}
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>
@@ -1630,7 +2210,7 @@ export default function SensorPricingPage() {
       {/* Category Sub-Filters and Search */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {['ALL', 'GEOTECHNICAL', 'METEOROLOGICAL', 'HYDROLOGY', 'SEISMIC', 'COMMUNICATION', 'COMPUTE', 'POWER', 'HOUSING'].map(cat => {
+          {['ALL', 'GEOTECHNICAL', 'REMOTE SENSING', 'HYDROLOGY', 'METEOROLOGICAL', 'SEISMIC', 'COMMUNICATION', 'COMPUTE', 'POWER', 'HOUSING'].map(cat => {
             const count = cat === 'ALL' ? items.length : items.filter(i => i.category === cat).length;
             const isSelected = selectedCategory === cat;
             return (
@@ -3514,20 +4094,688 @@ export default function SensorPricingPage() {
 
       {/* TAB 3: POWER & SOLAR AUTONOMY CALCULATOR */}
       {activeTab === 'AUTONOMY' && (
-        <div className="panel" style={{ marginBottom: '20px' }}>
-          <div className="panel-header">
-            <span className="label-caps">DYNAMIC SOLAR & OFF-GRID POWER AUTONOMY SIMULATOR</span>
-            <span style={{ fontSize: '11px', color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>
-              REAL-WORLD MONSOON CLOUD-COVER STRESS SIMULATION
-            </span>
-          </div>
-          <div className="panel-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '24px' }}>
-              <div>
-                <h4 style={{ color: '#fff', marginBottom: '12px' }}>Power Configuration & Environmental Variables</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
+          {/* 1. REAL-WORLD CLIMATE & ENVIRONMENTAL SITUATION SELECTOR */}
+          <div className="panel" style={{
+            background: 'linear-gradient(135deg, rgba(14, 20, 32, 0.95), rgba(7, 10, 16, 0.98))',
+            border: '1px solid rgba(0, 229, 255, 0.35)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+          }}>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 10px var(--cyan)' }} />
+                <span className="label-caps" style={{ color: 'var(--cyan)' }}>REAL-WORLD CLIMATE & ENVIRONMENTAL SITUATION ADAPTATION</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  ACTIVE SITUATION:
+                </span>
+                <span className="chip chip-cyan" style={{ fontWeight: 700 }}>
+                  {powerScenario}
+                </span>
+              </div>
+            </div>
+
+            <div className="panel-body">
+              {/* Situation Selector Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                {[
+                  {
+                    id: 'MONSOON',
+                    icon: '🌧️',
+                    title: 'Extreme Monsoon Cloudburst',
+                    subtitle: '92% Cloud • 85 W/m² • 18°C • 1-Min Poll',
+                    desc: 'Multi-day torrential downpour. Stress-tests zero-sun battery endurance under severe slope infiltration triggers.'
+                  },
+                  {
+                    id: 'CLEARSKY',
+                    icon: '☀️',
+                    title: 'Western Ghats Clearsky',
+                    subtitle: '10% Cloud • 980 W/m² • 34°C • 5-Min Poll',
+                    desc: 'Optimal tropical solar insolation. Rapid MPPT bulk charge brings LiFePO4 pack to float maintenance by 11:30 AM.'
+                  },
+                  {
+                    id: 'SUBZERO',
+                    icon: '❄️',
+                    title: 'Alpine Sub-Zero Blizzard',
+                    subtitle: '75% Cloud • -14°C Frost • 55% Snow on PV',
+                    desc: 'High Himalayan winter freeze. Accounts for -35% battery electrochemical capacity loss and snow panel shading.'
+                  },
+                  {
+                    id: 'CYCLONE',
+                    icon: '🌪️',
+                    title: '10-Day Cyclone Blackout',
+                    subtitle: '100% Blanket • 0 W Sun • 22°C • 1-Min Poll',
+                    desc: 'Severe tropical cyclonic storm. Zero direct sunlight for 10+ consecutive days. Tests AI power shedding survival.'
+                  }
+                ].map(sc => {
+                  const isSel = powerScenario === sc.id;
+                  return (
+                    <div
+                      key={sc.id}
+                      onClick={() => applyPowerScenario(sc.id)}
+                      style={{
+                        background: isSel ? 'rgba(0, 229, 255, 0.12)' : 'rgba(255,255,255,0.03)',
+                        border: isSel ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                        borderRadius: '6px',
+                        padding: '12px 14px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: isSel ? '0 0 16px rgba(0, 229, 255, 0.2)' : 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '18px' }}>{sc.icon}</span>
+                        <div style={{ fontWeight: 700, fontSize: '13px', color: isSel ? 'var(--cyan)' : '#fff' }}>
+                          {sc.title}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--amber)', fontFamily: 'var(--font-mono)', marginBottom: '6px' }}>
+                        {sc.subtitle}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                        {sc.desc}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Environmental Variables Tuning Sliders */}
+              <div style={{
+                background: 'rgba(0,0,0,0.4)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                padding: '14px 18px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '16px'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Cloud Cover:</span>
+                    <strong style={{ color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{cloudCoverPct}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={cloudCoverPct}
+                    onChange={(e) => { setPowerScenario('CUSTOM'); setCloudCoverPct(parseInt(e.target.value)); }}
+                    style={{ width: '100%', accentColor: 'var(--cyan)' }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Ambient Temperature:</span>
+                    <strong style={{ color: ambientTempC < 0 ? '#ff3b5c' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>
+                      {ambientTempC}°C ({ambientTempC < 0 ? 'Sub-Zero Freeze' : 'Normal'})
+                    </strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="-25"
+                    max="50"
+                    value={ambientTempC}
+                    onChange={(e) => { setPowerScenario('CUSTOM'); setAmbientTempC(parseInt(e.target.value)); }}
+                    style={{ width: '100%', accentColor: 'var(--amber)' }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Snow / Dust Panel Loss:</span>
+                    <strong style={{ color: '#ffb020', fontFamily: 'var(--font-mono)' }}>{snowDustLossPct}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="60"
+                    value={snowDustLossPct}
+                    onChange={(e) => { setPowerScenario('CUSTOM'); setSnowDustLossPct(parseInt(e.target.value)); }}
+                    style={{ width: '100%', accentColor: '#ffb020' }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>PV Panel Tilt Angle:</span>
+                    <strong style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>{panelTiltDeg}° (Optimal: 35°)</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="15"
+                    max="60"
+                    value={panelTiltDeg}
+                    onChange={(e) => setPanelTiltDeg(parseInt(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--green)' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. REAL-TIME 24-HOUR DIURNAL CLOCK & CELESTIAL ORBIT ARC */}
+          <div className="panel" style={{
+            background: 'linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 6, 10, 0.98))',
+            border: '1px solid var(--border-cyan)'
+          }}>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>☀️</span>
+                <span className="label-caps">24-HOUR DIURNAL SOLAR CYCLE & CELESTIAL TRACKING ENGINE</span>
+              </div>
+
+              {/* Playback Controls */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SIM SPEED:</span>
+                {[
+                  { speed: 0, label: '⏸ Pause' },
+                  { speed: 1, label: '1x Real' },
+                  { speed: 10, label: '10x Fast' },
+                  { speed: 60, label: '60x Turbo' }
+                ].map(btn => (
+                  <button
+                    key={btn.speed}
+                    onClick={() => { playTacticalAudio('click'); setSimSpeed(btn.speed); }}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '3px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)',
+                      border: simSpeed === btn.speed ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                      background: simSpeed === btn.speed ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255,255,255,0.04)',
+                      color: simSpeed === btn.speed ? 'var(--cyan)' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel-body" style={{ padding: '16px 20px' }}>
+              {/* Graphic Sky & Mountain Horizon Celestial Arc */}
+              <div style={{
+                height: '130px',
+                borderRadius: '8px',
+                position: 'relative',
+                overflow: 'hidden',
+                background: simHour >= 6 && simHour <= 18
+                  ? 'linear-gradient(180deg, #0f2744 0%, #1e3a5f 45%, #2a3d45 85%, #151e28 100%)'
+                  : 'linear-gradient(180deg, #030509 0%, #080d16 55%, #0d141e 100%)',
+                border: '1px solid rgba(0, 229, 255, 0.25)',
+                marginBottom: '14px',
+                transition: 'background 0.5s ease'
+              }}>
+                {/* Mountain Ridge Silhouette SVG in Background */}
+                <svg viewBox="0 0 1000 130" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 0, width: '100%', height: '70px', opacity: 0.65 }}>
+                  <path d="M 0 130 L 0 85 L 120 40 L 220 75 L 340 25 L 480 80 L 590 35 L 720 70 L 850 30 L 1000 80 L 1000 130 Z" fill="#040608" />
+                  <path d="M 0 130 L 0 100 L 180 65 L 310 95 L 450 55 L 610 90 L 780 50 L 920 85 L 1000 70 L 1000 130 Z" fill="#090e17" opacity="0.7" />
+                </svg>
+
+                {/* Parabolic Sun Trajectory Arc (06:00 to 18:00) */}
+                <svg viewBox="0 0 1000 130" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                  {/* Daylight Parabolic Flight Path */}
+                  <path d="M 150 110 Q 500 -10 850 110" fill="none" stroke="rgba(255, 176, 32, 0.35)" strokeWidth="2" strokeDasharray="5 5" />
+                  
+                  {/* Horizon ground line */}
+                  <line x1="0" y1="110" x2="1000" y2="110" stroke="rgba(0, 229, 255, 0.3)" strokeWidth="1" />
+
+                  {/* Sun or Moon Rendering */}
+                  {simHour >= 6 && simHour <= 18 ? (() => {
+                    const progress = (simHour - 6) / 12; // 0 to 1
+                    const sunX = 150 + progress * 700;
+                    const sunY = 110 - Math.sin(progress * Math.PI) * 95;
+                    return (
+                      <g transform={`translate(${sunX}, ${sunY})`}>
+                        <circle r="18" fill="rgba(255, 176, 32, 0.25)" className="sun-glow-anim" />
+                        <circle r="11" fill="#ffb020" />
+                        <circle r="6" fill="#fff5cc" />
+                      </g>
+                    );
+                  })() : (() => {
+                    const nightHour = simHour > 18 ? simHour - 18 : simHour + 6;
+                    const progress = nightHour / 12;
+                    const moonX = 150 + progress * 700;
+                    const moonY = 95 - Math.sin(progress * Math.PI) * 75;
+                    return (
+                      <g transform={`translate(${moonX}, ${moonY})`}>
+                        <circle r="12" fill="rgba(0, 229, 255, 0.2)" />
+                        <circle r="8" fill="#e2e8f0" />
+                        <circle cx="3" cy="-2" r="7" fill="#080d16" />
+                      </g>
+                    );
+                  })()}
+                </svg>
+
+                {/* Real-time Status Badge inside Sky */}
+                <div style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: '12px',
+                  background: 'rgba(0,0,0,0.85)',
+                  border: '1px solid var(--border-cyan)',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#fff',
+                  fontFamily: 'var(--font-mono)'
+                }}>
+                  {String(Math.floor(simHour)).padStart(2, '0')}:{String(Math.floor((simHour % 1) * 60)).padStart(2, '0')}{' '}
+                  <span style={{ color: 'var(--cyan)' }}>
+                    {simHour >= 6 && simHour <= 18 ? '☀️ DAYLIGHT HARVESTING' : '🌙 NIGHT BATTERY DISCHARGE'}
+                  </span>
+                </div>
+
+                <div style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '12px',
+                  background: 'rgba(0,0,0,0.85)',
+                  border: '1px solid var(--amber)',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: 'var(--amber)',
+                  fontFamily: 'var(--font-mono)'
+                }}>
+                  SOLAR INSOLATION: {powerAutonomy.instantIrradianceWm2} W/m²
+                </div>
+              </div>
+
+              {/* Time Scrubber Slider & Quick Jump Presets */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="23.9"
+                    step="0.1"
+                    value={simHour}
+                    onChange={(e) => {
+                      setSimSpeed(0); // Pause while dragging
+                      setSimHour(parseFloat(e.target.value));
+                    }}
+                    style={{ width: '100%', accentColor: 'var(--cyan)' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {[
+                    { h: 6.0, label: '🌅 Dawn (06:00)' },
+                    { h: 12.0, label: '☀️ Noon (12:00)' },
+                    { h: 18.0, label: '🌇 Dusk (18:00)' },
+                    { h: 0.0, label: '🌙 Midnight (00:00)' }
+                  ].map(preset => (
+                    <button
+                      key={preset.label}
+                      onClick={() => { playTacticalAudio('click'); setSimHour(preset.h); }}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '3px',
+                        fontSize: '10px',
+                        fontFamily: 'var(--font-mono)',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'rgba(255,255,255,0.04)',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. ANIMATED MICRO-GRID MPPT ENERGY FLOW CIRCUIT VISUALIZER */}
+          <div className="panel" style={{
+            background: 'linear-gradient(135deg, rgba(10, 14, 22, 0.95), rgba(6, 8, 12, 0.98))',
+            border: '1px solid rgba(0, 229, 255, 0.35)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+          }}>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--cyan)' }}>⚡</span>
+                <span className="label-caps">ANIMATED MICRO-GRID MPPT ENERGY FLOW CIRCUIT</span>
+              </div>
+              <span className={`chip ${parseFloat(powerAutonomy.netPowerWatts) >= 0 ? 'chip-green' : 'chip-amber'}`}>
+                NET FLOW: {parseFloat(powerAutonomy.netPowerWatts) >= 0 ? `+${powerAutonomy.netPowerWatts}W (CHARGING)` : `${powerAutonomy.netPowerWatts}W (DISCHARGING)`}
+              </span>
+            </div>
+
+            <div className="panel-body" style={{ padding: '20px' }}>
+              {/* 4 Interconnected Circuit Nodes */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px', position: 'relative' }}>
+                
+                {/* Node 1: PV Array */}
+                <div style={{
+                  background: 'rgba(255, 176, 32, 0.05)',
+                  border: '1px solid rgba(255, 176, 32, 0.35)',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--amber)', fontFamily: 'var(--font-mono)' }}>
+                      [1] SOLAR PV ARRAY
+                    </span>
+                    <span className="chip chip-amber" style={{ fontSize: '9px' }}>{pvWatts}W MONO</span>
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 800, color: '#ffb020', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.instantPvWatts} <span style={{ fontSize: '14px', fontWeight: 600 }}>WATTS</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.instantPvWatts > 0 ? '18.2V DC • ' + (parseFloat(powerAutonomy.instantPvWatts) / 18.2).toFixed(2) + 'A' : '0.0V DC (NO SUN)'}
+                  </div>
+                </div>
+
+                {/* Node 2: Victron SmartSolar MPPT */}
+                <div style={{
+                  background: 'rgba(0, 229, 255, 0.05)',
+                  border: '1px solid rgba(0, 229, 255, 0.35)',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                      [2] VICTRON MPPT 75/15
+                    </span>
+                    <span className="chip chip-cyan" style={{ fontSize: '9px' }}>98.9% EFF</span>
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)', marginTop: '6px' }}>
+                    {powerAutonomy.mpptMode}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '10px', fontFamily: 'var(--font-mono)' }}>
+                    TEMP: 34.2°C • P&O TRACKING
+                  </div>
+                </div>
+
+                {/* Node 3: LiFePO4 Smart Battery */}
+                <div style={{
+                  background: 'rgba(34, 197, 94, 0.05)',
+                  border: '1px solid rgba(34, 197, 94, 0.35)',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>
+                      [3] 12.8V LiFePO4 PACK
+                    </span>
+                    <span className="chip chip-green" style={{ fontSize: '9px' }}>{batteryAh}Ah ({powerAutonomy.nominalBatteryWh}Wh)</span>
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 800, color: '#22c55e', fontFamily: 'var(--font-mono)' }}>
+                    {liveBatterySoc}% <span style={{ fontSize: '14px', fontWeight: 600 }}>SoC</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.battV}V • {powerAutonomy.battCurrentAmps >= 0 ? '+' : ''}{powerAutonomy.battCurrentAmps}A
+                  </div>
+                </div>
+
+                {/* Node 4: Field Station DC Distribution Bus */}
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#f87171', fontFamily: 'var(--font-mono)' }}>
+                      [4] STATION DC LOAD BUS
+                    </span>
+                    <span className="chip chip-amber" style={{ fontSize: '9px' }}>12V / 5V / 3.3V</span>
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 800, color: '#f87171', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.instantLoadWatts} <span style={{ fontSize: '14px', fontWeight: 600 }}>WATTS</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                    POLL: {samplingRateMin} MIN • {(parseFloat(powerAutonomy.instantLoadWatts) / 12.8 * 1000).toFixed(0)} mA DRAW
+                  </div>
+                </div>
+              </div>
+
+              {/* Animated Energy Flow Particles Indicator Bar */}
+              <div style={{ marginTop: '16px', height: '10px', borderRadius: '5px', background: '#090d14', position: 'relative', overflow: 'hidden' }}>
+                <div
+                  className={parseFloat(powerAutonomy.netPowerWatts) >= 0 ? "energy-flow-active" : "energy-flow-reverse"}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: parseFloat(powerAutonomy.netPowerWatts) >= 0
+                      ? 'linear-gradient(90deg, #ffb020, #00e5ff, #22c55e)'
+                      : 'linear-gradient(90deg, #22c55e, #ffb020, #ff3b5c)'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. AUTONOMOUS AI POWER SHEDDING & MONSOON SURVIVAL DUAL COMPARISON */}
+          <div className="panel" style={{
+            background: 'linear-gradient(135deg, rgba(16, 24, 38, 0.95), rgba(8, 12, 20, 0.98))',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+          }}>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--green)' }}>🤖</span>
+                <span className="label-caps">AUTONOMOUS AI POWER-SHEDDING & ADAPTIVE SURVIVAL ENGINE</span>
+              </div>
+              <button
+                onClick={() => {
+                  playTacticalAudio(aiAdaptivePowerShedding ? 'click' : 'alert');
+                  setAiAdaptivePowerShedding(!aiAdaptivePowerShedding);
+                }}
+                className="btn"
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  background: aiAdaptivePowerShedding ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.05)',
+                  border: aiAdaptivePowerShedding ? '1px solid #22c55e' : '1px solid var(--border-default)',
+                  color: aiAdaptivePowerShedding ? '#22c55e' : 'var(--text-secondary)'
+                }}
+              >
+                {aiAdaptivePowerShedding ? '✓ AI ADAPTIVE SHEDDING: ACTIVE' : '⚠️ FIXED DUTY-CYCLE: DISABLED'}
+              </button>
+            </div>
+
+            <div className="panel-body" style={{ padding: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', alignItems: 'center' }}>
+                
+                {/* Standard Card */}
+                <div style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '6px',
+                  padding: '16px'
+                }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
+                    MODE A: STANDARD FIXED POLLING (NO SHEDDING)
+                  </div>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: '#f87171', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.autonomyDaysStandard} <span style={{ fontSize: '16px', fontWeight: 600 }}>DAYS</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: 1.4 }}>
+                    System draws continuous <strong>{powerAutonomy.standardTotalDailyWh} Wh/day</strong> at fixed {samplingRateMin}-min sampling with 4G backhaul continuously powered. Under prolonged zero-sun storm blackout, battery exhausts in {powerAutonomy.autonomyDaysStandard} days.
+                  </div>
+                </div>
+
+                {/* AI Adaptive Card */}
+                <div style={{
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid var(--green)',
+                  borderRadius: '6px',
+                  padding: '16px',
+                  position: 'relative'
+                }}>
+                  <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                    <span className="chip chip-green" style={{ fontSize: '9px' }}>RECOMMENDED SPEC</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--green)', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
+                    MODE B: AI ADAPTIVE BMS STORM SURVIVAL
+                  </div>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>
+                    {powerAutonomy.autonomyDaysAdaptive} <span style={{ fontSize: '16px', fontWeight: 600 }}>DAYS</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '8px', lineHeight: 1.4 }}>
+                    When battery drops below 35%, AI BMS autonomously scales polling to 15-min, puts 4G into deep sleep, and routes urgent geotechnical alarms via LoRaWAN Class A (11.5 Wh/day).
+                  </div>
+                  <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                    ✓ EXTENDS CONTINUOUS SURVIVAL BY +{Math.round(((powerAutonomy.autonomyDaysAdaptive - powerAutonomy.autonomyDaysStandard) / Math.max(0.1, powerAutonomy.autonomyDaysStandard)) * 100)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. DYNAMIC LiFePO4 DISCHARGE CURVE & 24H GENERATION AREA CHART */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+            
+            {/* Left: LiFePO4 Discharge Curve */}
+            <div className="panel" style={{ background: 'rgba(6, 9, 14, 0.98)', border: '1px solid var(--border-cyan)' }}>
+              <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="label-caps">LiFePO4 ELECTROCHEMICAL DISCHARGE CURVE</span>
+                <span style={{ fontSize: '11px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                  {powerAutonomy.battV}V • {liveBatterySoc}% SoC
+                </span>
+              </div>
+              <div className="panel-body">
+                <div style={{ height: '170px', position: 'relative' }}>
+                  <svg viewBox="0 0 400 160" style={{ width: '100%', height: '100%' }}>
+                    {/* Grid lines */}
+                    <line x1="40" y1="20" x2="380" y2="20" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                    <line x1="40" y1="50" x2="380" y2="50" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                    <line x1="40" y1="80" x2="380" y2="80" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                    <line x1="40" y1="110" x2="380" y2="110" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                    <line x1="40" y1="140" x2="380" y2="140" stroke="rgba(255,255,255,0.2)" />
+                    <line x1="40" y1="10" x2="40" y2="140" stroke="rgba(255,255,255,0.2)" />
+
+                    {/* Y-Axis Labels */}
+                    <text x="32" y="24" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">14.4V</text>
+                    <text x="32" y="54" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">13.6V</text>
+                    <text x="32" y="84" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">13.0V</text>
+                    <text x="32" y="114" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">12.0V</text>
+                    <text x="32" y="144" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">10.5V</text>
+
+                    {/* Characteristic LiFePO4 Flat Curve: High plateau between 13.3V and 12.8V */}
+                    <path
+                      d="M 40 140 L 70 125 C 100 115, 140 78, 200 70 C 260 62, 320 54, 350 48 L 380 20"
+                      fill="none"
+                      stroke="#22c55e"
+                      strokeWidth="2.5"
+                    />
+
+                    {/* Active Operating Point Dot */}
+                    {(() => {
+                      const dotX = 40 + (liveBatterySoc / 100) * 340;
+                      const normV = Math.max(10.5, Math.min(14.4, parseFloat(powerAutonomy.battV)));
+                      const dotY = 140 - ((normV - 10.5) / 3.9) * 120;
+                      return (
+                        <g transform={`translate(${dotX}, ${dotY})`}>
+                          <circle r="8" fill="rgba(0, 229, 255, 0.3)" className="satellite-wave-ring" />
+                          <circle r="5" fill="var(--cyan)" />
+                          <circle r="2" fill="#fff" />
+                        </g>
+                      );
+                    })()}
+                  </svg>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                  <span>0% (CUTOFF 10.5V)</span>
+                  <span>FLAT WORKING PLATEAU (13.3V - 12.8V)</span>
+                  <span>100% (FLOAT 14.4V)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: 24-Hour Solar Generation vs Load Area Chart */}
+            <div className="panel" style={{ background: 'rgba(6, 9, 14, 0.98)', border: '1px solid var(--border-cyan)' }}>
+              <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="label-caps">24-HOUR GENERATION VS LOAD PROFILE</span>
+                <span style={{ fontSize: '11px', color: 'var(--amber)', fontFamily: 'var(--font-mono)' }}>
+                  DAILY HARVEST: {powerAutonomy.dailySolarHarvestWh} Wh
+                </span>
+              </div>
+              <div className="panel-body">
+                <div style={{ height: '170px', position: 'relative' }}>
+                  <svg viewBox="0 0 400 160" style={{ width: '100%', height: '100%' }}>
+                    {/* Grid lines */}
+                    <line x1="30" y1="140" x2="390" y2="140" stroke="rgba(255,255,255,0.2)" />
+                    <line x1="30" y1="10" x2="30" y2="140" stroke="rgba(255,255,255,0.2)" />
+
+                    {/* Solar Curve Path */}
+                    <path
+                      d={`M 30 140 ${powerAutonomy.profile24h.map((p, idx) => {
+                        const x = 30 + (idx / 23) * 360;
+                        const y = 140 - (p.solarGen / Math.max(1, pvWatts)) * 120;
+                        return `L ${x} ${y}`;
+                      }).join(' ')} L 390 140 Z`}
+                      fill="rgba(255, 176, 32, 0.2)"
+                      stroke="#ffb020"
+                      strokeWidth="2"
+                    />
+
+                    {/* Load Line Path */}
+                    <path
+                      d={`M 30 ${140 - (powerAutonomy.profile24h[0].loadDraw / Math.max(1, pvWatts)) * 120} ${powerAutonomy.profile24h.map((p, idx) => {
+                        const x = 30 + (idx / 23) * 360;
+                        const y = 140 - (p.loadDraw / Math.max(1, pvWatts)) * 120;
+                        return `L ${x} ${y}`;
+                      }).join(' ')}`}
+                      fill="none"
+                      stroke="#00e5ff"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 2"
+                    />
+
+                    {/* Moving Laser Needle Line for Current Hour */}
+                    {(() => {
+                      const needleX = 30 + (simHour / 24) * 360;
+                      return (
+                        <g>
+                          <line x1={needleX} y1="10" x2={needleX} y2="140" stroke="var(--cyan)" strokeWidth="2" />
+                          <circle cx={needleX} cy="14" r="3" fill="#fff" />
+                        </g>
+                      );
+                    })()}
+                  </svg>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                  <span>00:00</span>
+                  <span style={{ color: 'var(--amber)' }}>☀️ SOLAR HARVEST (AMBER)</span>
+                  <span style={{ color: 'var(--cyan)' }}>-- LOAD DRAW (CYAN)</span>
+                  <span>23:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 6. HARDWARE CONFIGURATION CONTROLS */}
+          <div className="panel" style={{ background: 'rgba(10, 14, 20, 0.95)', border: '1px solid var(--border-default)' }}>
+            <div className="panel-header">
+              <span className="label-caps">HARDWARE CONFIGURATION & BATTERY/PV SIZING</span>
+            </div>
+            <div className="panel-body">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                
+                {/* Sampling Interval */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Sensor Sampling & Transmission Interval:</span>
                     <strong style={{ color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
                       Every {samplingRateMin} {samplingRateMin === 1 ? 'Minute' : 'Minutes'}
@@ -3537,24 +4785,27 @@ export default function SensorPricingPage() {
                     {[1, 5, 15, 60].map(val => (
                       <button
                         key={val}
-                        onClick={() => setSamplingRateMin(val)}
+                        onClick={() => { playTacticalAudio('click'); setSamplingRateMin(val); }}
                         className="btn"
                         style={{
                           flex: 1,
                           justifyContent: 'center',
-                          background: samplingRateMin === val ? 'var(--cyan)' : 'var(--bg-card)',
+                          background: samplingRateMin === val ? 'var(--cyan)' : 'rgba(255,255,255,0.04)',
                           color: samplingRateMin === val ? '#000' : 'var(--text-primary)',
-                          border: '1px solid var(--border-default)'
+                          border: '1px solid var(--border-default)',
+                          fontSize: '11px',
+                          fontWeight: 700
                         }}
                       >
-                        {val === 60 ? '1 Hour (Ultra-Eco)' : `${val} Min`}
+                        {val === 60 ? '1 Hr' : `${val} Min`}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
+                {/* Monocrystalline PV Panel */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Monocrystalline PV Panel Capacity:</span>
                     <strong style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{pvWatts} Watts</strong>
                   </div>
@@ -3562,14 +4813,16 @@ export default function SensorPricingPage() {
                     {[20, 30, 50, 100].map(val => (
                       <button
                         key={val}
-                        onClick={() => setPvWatts(val)}
+                        onClick={() => { playTacticalAudio('click'); setPvWatts(val); }}
                         className="btn"
                         style={{
                           flex: 1,
                           justifyContent: 'center',
-                          background: pvWatts === val ? 'var(--amber)' : 'var(--bg-card)',
+                          background: pvWatts === val ? 'var(--amber)' : 'rgba(255,255,255,0.04)',
                           color: pvWatts === val ? '#000' : 'var(--text-primary)',
-                          border: '1px solid var(--border-default)'
+                          border: '1px solid var(--border-default)',
+                          fontSize: '11px',
+                          fontWeight: 700
                         }}
                       >
                         {val}W Panel
@@ -3578,64 +4831,63 @@ export default function SensorPricingPage() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>12V LiFePO4 Smart Battery Pack:</span>
-                    <strong style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>{batteryAh} Ah ({batteryAh * 12} Wh)</strong>
+                {/* LiFePO4 Smart Battery */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>12.8V LiFePO4 Smart Battery Pack:</span>
+                    <strong style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>{batteryAh} Ah ({batteryAh * 12.8} Wh)</strong>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     {[10, 20, 40].map(val => (
                       <button
                         key={val}
-                        onClick={() => setBatteryAh(val)}
+                        onClick={() => { playTacticalAudio('click'); setBatteryAh(val); }}
                         className="btn"
                         style={{
                           flex: 1,
                           justifyContent: 'center',
-                          background: batteryAh === val ? 'var(--green)' : 'var(--bg-card)',
+                          background: batteryAh === val ? 'var(--green)' : 'rgba(255,255,255,0.04)',
                           color: batteryAh === val ? '#000' : 'var(--text-primary)',
-                          border: '1px solid var(--border-default)'
+                          border: '1px solid var(--border-default)',
+                          fontSize: '11px',
+                          fontWeight: 700
                         }}
                       >
-                        {val}Ah ({val * 12}Wh)
+                        {val}Ah ({val * 12.8}Wh)
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-cyan)' }}>
-                <span className="label-caps" style={{ color: 'var(--cyan)' }}>POWER BUDGET ASSESSMENT</span>
-                
-                <div style={{ margin: '16px 0', textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>AUTONOMOUS RUNTIME WITHOUT SUN</div>
-                  <div style={{ fontSize: '38px', fontWeight: 800, color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>
-                    {powerAutonomy.autonomyDays} <span style={{ fontSize: '16px', fontWeight: 600 }}>DAYS</span>
-                  </div>
-                  <span className={`chip ${parseFloat(powerAutonomy.autonomyDays) >= 6 ? 'chip-green' : 'chip-amber'}`}>
-                    {parseFloat(powerAutonomy.autonomyDays) >= 6 ? '✓ EXCEEDS 6-DAY MONSOON SPEC' : '⚠️ RECOMMEND HIGHER Ah BATTERY'}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Usable Battery Energy:</span>
-                    <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{powerAutonomy.batteryWhCapacity} Wh</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Daily System Consumption:</span>
-                    <strong style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{powerAutonomy.totalDailyWh} Wh/day</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Avg. Daily PV Generation:</span>
-                    <strong style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>{powerAutonomy.dailySolarHarvestWh} Wh/day</strong>
-                  </div>
-                </div>
+          {/* 7. LIVE BMS & TELEMETRY STREAM TERMINAL */}
+          <div className="panel" style={{ background: '#04070c', border: '1px solid var(--border-subtle)' }}>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="live-indicator-dot" />
+                <span className="label-caps">LIVE HARDWARE BMS & SERIAL TELEMETRY STREAM</span>
+              </div>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                NMEA-0183 & MODBUS RTU FRAMES • 115200 BAUD
+              </span>
+            </div>
+            <div className="panel-body" style={{ padding: '12px 16px', maxHeight: '110px', overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
+              <div style={{ color: '#00e5ff', marginBottom: '4px' }}>
+                [{String(Math.floor(simHour)).padStart(2, '0')}:{String(Math.floor((simHour % 1) * 60)).padStart(2, '0')}:12] $BMS,SOC={liveBatterySoc}%,VBAT={powerAutonomy.battV}V,IBAT={powerAutonomy.battCurrentAmps}A,MODE={powerAutonomy.mpptMode}*4F
+              </div>
+              <div style={{ color: '#ffb020', marginBottom: '4px' }}>
+                [{String(Math.floor(simHour)).padStart(2, '0')}:{String(Math.floor((simHour % 1) * 60)).padStart(2, '0')}:18] $SOLAR,PV_W={powerAutonomy.instantPvWatts}W,V=18.2V,IRR={powerAutonomy.instantIrradianceWm2}W/m2,PANEL_TILT={panelTiltDeg}DEG*7A
+              </div>
+              <div style={{ color: '#22c55e' }}>
+                [{String(Math.floor(simHour)).padStart(2, '0')}:{String(Math.floor((simHour % 1) * 60)).padStart(2, '0')}:24] $PWR_SYS,LOAD={powerAutonomy.instantLoadWatts}W,AUTONOMY={powerAutonomy.autonomyDays}DAYS,AI_SHEDDING={aiAdaptivePowerShedding ? 'ACTIVE' : 'DISABLED'}*2E
               </div>
             </div>
           </div>
         </div>
       )}
+
 
       {/* TAB 4: BOM TABLE VIEW */}
       {activeTab === 'BOM_TABLE' && (
