@@ -1,0 +1,135 @@
+{
+  "location_id": "chamoli",
+  "location_name": "Chamoli Cryo-Glacial Zone",
+  "classification": "EXECUTIVE",
+  "audit_window": "7D",
+  "hazards": [
+    "LANDSLIDE",
+    "FLOOD",
+    "EARTHQUAKE",
+    "CYCLONE",
+    "VOLCANO"
+  ],
+  "location": {
+    "id": "chamoli"
+  },
+  "snapshot_time": "2026-09-17T10:37:41.652290+00:00",
+  "sensors": [],
+  "current_risk": {
+    "location_id": "LOC-chamoli",
+    "timestamp": "2026-09-17T10:37:41.651875+00:00",
+    "overall_score": 35,
+    "overall_level": "MODERATE",
+    "primary_threat": "Landslide",
+    "hazards": {
+      "landslide": {
+        "hazard": "Landslide",
+        "score": 35,
+        "level": "MODERATE",
+        "reasons": [
+          "Saturated soil conditions detected",
+          "Steep slope vulnerability (38\u00b0)"
+        ]
+      },
+      "flood": {
+        "hazard": "Flood",
+        "score": 15,
+        "level": "LOW",
+        "reasons": [
+          "River level normal"
+        ]
+      },
+      "earthquake": {
+        "hazard": "Earthquake",
+        "score": 30,
+        "level": "MODERATE",
+        "reasons": [
+          "Moderate seismic hazard zone",
+          "No recent major events"
+        ]
+      },
+      "cyclone": {
+        "hazard": "Cyclone",
+        "score": 10,
+        "level": "LOW",
+        "reasons": [
+          "No active cyclone track nearby"
+        ]
+      },
+      "volcano": {
+        "hazard": "Volcano",
+        "score": 5,
+        "level": "LOW",
+        "reasons": [
+          "No active volcano in proximity"
+        ]
+      }
+    },
+    "remedial_actions": {
+      "immediate": [
+        "Continue routine monitoring"
+      ],
+      "short_term": [
+        "Review readiness protocols"
+      ]
+    }
+  },
+  "forecast": [
+    {
+      "date": "2026-09-18",
+      "landslide_risk": 37,
+      "flood_risk": 17,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-19",
+      "landslide_risk": 39,
+      "flood_risk": 19,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-20",
+      "landslide_risk": 41,
+      "flood_risk": 21,
+      "cyclone_risk": 10,
+      "level": "ELEVATED"
+    },
+    {
+      "date": "2026-09-21",
+      "landslide_risk": 27,
+      "flood_risk": 7,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-22",
+      "landslide_risk": 25,
+      "flood_risk": 5,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-23",
+      "landslide_risk": 23,
+      "flood_risk": 3,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-24",
+      "landslide_risk": 21,
+      "flood_risk": 1,
+      "cyclone_risk": 10,
+      "level": "MODERATE"
+    }
+  ],
+  "affected_assets": {
+    "roads": 4,
+    "bridges": 2,
+    "villages": 3,
+    "schools": 1,
+    "hospitals": 1
+  }
+}

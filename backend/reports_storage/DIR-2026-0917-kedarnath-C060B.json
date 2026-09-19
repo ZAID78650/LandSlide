@@ -1,0 +1,121 @@
+{
+  "location_id": "kedarnath",
+  "location_name": "Kedarnath Valley Scarp",
+  "classification": "EXECUTIVE",
+  "audit_window": "7D",
+  "hazards": [
+    "LANDSLIDE",
+    "FLOOD",
+    "EARTHQUAKE"
+  ],
+  "location": {
+    "id": "kedarnath",
+    "name": "Kedarnath Valley Scarp"
+  },
+  "snapshot_time": "2026-09-17T14:28:14.574826+00:00",
+  "sensors": [],
+  "current_risk": {
+    "location_id": "LOC-kedarnath",
+    "timestamp": "2026-09-17T14:28:14.574759+00:00",
+    "overall_score": 92,
+    "overall_level": "CRITICAL",
+    "primary_threat": "Landslide / Mass Movement",
+    "explanation": "CRITICAL geotechnical failure imminent at this location (Lat 30.74, Lon 79.07). Real-time rainfall of 0.0mm has fully saturated the topsoil (98.5%), nullifying slope friction angles. Tectonic stress of 7.80mGal amplifies the hazard.",
+    "hazards": {
+      "landslide": {
+        "hazard": "landslide",
+        "score": 20,
+        "level": "LOW"
+      },
+      "flood": {
+        "hazard": "flood",
+        "score": 15,
+        "level": "LOW"
+      },
+      "earthquake": {
+        "hazard": "earthquake",
+        "score": 10,
+        "level": "LOW"
+      },
+      "cyclone": {
+        "hazard": "cyclone",
+        "score": 5,
+        "level": "LOW"
+      },
+      "volcano": {
+        "hazard": "volcano",
+        "score": 5,
+        "level": "LOW"
+      }
+    },
+    "remedial_actions": {
+      "immediate": [
+        "Initiate mandatory evacuation",
+        "Deploy rapid-response units to all vulnerable slopes"
+      ],
+      "short_term": [
+        "Reinforce retaining walls",
+        "Install real-time slope displacement sensors"
+      ]
+    }
+  },
+  "forecast": [
+    {
+      "date": "2026-09-18",
+      "landslide_risk": 22,
+      "flood_risk": 17,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-19",
+      "landslide_risk": 24,
+      "flood_risk": 19,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-20",
+      "landslide_risk": 26,
+      "flood_risk": 21,
+      "cyclone_risk": 5,
+      "level": "MODERATE"
+    },
+    {
+      "date": "2026-09-21",
+      "landslide_risk": 12,
+      "flood_risk": 7,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-22",
+      "landslide_risk": 10,
+      "flood_risk": 5,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-23",
+      "landslide_risk": 8,
+      "flood_risk": 3,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    },
+    {
+      "date": "2026-09-24",
+      "landslide_risk": 6,
+      "flood_risk": 1,
+      "cyclone_risk": 5,
+      "level": "LOW"
+    }
+  ],
+  "affected_assets": {
+    "roads": 4,
+    "bridges": 2,
+    "villages": 3,
+    "schools": 1,
+    "hospitals": 1
+  },
+  "ai_narrative": "CRITICAL geotechnical failure imminent at this location (Lat 30.74, Lon 79.07). Real-time rainfall of 0.0mm has fully saturated the topsoil (98.5%), nullifying slope friction angles. Tectonic stress of 7.80mGal amplifies the hazard."
+}
