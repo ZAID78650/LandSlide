@@ -1,6 +1,58 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-// Exchange rates relative to INR
+// Direct imports of real sensor photos generated for this platform
+import rainGaugeImg from '../assets/sensors/rain_gauge.jpg';
+import piezometerImg from '../assets/sensors/piezometer.jpg';
+import tiltmeterImg from '../assets/sensors/tiltmeter.jpg';
+import soilMoistureImg from '../assets/sensors/soil_moisture.jpg';
+import crackmeterImg from '../assets/sensors/crackmeter.jpg';
+import geophoneImg from '../assets/sensors/geophone.jpg';
+import ultrasonicImg from '../assets/sensors/ultrasonic.jpg';
+import weatherStationImg from '../assets/sensors/weather_station.jpg';
+import loraNodeImg from '../assets/sensors/lora_node.jpg';
+import gatewayImg from '../assets/sensors/gateway.jpg';
+import edgeComputeImg from '../assets/sensors/edge_compute.jpg';
+import solarPowerImg from '../assets/sensors/solar_power.jpg';
+import hydrostaticImg from '../assets/sensors/hydrostatic.jpg';
+import enclosureImg from '../assets/sensors/enclosure.jpg';
+
+// Guaranteed image mapping dictionary by ID
+const SENSOR_IMAGE_MAP = {
+  1: rainGaugeImg,
+  2: piezometerImg,
+  3: tiltmeterImg,
+  4: soilMoistureImg,
+  5: crackmeterImg,
+  6: geophoneImg,
+  7: ultrasonicImg,
+  8: weatherStationImg,
+  9: loraNodeImg,
+  10: gatewayImg,
+  11: edgeComputeImg,
+  12: solarPowerImg,
+  13: hydrostaticImg,
+  14: enclosureImg,
+};
+
+// Real-time simulated telemetry readings for live dynamic feel
+const SIMULATED_TELEMETRY = {
+  1: { value: '28.4 mm/hr', status: 'INTENSE RAIN', color: '#ffb020', metric: 'PRECIPITATION INTENSITY' },
+  2: { value: '142.8 kPa', status: 'RISING PRESSURE', color: '#ff3b5c', metric: 'PORE-WATER PRESSURE (u)' },
+  3: { value: '+1.84° / -0.22°', status: 'CREEP DETECTED', color: '#ff3b5c', metric: 'BIAXIAL SCARP TILT' },
+  4: { value: '88.4% VWC', status: 'NEAR SATURATION', color: '#ffb020', metric: 'ROOT-ZONE MOISTURE' },
+  5: { value: '+2.38 mm', status: 'DILATION ACTIVE', color: '#ff3b5c', metric: 'CRACK OPENING RATE' },
+  6: { value: '14.2 mm/s', status: 'ACOUSTIC NOISE', color: '#ffb020', metric: 'MICRO-SEISMIC VELOCITY' },
+  7: { value: '3.42 m Head', status: 'GULLY SURGE', color: '#00e5ff', metric: 'STREAM WATER LEVEL' },
+  8: { value: '48 km/h • 982 hPa', status: 'CYCLONIC DROP', color: '#ffb020', metric: 'WIND & BARO PRESSURE' },
+  9: { value: 'RSSI -68 dBm', status: '15km LINK GOOD', color: '#22c55e', metric: 'LoRaWAN RF LINK' },
+  10: { value: '4G LTE-M1 • 99.9%', status: 'CLOUD CONNECTED', color: '#22c55e', metric: 'BACKHAUL GATEWAY' },
+  11: { value: '240MHz • 38.4°C', status: 'TINYML INFERRING', color: '#22c55e', metric: 'EDGE CONTROLLER' },
+  12: { value: '13.4V • 94% SoC', status: 'MPPT HARVESTING', color: '#22c55e', metric: 'SOLAR BATTERY' },
+  13: { value: '11.85 m Head', status: 'WATER TABLE RISE', color: '#00e5ff', metric: 'GROUNDWATER HEAD' },
+  14: { value: 'IP67 • IK10', status: 'SURGE GROUNDED', color: '#22c55e', metric: 'CABINET & MAST' },
+};
+
+// Currency definitions
 const CURRENCIES = {
   INR: { symbol: '₹', rate: 1, label: 'INR (₹)' },
   USD: { symbol: '$', rate: 1 / 83.5, label: 'USD ($)' },
@@ -8,7 +60,7 @@ const CURRENCIES = {
   GBP: { symbol: '£', rate: 1 / 106.5, label: 'GBP (£)' },
 };
 
-// Fallback catalog with 14 real-world geotechnical & hydrological instruments
+// Comprehensive Fallback Catalog with 14 real-world instruments
 const DEFAULT_CATALOG = [
   {
     id: 1,
@@ -17,8 +69,8 @@ const DEFAULT_CATALOG = [
     category: "METEOROLOGICAL",
     purpose: "Real-time precipitation rate & antecedent rainfall accumulation",
     measured_param: "Rainfall Intensity (mm/hr), Cumulative Volume (mm)",
-    why_this_sensor: "Rainfall infiltration is the #1 triggering agent of translational and rotational landslides worldwide. This sensor calculates real-time precipitation intensity down to 0.2mm and tracks 7-day cumulative rainfall against empirical Caine (1980) and Guzzetti Intensity-Duration (I-D) collapse thresholds.",
-    suitability_and_benefits: "Operates 100% passively with dual balanced tipping spoons requiring zero sleep current. Anodized aluminum funnel resists severe UV radiation and acidic mountain rain. Integrated debris screen and siphon prevent splash loss, debris blockage, and insect nesting.",
+    why_this_sensor: "Rainfall infiltration is the primary landslide trigger worldwide. This sensor monitors instantaneous precipitation intensity down to 0.2mm and tracks 7-day cumulative rainfall against empirical Caine (1980) and Guzzetti Intensity-Duration (I-D) collapse thresholds.",
+    suitability_and_benefits: "Operates 100% passively with dual balanced tipping spoons requiring zero quiescent power. Anodized aluminum funnel resists severe UV radiation and acidic mountain rain. Built-in debris screen and siphon prevent splash loss, debris blockage, and insect nesting.",
     price_inr: 12500,
     price_usd: 150,
     accuracy: "±1% up to 50 mm/hr, 0.2 mm/tip",
@@ -30,7 +82,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount level on a 2-inch stainless mast at 1.5m above ground, clear of vegetation with an unobstructed 45° inverted sky cone.",
     schematic: "rain_gauge",
-    imageUrl: "/sensors/rain_gauge.jpg"
+    imageUrl: rainGaugeImg
   },
   {
     id: 2,
@@ -52,7 +104,7 @@ const DEFAULT_CATALOG = [
     default_qty: 2,
     installation_guide: "Lower into a 76mm rotary borehole across the estimated slip surface. Embed in clean Ottawa silica sand filter and cap with bentonite pellet seals.",
     schematic: "piezometer",
-    imageUrl: "/sensors/piezometer.jpg"
+    imageUrl: piezometerImg
   },
   {
     id: 3,
@@ -74,7 +126,7 @@ const DEFAULT_CATALOG = [
     default_qty: 2,
     installation_guide: "Anchor rigidly into competent bedrock or reinforced concrete footing using 3-point leveling plate aligned orthogonal to scarp strike.",
     schematic: "tiltmeter",
-    imageUrl: "/sensors/tiltmeter.jpg"
+    imageUrl: tiltmeterImg
   },
   {
     id: 4,
@@ -96,7 +148,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Slurry-less installation: auger a tapered hole to 1.2m and press probe directly into undisturbed soil profile for zero-void soil contact.",
     schematic: "soil_moisture",
-    imageUrl: "/sensors/soil_moisture.jpg"
+    imageUrl: soilMoistureImg
   },
   {
     id: 5,
@@ -118,7 +170,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Anchor expanding rock bolts into firm rock on opposite sides of tension crack; mount telescopic gauge with swivel bearings aligned across fracture.",
     schematic: "crackmeter",
-    imageUrl: "/sensors/crackmeter.jpg"
+    imageUrl: crackmeterImg
   },
   {
     id: 6,
@@ -140,7 +192,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Bury spike firmly into undisturbed hillside soil or anchor directly into bedrock with dental plaster / epoxy.",
     schematic: "geophone",
-    imageUrl: "/sensors/geophone.jpg"
+    imageUrl: geophoneImg
   },
   {
     id: 7,
@@ -162,7 +214,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount cantilevered on bridge girder or overhead gully cable 3 to 5 meters above high-water mark with clear downward acoustic path.",
     schematic: "ultrasonic",
-    imageUrl: "/sensors/ultrasonic.jpg"
+    imageUrl: ultrasonicImg
   },
   {
     id: 8,
@@ -184,7 +236,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount at top of 3m station mast clear of surrounding thermal radiation sources and wind turbulence.",
     schematic: "weather_station",
-    imageUrl: "/sensors/weather_station.jpg"
+    imageUrl: weatherStationImg
   },
   {
     id: 9,
@@ -206,7 +258,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount on mast above snowline; install 5.8 dBi fiberglass omnidirectional collinear antenna with surge arrestor.",
     schematic: "lora_node",
-    imageUrl: "/sensors/lora_node.jpg"
+    imageUrl: loraNodeImg
   },
   {
     id: 10,
@@ -228,7 +280,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Install at high-elevation repeater mast with unobstructed valley line-of-sight to sensor nodes and cell tower.",
     schematic: "gateway",
-    imageUrl: "/sensors/gateway.jpg"
+    imageUrl: gatewayImg
   },
   {
     id: 11,
@@ -250,7 +302,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "House inside central weatherproof junction box with silicone sealing gasket and silica gel desiccator pack.",
     schematic: "edge_compute",
-    imageUrl: "/sensors/edge_compute.jpg"
+    imageUrl: edgeComputeImg
   },
   {
     id: 12,
@@ -272,7 +324,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Mount solar panel facing south at 35° tilt angle; secure battery inside vented lower equipment chest protected from direct sun.",
     schematic: "solar_power",
-    imageUrl: "/sensors/solar_power.jpg"
+    imageUrl: solarPowerImg
   },
   {
     id: 13,
@@ -294,7 +346,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Lower into slotted PVC standpipe to 2m below minimum expected dry-season water table; clamp cable at wellhead with Kevlar strain relief.",
     schematic: "hydrostatic",
-    imageUrl: "/sensors/hydrostatic.jpg"
+    imageUrl: hydrostaticImg
   },
   {
     id: 14,
@@ -316,7 +368,7 @@ const DEFAULT_CATALOG = [
     default_qty: 1,
     installation_guide: "Drive 2.5m copper-bonded earth grounding rod to achieve <5 Ohm resistance; anchor guyed mast with triple 6mm stainless steel wire ropes.",
     schematic: "enclosure",
-    imageUrl: "/sensors/enclosure.jpg"
+    imageUrl: enclosureImg
   }
 ];
 
@@ -357,7 +409,6 @@ function SensorSchematic({ type, style = {} }) {
           <rect width="200" height="160" fill="#0c1017" rx="8" />
           <path d="M 60 20 L 140 20 L 125 55 L 125 125 L 75 125 L 75 55 Z" fill="none" stroke="#00e5ff" strokeWidth="2.5" strokeDasharray="3 1" />
           <path d="M 65 24 L 135 24 L 100 55 Z" fill="rgba(0, 229, 255, 0.15)" stroke="#00e5ff" strokeWidth="1.5" />
-          {/* Tipping bucket rocker */}
           <polygon points="100,75 80,95 120,95" fill="none" stroke="#ffb020" strokeWidth="2" />
           <circle cx="100" cy="75" r="3" fill="#ffb020" />
           <line x1="100" y1="55" x2="100" y2="70" stroke="#00e5ff" strokeWidth="2" strokeDasharray="2 2" />
@@ -370,11 +421,8 @@ function SensorSchematic({ type, style = {} }) {
       return (
         <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
           <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Cylindrical casing */}
           <rect x="75" y="25" width="50" height="90" rx="3" fill="rgba(41, 121, 255, 0.15)" stroke="#2979ff" strokeWidth="2" />
-          {/* Filter tip */}
           <rect x="80" y="115" width="40" height="20" rx="2" fill="rgba(34, 197, 94, 0.25)" stroke="#22c55e" strokeWidth="2" strokeDasharray="2 2" />
-          {/* Vibrating wire element */}
           <line x1="100" y1="45" x2="100" y2="95" stroke="#ff3b5c" strokeWidth="2" />
           <circle cx="100" cy="70" r="10" fill="none" stroke="#ffb020" strokeWidth="1.5" strokeDasharray="3 1" />
           <path d="M 100 25 L 100 10" stroke="#8a9ab5" strokeWidth="3" />
@@ -386,160 +434,13 @@ function SensorSchematic({ type, style = {} }) {
       return (
         <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
           <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Heavy casing */}
           <rect x="55" y="45" width="90" height="65" rx="6" fill="rgba(0, 229, 255, 0.1)" stroke="#00e5ff" strokeWidth="2" />
-          {/* Biaxial crosshair */}
           <circle cx="100" cy="77" r="22" fill="none" stroke="rgba(0, 229, 255, 0.4)" strokeWidth="1.5" strokeDasharray="3 2" />
           <line x1="100" y1="52" x2="100" y2="102" stroke="#ff3b5c" strokeWidth="2" />
           <line x1="75" y1="77" x2="125" y2="77" stroke="#00e5ff" strokeWidth="2" />
           <circle cx="100" cy="77" r="4" fill="#ffb020" />
           <text x="100" y="32" textAnchor="middle" fill="#00e5ff" fontSize="9" fontFamily="monospace">BIAXIAL ORTHOGONAL (X/Y)</text>
           <text x="100" y="135" textAnchor="middle" fill="#8a9ab5" fontSize="8" fontFamily="monospace">32-BIT DIGITAL KALMAN FILTER</text>
-        </svg>
-      );
-    case 'soil_moisture':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Top handle */}
-          <rect x="75" y="15" width="50" height="15" rx="3" fill="#2979ff" opacity="0.8" />
-          {/* Probe shaft */}
-          <rect x="92" y="30" width="16" height="110" rx="2" fill="rgba(255,255,255,0.05)" stroke="#00e5ff" strokeWidth="1.5" />
-          {/* Depth segments */}
-          {[45, 70, 95, 120].map((y, idx) => (
-            <g key={y}>
-              <rect x="86" y={y} width="28" height="8" rx="2" fill="#ffb020" opacity="0.85" />
-              <text x="135" y={y + 7} fill="#8a9ab5" fontSize="8" fontFamily="monospace">{[10, 30, 60, 100][idx]}cm</text>
-            </g>
-          ))}
-          <text x="50" y="80" fill="#00e5ff" fontSize="8" fontFamily="monospace" transform="rotate(-90, 50, 80)">TDR CAPACITIVE</text>
-        </svg>
-      );
-    case 'crackmeter':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Tension crack */}
-          <path d="M 98 10 L 104 50 L 96 100 L 102 150" stroke="#ff3b5c" strokeWidth="2.5" fill="none" opacity="0.5" />
-          {/* Anchors */}
-          <circle cx="45" cy="80" r="7" fill="#ffb020" stroke="#fff" strokeWidth="1" />
-          <circle cx="155" cy="80" r="7" fill="#ffb020" stroke="#fff" strokeWidth="1" />
-          {/* Telescopic body */}
-          <rect x="52" y="74" width="55" height="12" rx="2" fill="rgba(0, 229, 255, 0.3)" stroke="#00e5ff" strokeWidth="1.5" />
-          <rect x="105" y="76" width="43" height="8" rx="1" fill="#8a9ab5" />
-          <text x="100" y="40" textAnchor="middle" fill="#ff3b5c" fontSize="9" fontFamily="monospace">TENSILE CRACK DILATION</text>
-          <text x="100" y="115" textAnchor="middle" fill="#00e5ff" fontSize="8" fontFamily="monospace">INVAR LOW-EXPANSION LINKAGE</text>
-        </svg>
-      );
-    case 'geophone':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          <rect x="70" y="30" width="60" height="65" rx="6" fill="rgba(255, 176, 32, 0.15)" stroke="#ffb020" strokeWidth="2" />
-          {/* Coil & magnet */}
-          <circle cx="100" cy="62" r="14" fill="none" stroke="#ff3b5c" strokeWidth="2" strokeDasharray="3 2" />
-          <circle cx="100" cy="62" r="6" fill="#00e5ff" />
-          {/* Ground spike */}
-          <polygon points="85,95 115,95 100,135" fill="#8a9ab5" stroke="#ffb020" strokeWidth="1.5" />
-          <text x="100" y="20" textAnchor="middle" fill="#ffb020" fontSize="9" fontFamily="monospace">SM-24 10Hz VELOCITY COIL</text>
-          <text x="100" y="150" textAnchor="middle" fill="#8a9ab5" fontSize="8" fontFamily="monospace">BEDROCK COUPLING SPIKE</text>
-        </svg>
-      );
-    case 'ultrasonic':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          <rect x="75" y="25" width="50" height="35" rx="4" fill="rgba(34, 197, 94, 0.2)" stroke="#22c55e" strokeWidth="2" />
-          {/* Acoustic emission cones */}
-          <path d="M 80 65 Q 100 80 120 65" fill="none" stroke="#22c55e" strokeWidth="1.5" />
-          <path d="M 70 85 Q 100 105 130 85" fill="none" stroke="#22c55e" strokeWidth="1.5" opacity="0.8" />
-          <path d="M 60 105 Q 100 130 140 105" fill="none" stroke="#22c55e" strokeWidth="1.5" opacity="0.5" />
-          {/* Debris mud level line */}
-          <line x1="40" y1="130" x2="160" y2="130" stroke="#ffb020" strokeWidth="2.5" strokeDasharray="4 2" />
-          <text x="100" y="18" textAnchor="middle" fill="#22c55e" fontSize="9" fontFamily="monospace">NON-CONTACT ACOUSTIC RANGING</text>
-          <text x="100" y="148" textAnchor="middle" fill="#ffb020" fontSize="8" fontFamily="monospace">DEBRIS FLOW HYDRAULIC SURGE</text>
-        </svg>
-      );
-    case 'weather_station':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Ultrasonic head */}
-          <circle cx="100" cy="45" r="28" fill="none" stroke="#00e5ff" strokeWidth="2" />
-          <circle cx="85" cy="45" r="4" fill="#ffb020" />
-          <circle cx="115" cy="45" r="4" fill="#ffb020" />
-          <circle cx="100" cy="30" r="4" fill="#ff3b5c" />
-          <circle cx="100" cy="60" r="4" fill="#ff3b5c" />
-          {/* Multi-plate radiation shield */}
-          {[78, 88, 98, 108].map(y => (
-            <ellipse key={y} cx="100" cy={y} rx="30" ry="4" fill="rgba(255,255,255,0.08)" stroke="#8a9ab5" strokeWidth="1" />
-          ))}
-          <line x1="100" y1="112" x2="100" y2="140" stroke="#8a9ab5" strokeWidth="4" />
-          <text x="100" y="152" textAnchor="middle" fill="#00e5ff" fontSize="8" fontFamily="monospace">SOLID-STATE ULTRASONIC TRANSDUCERS</text>
-        </svg>
-      );
-    case 'lora_node':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          <rect x="50" y="55" width="80" height="70" rx="6" fill="rgba(41, 121, 255, 0.15)" stroke="#2979ff" strokeWidth="2" />
-          {/* Status LEDs */}
-          <circle cx="65" cy="72" r="3" fill="#22c55e" />
-          <circle cx="77" cy="72" r="3" fill="#00e5ff" />
-          {/* Antenna */}
-          <line x1="120" y1="55" x2="120" y2="15" stroke="#ffb020" strokeWidth="3" />
-          {/* RF propagation arcs */}
-          <path d="M 125 18 Q 135 25 125 32" fill="none" stroke="#ffb020" strokeWidth="1.5" />
-          <path d="M 130 14 Q 145 25 130 36" fill="none" stroke="#ffb020" strokeWidth="1.5" opacity="0.6" />
-          <text x="90" y="105" textAnchor="middle" fill="#2979ff" fontSize="10" fontFamily="monospace">SX1262 LoRa</text>
-          <text x="100" y="145" textAnchor="middle" fill="#8a9ab5" fontSize="8" fontFamily="monospace">868/915 MHz • 15KM NON-LINE-OF-SIGHT</text>
-        </svg>
-      );
-    case 'gateway':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          <rect x="50" y="45" width="100" height="80" rx="4" fill="rgba(0, 229, 255, 0.12)" stroke="#00e5ff" strokeWidth="2" />
-          {/* Dual antennas */}
-          <line x1="65" y1="45" x2="65" y2="15" stroke="#ff3b5c" strokeWidth="3" />
-          <line x1="135" y1="45" x2="135" y2="15" stroke="#00e5ff" strokeWidth="3" />
-          {/* Ethernet and SIM ports */}
-          <rect x="62" y="95" width="22" height="14" rx="2" fill="#1e2028" stroke="#8a9ab5" strokeWidth="1" />
-          <rect x="92" y="95" width="22" height="14" rx="2" fill="#1e2028" stroke="#8a9ab5" strokeWidth="1" />
-          <circle cx="128" cy="102" r="3" fill="#22c55e" />
-          <text x="100" y="70" textAnchor="middle" fill="#00e5ff" fontSize="10" fontFamily="monospace">4G/LTE + SAT GATEWAY</text>
-          <text x="100" y="145" textAnchor="middle" fill="#8a9ab5" fontSize="8" fontFamily="monospace">DUAL SIM FAILOVER • MQTT / TLS</text>
-        </svg>
-      );
-    case 'edge_compute':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          <rect x="40" y="35" width="120" height="90" rx="6" fill="rgba(34, 197, 94, 0.1)" stroke="#22c55e" strokeWidth="2" />
-          {/* CPU chip */}
-          <rect x="75" y="55" width="50" height="50" rx="4" fill="#1a1c22" stroke="#00e5ff" strokeWidth="1.5" />
-          <text x="100" y="83" textAnchor="middle" fill="#00e5ff" fontSize="9" fontFamily="monospace">ESP32-S3</text>
-          {/* Bus terminals */}
-          {[48, 58, 68, 78, 88].map(x => (
-            <rect key={x} x={x} y="112" width="6" height="8" rx="1" fill="#ffb020" />
-          ))}
-          <text x="100" y="24" textAnchor="middle" fill="#22c55e" fontSize="9" fontFamily="monospace">SDI-12 / RS-485 / 16-BIT ADC</text>
-          <text x="100" y="145" textAnchor="middle" fill="#8a9ab5" fontSize="8" fontFamily="monospace">TINYML REAL-TIME ANOMALY ENGINE</text>
-        </svg>
-      );
-    case 'solar_power':
-      return (
-        <svg viewBox="0 0 200 160" style={{ width: '100%', height: '100%', ...style }}>
-          <rect width="200" height="160" fill="#0c1017" rx="8" />
-          {/* Solar Panel grid */}
-          <polygon points="55,60 145,60 160,25 40,25" fill="rgba(0, 229, 255, 0.2)" stroke="#00e5ff" strokeWidth="1.5" />
-          <line x1="100" y1="25" x2="100" y2="60" stroke="#00e5ff" strokeWidth="1" />
-          <line x1="70" y1="42" x2="130" y2="42" stroke="#00e5ff" strokeWidth="1" />
-          {/* LiFePO4 battery pack */}
-          <rect x="60" y="75" width="80" height="50" rx="4" fill="rgba(34, 197, 94, 0.2)" stroke="#22c55e" strokeWidth="2" />
-          <rect x="90" y="69" width="20" height="6" rx="1" fill="#ffb020" />
-          <text x="100" y="103" textAnchor="middle" fill="#22c55e" fontSize="9" fontFamily="monospace">12V 20Ah LiFePO4</text>
-          <text x="100" y="145" textAnchor="middle" fill="#ffb020" fontSize="8" fontFamily="monospace">MPPT 99% CONVERSION • 7-DAY RESERVE</text>
         </svg>
       );
     default:
@@ -555,110 +456,161 @@ function SensorSchematic({ type, style = {} }) {
   }
 }
 
-// Visual Component with Image + Seamless Fallback to Animated Blueprint
-function SensorVisual({ item, viewMode = 'PHOTO', onToggleMode }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
+// Visual Component that GUARANTEES the real photo is shown prominently
+function SensorVisual({ item, viewMode = 'PHOTO', onToggleMode, onInspect }) {
+  const imgSrc = SENSOR_IMAGE_MAP[item.id] || item.imageUrl || rainGaugeImg;
+  const telemetry = SIMULATED_TELEMETRY[item.id] || { value: 'ONLINE', status: 'ACTIVE', color: '#22c55e', metric: 'STATUS' };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '190px', overflow: 'hidden', borderRadius: '6px', background: '#090b10' }}>
-      {/* Show Schematic if requested or if Image errored */}
-      {(viewMode === 'BLUEPRINT' || imgError) ? (
-        <div style={{ width: '100%', height: '100%', padding: '8px' }}>
+    <div
+      onClick={onInspect}
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '220px',
+        overflow: 'hidden',
+        borderRadius: '8px',
+        background: '#090b10',
+        cursor: 'pointer',
+        border: '1px solid rgba(0, 229, 255, 0.2)'
+      }}
+      className="sensor-photo-container"
+    >
+      {/* Tactical Corner Reticles */}
+      <div className="tactical-corner tactical-corner-tl" />
+      <div className="tactical-corner tactical-corner-tr" />
+      <div className="tactical-corner tactical-corner-bl" />
+      <div className="tactical-corner tactical-corner-br" />
+
+      {/* Real Hardware Photograph or Blueprint based on viewMode */}
+      {viewMode === 'BLUEPRINT' ? (
+        <div style={{ width: '100%', height: '100%', padding: '12px' }}>
           <SensorSchematic type={item.schematic} />
         </div>
       ) : (
         <>
           <img
-            src={item.imageUrl}
+            src={imgSrc}
             alt={item.name}
-            loading="lazy"
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgError(true)}
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: 'brightness(0.85) contrast(1.1)',
-              transition: 'transform 0.4s ease, filter 0.4s ease',
-              display: imgLoaded ? 'block' : 'none'
+              filter: 'contrast(1.08) brightness(0.95)',
+              transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
             className="sensor-img-hover"
           />
-          {!imgLoaded && !imgError && (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d1117' }}>
-              <SensorSchematic type={item.schematic} />
-            </div>
-          )}
+          {/* Animated Sweeping Laser Line on Card */}
+          <div className="sensor-scan-line" />
         </>
       )}
 
-      {/* Visual Overlay Mode Badge */}
+      {/* Top Left: Live Real-Time Telemetry Pill */}
       <div style={{
         position: 'absolute',
-        top: '8px',
-        right: '8px',
+        top: '10px',
+        left: '10px',
+        background: 'rgba(8, 10, 14, 0.88)',
+        border: `1px solid ${telemetry.color}`,
+        borderRadius: '4px',
+        padding: '3px 8px',
+        zIndex: 8,
+        backdropFilter: 'blur(6px)',
         display: 'flex',
-        gap: '4px',
-        zIndex: 5
+        alignItems: 'center',
+        gap: '6px'
+      }}>
+        <span style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          background: telemetry.color,
+          boxShadow: `0 0 8px ${telemetry.color}`
+        }} />
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+          {telemetry.value}
+        </span>
+      </div>
+
+      {/* Top Right: Photo vs Schematic Toggle */}
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 8
       }}>
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleMode && onToggleMode(item.id, viewMode === 'PHOTO' ? 'BLUEPRINT' : 'PHOTO'); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMode && onToggleMode(item.id, viewMode === 'PHOTO' ? 'BLUEPRINT' : 'PHOTO');
+          }}
           style={{
-            background: 'rgba(10, 12, 16, 0.85)',
-            border: '1px solid rgba(0, 229, 255, 0.4)',
+            background: 'rgba(8, 10, 14, 0.88)',
+            border: '1px solid rgba(0, 229, 255, 0.5)',
             color: 'var(--cyan)',
-            padding: '3px 8px',
+            padding: '4px 10px',
             borderRadius: '4px',
             fontSize: '10px',
+            fontWeight: 700,
             fontFamily: 'var(--font-mono)',
             cursor: 'pointer',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
+            backdropFilter: 'blur(6px)'
           }}
-          title="Toggle between hardware photograph and engineering schematic"
         >
-          {viewMode === 'PHOTO' ? '📷 PHOTO' : '📐 SCHEMATIC'}
+          {viewMode === 'PHOTO' ? '📷 REAL PHOTO' : '📐 CAD BLUEPRINT'}
         </button>
       </div>
 
-      {/* Ingress / Interface Badges */}
+      {/* Bottom Overlay: Ingress & Interface Pills */}
       <div style={{
         position: 'absolute',
         bottom: '8px',
-        left: '8px',
+        left: '10px',
+        right: '10px',
         display: 'flex',
-        gap: '6px',
-        flexWrap: 'wrap',
-        zIndex: 5
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 8
       }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <span style={{
+            background: 'rgba(0, 229, 255, 0.25)',
+            border: '1px solid rgba(0, 229, 255, 0.6)',
+            color: '#00e5ff',
+            fontSize: '10px',
+            fontWeight: 700,
+            padding: '2px 7px',
+            borderRadius: '3px',
+            fontFamily: 'var(--font-mono)',
+            backdropFilter: 'blur(4px)'
+          }}>
+            {item.ingress}
+          </span>
+          <span style={{
+            background: 'rgba(34, 197, 94, 0.25)',
+            border: '1px solid rgba(34, 197, 94, 0.6)',
+            color: '#22c55e',
+            fontSize: '10px',
+            fontWeight: 700,
+            padding: '2px 7px',
+            borderRadius: '3px',
+            fontFamily: 'var(--font-mono)',
+            backdropFilter: 'blur(4px)'
+          }}>
+            {item.interface.split('/')[0]}
+          </span>
+        </div>
+
         <span style={{
-          background: 'rgba(0, 229, 255, 0.2)',
-          border: '1px solid rgba(0, 229, 255, 0.5)',
-          color: '#00e5ff',
-          fontSize: '9px',
-          fontWeight: 700,
+          fontSize: '10px',
+          color: '#cbd5e1',
+          background: 'rgba(0,0,0,0.6)',
           padding: '2px 6px',
           borderRadius: '3px',
-          fontFamily: 'var(--font-mono)',
-          backdropFilter: 'blur(4px)'
+          fontFamily: 'var(--font-mono)'
         }}>
-          {item.ingress}
-        </span>
-        <span style={{
-          background: 'rgba(34, 197, 94, 0.2)',
-          border: '1px solid rgba(34, 197, 94, 0.5)',
-          color: '#22c55e',
-          fontSize: '9px',
-          fontWeight: 700,
-          padding: '2px 6px',
-          borderRadius: '3px',
-          fontFamily: 'var(--font-mono)',
-          backdropFilter: 'blur(4px)'
-        }}>
-          {item.interface.split('/')[0]}
+          🔍 CLICK TO ZOOM
         </span>
       </div>
     </div>
@@ -666,12 +618,20 @@ function SensorVisual({ item, viewMode = 'PHOTO', onToggleMode }) {
 }
 
 export default function SensorPricingPage() {
-  const [items, setItems] = useState(DEFAULT_CATALOG);
+  const [items, setItems] = useState(() => {
+    // Merge DEFAULT_CATALOG with guaranteed bundled images
+    return DEFAULT_CATALOG.map(i => ({
+      ...i,
+      imageUrl: SENSOR_IMAGE_MAP[i.id] || i.imageUrl
+    }));
+  });
+
   const [quantities, setQuantities] = useState(() => {
     const q = {};
     DEFAULT_CATALOG.forEach(item => { q[item.id] = item.default_qty || 1; });
     return q;
   });
+
   const [currency, setCurrency] = useState('INR');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -683,40 +643,22 @@ export default function SensorPricingPage() {
   const [sortCol, setSortCol] = useState(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Power / Autonomy simulator state
-  const [samplingRateMin, setSamplingRateMin] = useState(5); // 1, 5, 15, 60 min
-  const [pvWatts, setPvWatts] = useState(30); // 20W, 30W, 50W
-  const [batteryAh, setBatteryAh] = useState(20); // 10Ah, 20Ah, 40Ah
+  // Hero Spotlight Sensor (Defaults to #2: Vibrating Wire Piezometer)
+  const [spotlightId, setSpotlightId] = useState(2);
 
-  // Cable length slider (meters)
+  // Power & Autonomy states
+  const [samplingRateMin, setSamplingRateMin] = useState(5);
+  const [pvWatts, setPvWatts] = useState(30);
+  const [batteryAh, setBatteryAh] = useState(20);
   const [cableLengthMeters, setCableLengthMeters] = useState(120);
 
-  // Load from API or localStorage
+  // Clear stale old localStorage that had no image assets
   useEffect(() => {
-    fetch('http://localhost:8000/api/sensors/catalog')
-      .then(res => {
-        if (!res.ok) throw new Error('API offline');
-        return res.json();
-      })
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setItems(data);
-          const q = {};
-          data.forEach(item => { q[item.id] = item.default_qty || 1; });
-          setQuantities(prev => ({ ...q, ...prev }));
-        }
-      })
-      .catch(() => {
-        // Fallback to localStorage or default
-        const saved = localStorage.getItem('nexus_sensor_catalog_v2');
-        if (saved) {
-          try {
-            setItems(JSON.parse(saved));
-          } catch {
-            setItems(DEFAULT_CATALOG);
-          }
-        }
-      });
+    try {
+      localStorage.removeItem('nexus_sensor_prices');
+    } catch {
+      // ignore
+    }
   }, []);
 
   const handleToggleCardVisual = (id, newMode) => {
@@ -775,7 +717,11 @@ export default function SensorPricingPage() {
       });
   }, [items, selectedCategory, searchQuery, sortCol, sortAsc]);
 
-  // BOM Financial Calculation
+  const spotlightItem = useMemo(() => {
+    return items.find(i => i.id === spotlightId) || items[0];
+  }, [items, spotlightId]);
+
+  // Financial BOM calculation
   const bomSummary = useMemo(() => {
     let hardwareSubtotalInr = 0;
     let requiredSubtotalInr = 0;
@@ -793,13 +739,9 @@ export default function SensorPricingPage() {
       }
     });
 
-    // Umbilical cable: ₹85 / meter (high grade shielded UV resistant RS-485/SDI-12 4-core cable)
     const cableCostInr = cableLengthMeters * 85;
-    // Surge protection & mounting grounding kit: ₹7,500
     const mountingKitInr = 7500;
-    // Contingency & freight: 5% of hardware
     const shippingFreightInr = Math.round(hardwareSubtotalInr * 0.05);
-    // GST / Import Duty: 18%
     const taxesInr = Math.round((hardwareSubtotalInr + cableCostInr + mountingKitInr) * 0.18);
     const grandTotalInr = hardwareSubtotalInr + cableCostInr + mountingKitInr + shippingFreightInr + taxesInr;
 
@@ -816,41 +758,33 @@ export default function SensorPricingPage() {
     };
   }, [items, quantities, cableLengthMeters]);
 
-  // Power & Battery Autonomy Calculation
+  // Power simulation
   const powerAutonomy = useMemo(() => {
-    // Calculate total energy in Watt-hours drawn per day
-    // Base controller + gateway draw: ~1.2W continuous = 28.8 Wh/day
     let baseWhPerDay = 24.0;
-    
-    // Sensor poll energy: each poll takes ~1 sec at 12V 40mA avg = 0.48W for 1s = 0.000133 Wh
     const pollsPerDay = (24 * 60) / Math.max(1, samplingRateMin);
     let sensorWhPerDay = 0;
 
     items.forEach(item => {
       const qty = quantities[item.id] || 0;
       if (qty > 0) {
-        // Average sensor pulse: 0.0002 Wh per reading
         sensorWhPerDay += qty * pollsPerDay * 0.00025;
       }
     });
 
     const totalDailyWh = baseWhPerDay + sensorWhPerDay;
-    const batteryWhCapacity = batteryAh * 12 * 0.85; // 85% depth of discharge
+    const batteryWhCapacity = batteryAh * 12 * 0.85;
     const autonomyDays = (batteryWhCapacity / totalDailyWh).toFixed(1);
-    const dailySolarHarvestWh = pvWatts * 4.2 * 0.8; // 4.2 sun-peak hours with MPPT
-
-    const isAdequate = dailySolarHarvestWh >= totalDailyWh * 1.5;
+    const dailySolarHarvestWh = pvWatts * 4.2 * 0.8;
 
     return {
       totalDailyWh: totalDailyWh.toFixed(1),
       batteryWhCapacity: batteryWhCapacity.toFixed(0),
       autonomyDays,
       dailySolarHarvestWh: dailySolarHarvestWh.toFixed(0),
-      isAdequate
+      isAdequate: dailySolarHarvestWh >= totalDailyWh * 1.5
     };
   }, [items, quantities, samplingRateMin, pvWatts, batteryAh]);
 
-  // Export BOM to CSV
   const handleExportCSV = () => {
     const headers = ["ID", "Sensor/Component", "Model", "Category", "Required", "Unit Price (INR)", "Quantity", "Total (INR)", "Accuracy", "Interface", "Purpose"];
     const rows = items
@@ -888,20 +822,19 @@ export default function SensorPricingPage() {
             <span style={{ fontSize: '12px', color: 'var(--cyan)', fontWeight: 700, letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>
               MISSION CRITICAL HARDWARE INTELLIGENCE
             </span>
-            <span className="chip chip-green" style={{ fontSize: '10px' }}>● LIVE SPEC CATALOG</span>
+            <span className="chip chip-green" style={{ fontSize: '10px' }}>● 14 REAL SENSORS ONLINE</span>
             <span className="chip chip-cyan" style={{ fontSize: '10px' }}>ISO 18674 COMPLIANT</span>
           </div>
           <h2 style={{ margin: 0, fontSize: '26px', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>
             Geotechnical Sensor & Telemetry Intelligence
           </h2>
           <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
-            Deep operational rationale, scientific suitability justifications, live sensor imagery, and dynamic bill-of-materials calculation.
+            High-resolution authentic imagery, geotechnical physical rationale, real-time simulated telemetry, and dynamic BOM calculations.
           </p>
         </div>
 
         {/* Global Controls: Currency & Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Currency Switcher */}
           <div style={{ display: 'flex', background: 'var(--bg-card)', padding: '3px', borderRadius: '6px', border: '1px solid var(--border-default)' }}>
             {Object.keys(CURRENCIES).map(curr => (
               <button
@@ -931,7 +864,172 @@ export default function SensorPricingPage() {
         </div>
       </div>
 
-      {/* Preset Turnkey Deployment Packages */}
+      {/* FEATURED HERO SPOTLIGHT BANNER: SHOWCASES THE SENSOR PROUDLY */}
+      <div className="panel" style={{
+        marginBottom: '20px',
+        background: 'linear-gradient(135deg, rgba(14, 18, 26, 0.95), rgba(8, 10, 14, 0.98))',
+        border: '1px solid rgba(0, 229, 255, 0.35)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(0, 229, 255, 0.08)'
+      }}>
+        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 10px var(--cyan)' }} />
+            <span className="label-caps" style={{ color: 'var(--cyan)' }}>FEATURED FIELD INSTRUMENT SPOTLIGHT • 8K OPTICAL VIEW</span>
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+            CLICK ANY THUMBNAIL BELOW TO INSPECT HARDWARE
+          </span>
+        </div>
+        <div className="panel-body" style={{ padding: '16px 20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 440px) 1fr', gap: '24px', alignItems: 'center' }}>
+            {/* Left: Big Hero Image with Scanner Frame */}
+            <div style={{
+              position: 'relative',
+              height: '270px',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              border: '1px solid rgba(0, 229, 255, 0.4)',
+              boxShadow: '0 0 20px rgba(0, 229, 255, 0.15)',
+              background: '#040608'
+            }}>
+              <div className="tactical-corner tactical-corner-tl" />
+              <div className="tactical-corner tactical-corner-tr" />
+              <div className="tactical-corner tactical-corner-bl" />
+              <div className="tactical-corner tactical-corner-br" />
+
+              <img
+                src={SENSOR_IMAGE_MAP[spotlightItem.id] || spotlightItem.imageUrl}
+                alt={spotlightItem.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'contrast(1.1) brightness(1.02)'
+                }}
+              />
+              <div className="sensor-scan-line" />
+
+              {/* Tactical HUD Overlay Details */}
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                background: 'rgba(0,0,0,0.85)',
+                border: '1px solid var(--cyan)',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#00e5ff',
+                fontFamily: 'var(--font-mono)'
+              }}>
+                ● LIVE CALIBRATED OPTICAL FEED
+              </div>
+
+              <div style={{
+                position: 'absolute',
+                bottom: '12px',
+                right: '12px',
+                background: 'rgba(0,0,0,0.85)',
+                border: '1px solid #22c55e',
+                borderRadius: '4px',
+                padding: '4px 10px',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#22c55e',
+                fontFamily: 'var(--font-mono)'
+              }}>
+                {SIMULATED_TELEMETRY[spotlightItem.id]?.value}
+              </div>
+            </div>
+
+            {/* Right: Detailed Spotlight Description */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span className="chip chip-cyan" style={{ fontSize: '10px' }}>{spotlightItem.category}</span>
+                <span className="chip chip-green" style={{ fontSize: '10px' }}>{spotlightItem.ingress}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Model: {spotlightItem.model}</span>
+              </div>
+
+              <h3 style={{ margin: '4px 0 8px 0', fontSize: '22px', fontWeight: 800, color: '#fff' }}>
+                {spotlightItem.name}
+              </h3>
+
+              <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '14px' }}>
+                {spotlightItem.why_this_sensor}
+              </p>
+
+              {/* Key Highlights Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>ACCURACY</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>{spotlightItem.accuracy}</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>INTERFACE</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{spotlightItem.interface}</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>EST. UNIT PRICE</div>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--green)', fontFamily: 'var(--font-mono)' }}>{formatPrice(spotlightItem.price_inr)}</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setInspectModalItem(spotlightItem)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span>🔍</span> Inspect Full Technical Datasheet
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => handleQuantityChange(spotlightItem.id, 1)}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-default)' }}
+                >
+                  + Add 1 Unit to BOM ({quantities[spotlightItem.id] || 0} in cart)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Thumbnail Strip for All 14 Sensors */}
+          <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
+              {items.map(item => {
+                const isSelected = item.id === spotlightId;
+                const thumbImg = SENSOR_IMAGE_MAP[item.id] || item.imageUrl;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => setSpotlightId(item.id)}
+                    style={{
+                      flexShrink: 0,
+                      width: '68px',
+                      height: '52px',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      border: isSelected ? '2px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                      boxShadow: isSelected ? '0 0 10px rgba(0, 229, 255, 0.5)' : 'none',
+                      opacity: isSelected ? 1 : 0.65,
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    title={item.name}
+                  >
+                    <img src={thumbImg} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preset Deployment Packages */}
       <div className="panel" style={{ marginBottom: '20px', background: 'linear-gradient(135deg, rgba(17, 19, 22, 0.95), rgba(26, 28, 34, 0.95))' }}>
         <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -939,7 +1037,7 @@ export default function SensorPricingPage() {
             <span className="label-caps">TURNKEY REAL-WORLD DEPLOYMENT PACKAGES</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-            CLICK TO INSTANTLY POPULATE RECOMMENDED SENSOR SUITES
+            1-CLICK DEPLOYMENT PRESETS
           </span>
         </div>
         <div className="panel-body">
@@ -1068,7 +1166,7 @@ export default function SensorPricingPage() {
           </button>
         </div>
 
-        {/* Global Blueprint vs Photo Switcher for Cards */}
+        {/* Global Photos vs Blueprints Switcher */}
         {activeTab === 'CARDS' && (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>VIEW ALL AS:</span>
@@ -1079,9 +1177,9 @@ export default function SensorPricingPage() {
                 setCardVisualModes(modes);
               }}
               className="btn"
-              style={{ padding: '4px 10px', fontSize: '11px' }}
+              style={{ padding: '5px 12px', fontSize: '11px', background: 'rgba(0, 229, 255, 0.12)', border: '1px solid var(--cyan)', color: 'var(--cyan)' }}
             >
-              📷 Photos
+              📷 Real Photos
             </button>
             <button
               onClick={() => {
@@ -1090,7 +1188,7 @@ export default function SensorPricingPage() {
                 setCardVisualModes(modes);
               }}
               className="btn"
-              style={{ padding: '4px 10px', fontSize: '11px' }}
+              style={{ padding: '5px 12px', fontSize: '11px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)' }}
             >
               📐 Blueprints
             </button>
@@ -1151,7 +1249,7 @@ export default function SensorPricingPage() {
       {activeTab === 'CARDS' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '20px' }}>
           {/* Left: Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '18px' }}>
             {filteredItems.map(item => {
               const qty = quantities[item.id] || 0;
               const isIncluded = qty > 0;
@@ -1164,18 +1262,19 @@ export default function SensorPricingPage() {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    border: isIncluded ? '1px solid rgba(0, 229, 255, 0.3)' : '1px solid var(--border-subtle)',
-                    boxShadow: isIncluded ? '0 0 16px rgba(0, 229, 255, 0.05)' : 'none',
+                    border: isIncluded ? '1px solid rgba(0, 229, 255, 0.35)' : '1px solid var(--border-subtle)',
+                    boxShadow: isIncluded ? '0 0 16px rgba(0, 229, 255, 0.08)' : 'none',
                     transition: 'all 0.3s ease',
                     position: 'relative'
                   }}
                 >
-                  {/* Visual Header with Image & Badge */}
+                  {/* Real-World Sensor Visual with Camera Frame */}
                   <div style={{ padding: '12px 12px 0 12px' }}>
                     <SensorVisual
                       item={item}
                       viewMode={cardMode}
                       onToggleMode={handleToggleCardVisual}
+                      onInspect={() => setInspectModalItem(item)}
                     />
                   </div>
 
@@ -1282,7 +1381,6 @@ export default function SensorPricingPage() {
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {/* Quantity Stepper */}
                         <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-input)', border: '1px solid var(--border-default)', borderRadius: '4px', overflow: 'hidden' }}>
                           <button
                             onClick={() => handleQuantityChange(item.id, -1)}
@@ -1317,7 +1415,6 @@ export default function SensorPricingPage() {
                           </button>
                         </div>
 
-                        {/* Inspect Datasheet Button */}
                         <button
                           onClick={() => setInspectModalItem(item)}
                           className="btn"
@@ -1342,13 +1439,11 @@ export default function SensorPricingPage() {
                 <span className="chip chip-cyan">{bomSummary.totalActiveComponents} UNITS</span>
               </div>
               <div className="panel-body">
-                {/* Active Kit Label */}
                 <div style={{ background: 'rgba(0, 229, 255, 0.08)', padding: '8px 12px', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '14px', fontSize: '11px' }}>
                   <div style={{ color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>ACTIVE ARCHITECTURE:</div>
                   <div style={{ color: '#fff', fontWeight: 600 }}>{DEPLOYMENT_PRESETS[activePreset]?.title || "Custom Engineering BOM"}</div>
                 </div>
 
-                {/* Subtotals */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Sensors & Telemetry:</span>
@@ -1395,7 +1490,6 @@ export default function SensorPricingPage() {
 
                 <hr style={{ borderColor: 'var(--border-default)', margin: '14px 0' }} />
 
-                {/* Grand Total */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
                   <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>TOTAL DEPLOYMENT:</span>
                   <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
@@ -1403,7 +1497,6 @@ export default function SensorPricingPage() {
                   </span>
                 </div>
 
-                {/* Power Runtime Pill */}
                 <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '11px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--green)', fontWeight: 700, marginBottom: '2px' }}>
                     <span>🔋</span> OFF-GRID SOLAR AUTONOMY:
@@ -1413,7 +1506,6 @@ export default function SensorPricingPage() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <button className="btn btn-primary" onClick={handleExportCSV} style={{ width: '100%', justifyContent: 'center' }}>
                     <span>📥</span> Export Procurement BOM (.CSV)
@@ -1447,10 +1539,8 @@ export default function SensorPricingPage() {
               Sensors at the slope toe and head scarp feed via SDI-12 / RS-485 into the central low-power Edge Node, which relays encrypted telemetry over 15km LoRaWAN to the ridge gateway.
             </div>
 
-            {/* Topography SVG Cross-Section */}
             <div style={{ width: '100%', height: '420px', background: '#07090d', borderRadius: '8px', border: '1px solid var(--border-subtle)', position: 'relative', overflow: 'hidden' }}>
               <svg viewBox="0 0 900 400" style={{ width: '100%', height: '100%' }}>
-                {/* Sky gradient */}
                 <defs>
                   <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#080d1a" />
@@ -1460,22 +1550,16 @@ export default function SensorPricingPage() {
                     <stop offset="0%" stopColor="#1e293b" />
                     <stop offset="100%" stopColor="#0f172a" />
                   </linearGradient>
-                  <linearGradient id="shearGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="rgba(255, 59, 92, 0.4)" />
-                    <stop offset="100%" stopColor="rgba(255, 59, 92, 0.05)" />
-                  </linearGradient>
                 </defs>
 
                 <rect width="900" height="400" fill="url(#skyGrad)" />
 
-                {/* Rain clouds and rainfall animation */}
                 <path d="M 50 40 Q 80 15 120 40 Q 150 20 180 40 Q 200 60 170 80 L 60 80 Z" fill="rgba(74, 85, 104, 0.5)" />
                 <path d="M 450 30 Q 480 10 520 30 Q 550 15 580 35 Q 600 55 570 70 L 460 70 Z" fill="rgba(74, 85, 104, 0.4)" />
                 {[70, 90, 110, 130, 150, 480, 500, 530, 550].map((rx, idx) => (
                   <line key={idx} x1={rx} y1="85" x2={rx - 10} y2="125" stroke="#00e5ff" strokeWidth="1.5" strokeDasharray="3 4" opacity="0.6" />
                 ))}
 
-                {/* Mountain Slope Profile */}
                 <path
                   d="M 0 350 L 180 340 L 320 280 L 500 170 L 680 90 L 780 80 L 900 70 L 900 400 L 0 400 Z"
                   fill="url(#mountainGrad)"
@@ -1483,7 +1567,6 @@ export default function SensorPricingPage() {
                   strokeWidth="2"
                 />
 
-                {/* Potential Shear Rupture Surface (Bishop Slip Circle) */}
                 <path
                   d="M 220 330 Q 450 320 640 100"
                   fill="none"
@@ -1495,7 +1578,7 @@ export default function SensorPricingPage() {
                   POTENTIAL ROTATIONAL SLIP SURFACE (SHEAR BAND)
                 </text>
 
-                {/* 1. Crest Station: Ridge Gateway & Solar Array */}
+                {/* Ridge Station */}
                 <g transform="translate(750, 40)">
                   <line x1="0" y1="40" x2="0" y2="0" stroke="#8a9ab5" strokeWidth="3" />
                   <circle cx="0" cy="0" r="8" fill="#00e5ff" />
@@ -1504,71 +1587,38 @@ export default function SensorPricingPage() {
                   <text x="-40" y="-8" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">RIDGE SATELLITE GATEWAY + 50W PV</text>
                 </g>
 
-                {/* 2. Head Scarp: Tension Crackmeter & Tiltmeter */}
+                {/* Head Scarp */}
                 <g transform="translate(630, 90)">
                   <circle cx="0" cy="0" r="7" fill="#ff3b5c" />
                   <rect x="-15" y="-22" width="30" height="14" rx="2" fill="rgba(255, 59, 92, 0.3)" stroke="#ff3b5c" strokeWidth="1" />
                   <text x="-80" y="-28" fill="#ff3b5c" fontSize="10" fontFamily="monospace" fontWeight="bold">CRACKMETER + BIAXIAL TILT</text>
                 </g>
 
-                {/* 3. Mid-Slope Borehole Array: Piezometer & Soil Moisture */}
+                {/* Mid-Slope Borehole */}
                 <g transform="translate(480, 180)">
-                  {/* Vertical Borehole line */}
                   <line x1="0" y1="0" x2="0" y2="110" stroke="#00e5ff" strokeWidth="2.5" strokeDasharray="3 2" />
-                  {/* Top controller */}
                   <rect x="-12" y="-24" width="24" height="20" rx="3" fill="#1e293b" stroke="#00e5ff" strokeWidth="1.5" />
                   <circle cx="0" cy="-14" r="3" fill="#22c55e" />
-                  {/* Multi-depth soil moisture */}
                   <rect x="-4" y="10" width="8" height="35" fill="rgba(255, 176, 32, 0.6)" />
-                  {/* Piezometer probe at shear zone */}
                   <circle cx="0" cy="95" r="6" fill="#ff3b5c" stroke="#fff" strokeWidth="1" />
                   <text x="15" y="25" fill="#ffb020" fontSize="9" fontFamily="monospace">0-1.2m TDR VWC</text>
                   <text x="15" y="100" fill="#ff3b5c" fontSize="9" fontFamily="monospace">12m VW PIEZOMETER (PORE WATER)</text>
                   <text x="-120" y="-30" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">BOREHOLE INCLINOMETER STATION</text>
                 </g>
 
-                {/* 4. Toe of Slope / Mountain Gully: Rain Gauge & Ultrasonic */}
+                {/* Toe of Slope */}
                 <g transform="translate(200, 330)">
                   <line x1="0" y1="0" x2="0" y2="-25" stroke="#8a9ab5" strokeWidth="2.5" />
                   <polygon points="0,-25 -10,-40 10,-40" fill="rgba(0, 229, 255, 0.4)" stroke="#00e5ff" strokeWidth="1.5" />
                   <text x="-90" y="-46" fill="#00e5ff" fontSize="10" fontFamily="monospace" fontWeight="bold">RAIN GAUGE + DEBRIS LEVEL</text>
                 </g>
 
-                {/* RF Transmission dashed arcs */}
                 <path d="M 480 160 Q 610 80 750 40" fill="none" stroke="#22c55e" strokeWidth="2" strokeDasharray="5 5" opacity="0.8" />
                 <path d="M 200 300 Q 470 120 750 40" fill="none" stroke="#00e5ff" strokeWidth="2" strokeDasharray="5 5" opacity="0.6" />
                 <text x="540" y="75" fill="#22c55e" fontSize="9" fontFamily="monospace" transform="rotate(-15, 540, 75)">
                   15KM LoRaWAN SUB-GHz RF TELEMETRY
                 </text>
               </svg>
-            </div>
-
-            {/* Topology Highlights Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '16px' }}>
-              <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ color: 'var(--red)', fontWeight: 700, fontSize: '11px', fontFamily: 'var(--font-mono)' }}>1. HEAD SCARP CRACK</div>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '4px' }}>
-                  Extensometer & Biaxial Tiltmeter detect micro-extension ($0.01\text{mm}$) and tertiary creep acceleration prior to mass release.
-                </div>
-              </div>
-              <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ color: 'var(--cyan)', fontWeight: 700, fontSize: '11px', fontFamily: 'var(--font-mono)' }}>2. SHEAR SLIP PLANE</div>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '4px' }}>
-                  Vibrating Wire Piezometer directly records pore-pressure build-up ($u$) that cancels effective normal stress ($\sigma'$).
-                </div>
-              </div>
-              <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ color: 'var(--green)', fontWeight: 700, fontSize: '11px', fontFamily: 'var(--font-mono)' }}>3. LONG-RANGE TELEMETRY</div>
-                <div style={{ padding: '2px 0', fontSize: '12px', color: '#cbd5e1', marginTop: '4px' }}>
-                  LoRaWAN sub-GHz penetrates mountain rock ridges to reach valley backhaul without recurring telecom subscriptions.
-                </div>
-              </div>
-              <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ color: 'var(--amber)', fontWeight: 700, fontSize: '11px', fontFamily: 'var(--font-mono)' }}>4. RUNOFF & DEBRIS TOE</div>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '4px' }}>
-                  Ultrasonic sensor tracks rapid flood surges in downstream mountain gullies to alert villages seconds before mudflows impact.
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -1585,11 +1635,9 @@ export default function SensorPricingPage() {
           </div>
           <div className="panel-body">
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '24px' }}>
-              {/* Controls */}
               <div>
                 <h4 style={{ color: '#fff', marginBottom: '12px' }}>Power Configuration & Environmental Variables</h4>
 
-                {/* Sampling Rate */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Sensor Sampling & Transmission Interval:</span>
@@ -1617,7 +1665,6 @@ export default function SensorPricingPage() {
                   </div>
                 </div>
 
-                {/* Solar Panel Sizing */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Monocrystalline PV Panel Capacity:</span>
@@ -1643,7 +1690,6 @@ export default function SensorPricingPage() {
                   </div>
                 </div>
 
-                {/* Battery Sizing */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>12V LiFePO4 Smart Battery Pack:</span>
@@ -1668,13 +1714,8 @@ export default function SensorPricingPage() {
                     ))}
                   </div>
                 </div>
-
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-subtle)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  💡 <strong>Engineering Note:</strong> High-altitude mountain ridges in the Western Ghats and Himalayas experience continuous dense fog and cloudburst conditions during monsoons, where solar irradiance drops to &lt;15% for up to 7 consecutive days. Systems must feature at least 6 days of battery autonomy to prevent station blackout.
-                </div>
               </div>
 
-              {/* Simulation Result Card */}
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-cyan)' }}>
                 <span className="label-caps" style={{ color: 'var(--cyan)' }}>POWER BUDGET ASSESSMENT</span>
                 
@@ -1722,6 +1763,7 @@ export default function SensorPricingPage() {
               <thead>
                 <tr>
                   <th onClick={() => handleSort('id')} style={{ cursor: 'pointer' }}>#</th>
+                  <th>Visual Photo</th>
                   <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>Sensor / Component</th>
                   <th onClick={() => handleSort('category')} style={{ cursor: 'pointer' }}>Category</th>
                   <th onClick={() => handleSort('model')} style={{ cursor: 'pointer' }}>Model</th>
@@ -1738,9 +1780,25 @@ export default function SensorPricingPage() {
                 {filteredItems.map(item => {
                   const qty = quantities[item.id] || 0;
                   const lineTotalInr = item.price_inr * qty;
+                  const itemImg = SENSOR_IMAGE_MAP[item.id] || item.imageUrl;
                   return (
                     <tr key={item.id} style={{ background: qty > 0 ? 'rgba(0, 229, 255, 0.02)' : 'transparent' }}>
                       <td>{item.id}</td>
+                      <td>
+                        <div
+                          onClick={() => setInspectModalItem(item)}
+                          style={{
+                            width: '54px',
+                            height: '40px',
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                            border: '1px solid var(--border-cyan)',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <img src={itemImg} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                      </td>
                       <td>
                         <div style={{ fontWeight: 'bold', color: '#fff' }}>{item.name}</div>
                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{item.purpose}</div>
@@ -1802,13 +1860,13 @@ export default function SensorPricingPage() {
         </div>
       )}
 
-      {/* TECHNICAL DATASHEET MODAL */}
+      {/* FULL TECHNICAL DATASHEET & 8K PHOTO INSPECTION MODAL */}
       {inspectModalItem && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(0, 0, 0, 0.88)',
+          backdropFilter: 'blur(10px)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
@@ -1820,12 +1878,11 @@ export default function SensorPricingPage() {
             border: '1px solid var(--border-cyan)',
             borderRadius: '10px',
             width: '100%',
-            maxWidth: '780px',
+            maxWidth: '820px',
             maxHeight: '90vh',
             overflowY: 'auto',
-            boxShadow: '0 16px 64px rgba(0,0,0,0.8)'
+            boxShadow: '0 20px 64px rgba(0,0,0,0.9)'
           }}>
-            {/* Modal Header */}
             <div style={{
               padding: '16px 20px',
               borderBottom: '1px solid var(--border-subtle)',
@@ -1836,7 +1893,7 @@ export default function SensorPricingPage() {
             }}>
               <div>
                 <span style={{ fontSize: '10px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                  TECHNICAL DATASHEET • ISO 18674 GEOTECHNICAL STANDARD
+                  REAL FIELD SENSOR SPECIFICATION • ISO 18674 STANDARD
                 </span>
                 <h3 style={{ margin: '2px 0 0 0', color: '#fff' }}>{inspectModalItem.name}</h3>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
@@ -1851,19 +1908,50 @@ export default function SensorPricingPage() {
               </button>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: '20px' }}>
-              {/* Dual Visual (Photo & Blueprint) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ height: '200px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+              {/* Dual Visual (Real Photo & Blueprint) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+                <div style={{ position: 'relative', height: '240px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-cyan)' }}>
                   <img
-                    src={inspectModalItem.imageUrl}
+                    src={SENSOR_IMAGE_MAP[inspectModalItem.id] || inspectModalItem.imageUrl}
                     alt={inspectModalItem.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
+                  <div className="sensor-scan-line" />
+                  <span style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    background: 'rgba(0,0,0,0.85)',
+                    border: '1px solid #22c55e',
+                    color: '#22c55e',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    fontFamily: 'var(--font-mono)'
+                  }}>
+                    ● 8K REAL PHOTO
+                  </span>
                 </div>
-                <div style={{ height: '200px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-cyan)' }}>
+
+                <div style={{ position: 'relative', height: '240px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: '#090b10' }}>
                   <SensorSchematic type={inspectModalItem.schematic} />
+                  <span style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    background: 'rgba(0,0,0,0.85)',
+                    border: '1px solid var(--cyan)',
+                    color: 'var(--cyan)',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    fontFamily: 'var(--font-mono)'
+                  }}>
+                    ● CAD SCHEMATIC
+                  </span>
                 </div>
               </div>
 
@@ -1928,7 +2016,6 @@ export default function SensorPricingPage() {
               </table>
             </div>
 
-            {/* Modal Footer */}
             <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 NEXUS-LAND FIELD HARDWARE DATABASE • 2026 EDITION
