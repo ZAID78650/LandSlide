@@ -1195,80 +1195,116 @@ export default function SensorPricingPage() {
   const [graphStreamingActive, setGraphStreamingActive] = useState(true);
   const [graphCriticalPulse, setGraphCriticalPulse] = useState(false);
 
-  // Progressive real-time multi-channel geotechnical stream buffer
+  // Progressive real-time multi-channel geotechnical stream buffer with authentic physics
   const [progressiveTelemetryData, setProgressiveTelemetryData] = useState(() => {
     const pts = [];
-    const basePore = 138.4;
-    const baseDisp = 14.2;
     for (let i = 24; i >= 0; i--) {
       const t = Date.now() - i * 1500;
+      const progress = (24 - i) / 24; // 0.0 to 1.0
+
+      // Hydrological infiltration wave: rises dynamically from 122 kPa, crosses 135 kPa, crests at 148.4 kPa
+      const hydroWave = Math.sin(progress * Math.PI * 2.2) * 5.2 + Math.cos(progress * 6.5) * 1.8;
+      const pore = +(122.0 + progress * 24.5 + hydroWave).toFixed(1);
+      const stress = +(210.0 - pore).toFixed(1);
+
+      // Tertiary creep displacement (mm): non-linear acceleration from 11.2 mm to 17.8 mm
+      const disp = +(11.2 + 6.2 * Math.pow(progress, 1.85) + Math.sin(i * 0.8) * 0.06).toFixed(2);
+      
+      // Creep velocity (mm/hr): accelerates from 0.16 to 2.8 mm/hr
+      const velocityMmHr = Math.max(0.12, +(0.16 + 2.6 * Math.pow(progress, 2.2)).toFixed(2));
+      // Saito Inverse Velocity (hr/mm): plunges from 6.25 hr/mm down to 0.38 hr/mm heading toward 0
+      const invVel = +(1.0 / velocityMmHr).toFixed(2);
+
+      // Convective storm hyetograph: distinct rain squalls from 8 to 56 mm/hr
+      const stormCells = Math.sin(progress * Math.PI * 3.2) * 20.0 + Math.cos(progress * 7.0) * 10.0;
+      const rainRate = Math.max(6.0, +(28.0 + stormCells + (i % 4 === 0 ? 14 : -6)).toFixed(1));
+      const cumRain = +(192.0 + progress * 26.0 + Math.sin(progress * 4.0) * 1.5).toFixed(1);
+
+      // Acoustic emissions (hits/min): episodic shear micro-fracturing bursts
+      const isBurst = (i === 19 || i === 12 || i === 5 || i === 0);
+      const ae = Math.round(20 + Math.sin(progress * 5.5) * 12 + (isBurst ? 68 + Math.random() * 32 : Math.random() * 8));
+      const ppv = +(5.8 + Math.sin(progress * 14.0) * 4.8 + (isBurst ? 9.2 : 0)).toFixed(1);
+
+      // Multi-depth soil VWC (%): downward vertical infiltration gradient
+      const vwc10 = +(85.5 + progress * 8.5 + Math.sin(progress * 4.5) * 1.4).toFixed(1);
+      const vwc30 = +(79.5 + progress * 8.0 + Math.sin(progress * 3.8) * 1.1).toFixed(1);
+      const vwc60 = +(74.8 + progress * 6.5 + Math.sin(progress * 3.2) * 0.8).toFixed(1);
+      const vwc100 = +(68.2 + progress * 5.4 + Math.sin(progress * 2.2) * 0.6).toFixed(1);
+
       pts.push({
         time: new Date(t).toLocaleTimeString('en-US', { hour12: false }),
-        porePressure: +(basePore + (24 - i) * 0.18 + (Math.sin(i) * 0.4)).toFixed(1),
-        effectiveStress: +(210 - (basePore + (24 - i) * 0.18)).toFixed(1),
-        displacementMm: +(baseDisp + (24 - i) * 0.05 + (Math.cos(i) * 0.02)).toFixed(2),
-        inverseVelocity: +(1.0 / Math.max(0.01, 0.08 + (24 - i) * 0.005)).toFixed(2),
-        rainfallRate: +(24 + Math.sin(i * 0.5) * 6).toFixed(1),
-        cumulativeRain: +(210 + (24 - i) * 0.3).toFixed(1),
-        aeHits: Math.round(35 + Math.sin(i * 0.8) * 12 + (i === 3 ? 45 : 0)),
-        ppvVelocity: +(12.4 + Math.sin(i * 0.6) * 2.2).toFixed(1),
-        vwc10cm: +(88.2 + Math.sin(i * 0.3) * 0.8).toFixed(1),
-        vwc30cm: +(84.5 + Math.sin(i * 0.25) * 0.6).toFixed(1),
-        vwc60cm: +(79.8 + (24 - i) * 0.08).toFixed(1),
-        vwc100cm: +(72.1 + (24 - i) * 0.05).toFixed(1)
+        porePressure: pore,
+        effectiveStress: stress,
+        displacementMm: disp,
+        velocityMmHr: velocityMmHr,
+        inverseVelocity: invVel,
+        rainfallRate: rainRate,
+        cumulativeRain: cumRain,
+        aeHits: ae,
+        ppvVelocity: ppv,
+        vwc10cm: vwc10,
+        vwc30cm: vwc30,
+        vwc60cm: vwc60,
+        vwc100cm: vwc100
       });
     }
     return pts;
   });
 
-  // Live Streaming Progressive Telemetry Updater
+  // Live Streaming Progressive Telemetry Updater with Realistic Physical Wave Dynamics
   useEffect(() => {
     if (!graphStreamingActive) return;
     const timer = setInterval(() => {
       setProgressiveTelemetryData(prev => {
-        const last = prev[prev.length - 1] || {
-          porePressure: 142.8,
-          effectiveStress: 67.2,
-          displacementMm: 15.4,
-          inverseVelocity: 8.2,
-          rainfallRate: 28.4,
-          cumulativeRain: 214.2,
-          aeHits: 42,
-          ppvVelocity: 14.2,
-          vwc10cm: 88.4,
-          vwc30cm: 84.8,
-          vwc60cm: 80.2,
-          vwc100cm: 72.8
-        };
-
-        const pulseAdd = graphCriticalPulse ? 3.5 : 0;
+        const last = prev[prev.length - 1];
         const nowStr = new Date().toLocaleTimeString('en-US', { hour12: false });
-        const jitter = (Math.random() - 0.48) * 0.5;
+        const pulse = graphCriticalPulse ? 2.4 : 1.0;
 
-        const nextPore = Math.min(180, +(last.porePressure + 0.06 + jitter + pulseAdd).toFixed(1));
-        const nextStress = +(210 - nextPore).toFixed(1);
-        const nextDisp = +(last.displacementMm + 0.012 + (graphCriticalPulse ? 0.06 : 0)).toFixed(2);
-        const velocity = Math.max(0.005, (nextDisp - last.displacementMm) / 1.5);
-        const nextInvVel = +(1.0 / velocity).toFixed(2);
-        const nextRain = +(28.4 + (Math.random() - 0.5) * 3).toFixed(1);
+        // Dynamic pore pressure: hydraulic wave around failure boundary
+        const hydroOsc = Math.sin(Date.now() / 2500) * 0.85 + (Math.random() - 0.48) * 0.5;
+        const poreDelta = (graphCriticalPulse ? 2.2 : 0.14) + hydroOsc;
+        const nextPore = Math.min(168, Math.max(120, +(last.porePressure + poreDelta).toFixed(1)));
+        const nextStress = +(210.0 - nextPore).toFixed(1);
+
+        // Tertiary accelerating creep: displacement step
+        const creepRate = (0.045 + (nextPore > 135 ? (nextPore - 135) * 0.009 : 0)) * pulse;
+        const nextDisp = +(last.displacementMm + creepRate + (Math.random() - 0.5) * 0.01).toFixed(2);
+        
+        // Creep velocity in mm/hr & Saito Inverse Velocity
+        const instantaneousVel = Math.max(0.12, +(creepRate * 220).toFixed(2));
+        const nextInvVel = +(Math.min(6.5, 1.0 / instantaneousVel)).toFixed(2);
+
+        // Convective storm hyetograph wave
+        const stormWave = Math.sin(Date.now() / 4000) * 18;
+        const nextRain = +(Math.max(6.0, 32.0 + stormWave + (Math.random() - 0.5) * 6.0)).toFixed(1);
         const nextCumRain = +(last.cumulativeRain + nextRain / 2400).toFixed(1);
-        const nextAe = Math.round(Math.max(10, 42 + (Math.random() - 0.5) * 16 + (graphCriticalPulse ? 65 : 0)));
-        const nextPpv = +(14.2 + (Math.random() - 0.5) * 2.5 + (graphCriticalPulse ? 8 : 0)).toFixed(1);
+
+        // Episodic acoustic micro-fracturing bursts
+        const burstChance = Math.random() < (graphCriticalPulse ? 0.65 : 0.22);
+        const nextAe = Math.round(Math.max(16, burstChance ? 78 + Math.random() * 48 : 26 + Math.sin(Date.now() / 3000) * 12));
+        const nextPpv = +(6.0 + (burstChance ? 10.5 : 0) + Math.sin(Date.now() / 1600) * 3.5).toFixed(1);
+
+        // Multi-depth soil moisture downward infiltration
+        const nextVwc10 = Math.min(98.5, +(last.vwc10cm + (nextRain > 30 ? 0.16 : -0.04) + (Math.random() - 0.5) * 0.2).toFixed(1));
+        const nextVwc30 = Math.min(95.0, +(last.vwc30cm + (nextVwc10 > 90 ? 0.11 : -0.02) + (Math.random() - 0.5) * 0.15).toFixed(1));
+        const nextVwc60 = Math.min(90.0, +(last.vwc60cm + 0.05 + (Math.random() - 0.5) * 0.1).toFixed(1));
+        const nextVwc100 = Math.min(84.0, +(last.vwc100cm + 0.03 + (Math.random() - 0.5) * 0.08).toFixed(1));
 
         const newPoint = {
           time: nowStr,
           porePressure: nextPore,
           effectiveStress: nextStress,
           displacementMm: nextDisp,
+          velocityMmHr: instantaneousVel,
           inverseVelocity: nextInvVel,
           rainfallRate: nextRain,
           cumulativeRain: nextCumRain,
           aeHits: nextAe,
           ppvVelocity: nextPpv,
-          vwc10cm: +(88.4 + (Math.random() - 0.5) * 0.4).toFixed(1),
-          vwc30cm: +(84.8 + (Math.random() - 0.5) * 0.3).toFixed(1),
-          vwc60cm: +(80.2 + (Math.random() - 0.5) * 0.2).toFixed(1),
-          vwc100cm: +(72.8 + (Math.random() - 0.5) * 0.2).toFixed(1)
+          vwc10cm: nextVwc10,
+          vwc30cm: nextVwc30,
+          vwc60cm: nextVwc60,
+          vwc100cm: nextVwc100
         };
 
         return [...prev.slice(1), newPoint];
@@ -1279,6 +1315,24 @@ export default function SensorPricingPage() {
   }, [graphStreamingActive, graphCriticalPulse]);
 
   const [activeGraphStation, setActiveGraphStation] = useState('STATION_A');
+  const [hoveredGraphPoint, setHoveredGraphPoint] = useState(null); // { graphId, index, x, y, data }
+  const [inclinometerMode, setInclinometerMode] = useState('CUMULATIVE'); // 'CUMULATIVE' | 'STRAIN_RATE'
+  const [saitoScaleMode, setSaitoScaleMode] = useState('INVERSE'); // 'INVERSE' | 'VELOCITY'
+  const [rainfallGraphMode, setRainfallGraphMode] = useState('BOTH'); // 'BOTH' | 'RATE_ONLY' | 'CUMULATIVE_ONLY'
+  const [visibleGraphChannels, setVisibleGraphChannels] = useState({
+    pore: true,
+    stress: true,
+    disp: true,
+    saito: true,
+    rainBars: true,
+    rainCum: true,
+    aeHits: true,
+    ppv: true,
+    vwc10: true,
+    vwc30: true,
+    vwc60: true,
+    vwc100: true
+  });
 
   const handleDownloadTelemetryCsv = () => {
     playTacticalAudio('click');
@@ -5899,20 +5953,93 @@ export default function SensorPricingPage() {
         const foSColor = liveFoS < 1.05 ? '#ff3b5c' : liveFoS < 1.25 ? '#ffb020' : '#22c55e';
         const saitoCountdownHours = lastPt.inverseVelocity > 0 ? (lastPt.inverseVelocity * 2.2).toFixed(1) : '0.0';
 
-        // Inclinometer Depth Deflection Profile Data (0 to 25m)
+        // Smooth Sigmoid Inclinometer Profile (0m to 25m) with realistic localized shear band at 8.2m
         const inclinometerDepths = [
-          { z: 0.0, base: 0.0, h24: 4.8, live: +(lastPt.displacementMm).toFixed(2), stratum: 'TOPSOIL' },
-          { z: 2.0, base: 0.0, h24: 4.6, live: +(lastPt.displacementMm - 0.2).toFixed(2), stratum: 'COLLUVIUM' },
-          { z: 4.0, base: 0.0, h24: 4.4, live: +(lastPt.displacementMm - 0.4).toFixed(2), stratum: 'WEATHERED SILT' },
-          { z: 6.0, base: 0.0, h24: 4.2, live: +(lastPt.displacementMm - 0.7).toFixed(2), stratum: 'SATURATED CLAY' },
-          { z: 8.0, base: 0.0, h24: 4.0, live: +(lastPt.displacementMm - 0.9).toFixed(2), stratum: 'UPPER SLIP BOUNDARY' },
-          { z: 8.2, base: 0.0, h24: 1.2, live: +(lastPt.displacementMm * 0.42).toFixed(2), stratum: 'CRITICAL SHEAR PLANE ⚠️' },
-          { z: 9.0, base: 0.0, h24: 0.6, live: 2.1, stratum: 'LOWER SHEAR CONTACT' },
-          { z: 12.0, base: 0.0, h24: 0.2, live: 0.8, stratum: 'FRACTURED QUARTZITE' },
-          { z: 16.0, base: 0.0, h24: 0.0, live: 0.2, stratum: 'INTACT BEDROCK' },
-          { z: 20.0, base: 0.0, h24: 0.0, live: 0.0, stratum: 'BEDROCK ANCHOR' },
-          { z: 25.0, base: 0.0, h24: 0.0, live: 0.0, stratum: 'FIXED DATUM' },
-        ];
+          { z: 0.0, stratum: 'TOPSOIL (Loose Silt)', desc: 'Ground surface colluvium' },
+          { z: 2.0, stratum: 'COLLUVIUM (Debris)', desc: 'Unconsolidated gravelly clay' },
+          { z: 4.0, stratum: 'WEATHERED SILTSTONE', desc: 'Moderately weathered matrix' },
+          { z: 6.0, stratum: 'SATURATED CLAY LENS', desc: 'Pre-failure softening band' },
+          { z: 7.5, stratum: 'UPPER SLIP BOUNDARY', desc: 'Developing shear micro-bands' },
+          { z: 8.2, stratum: 'CRITICAL SHEAR PLANE ⚠️', desc: 'Active basal slickenside slip surface' },
+          { z: 9.0, stratum: 'LOWER SLIP CONTACT', desc: 'Transition to fractured zone' },
+          { z: 12.0, stratum: 'FRACTURED QUARTZITE', desc: 'Jointed rock block mass' },
+          { z: 16.0, stratum: 'INTACT BEDROCK', desc: 'Competent gneiss anchor' },
+          { z: 20.0, stratum: 'BEDROCK ANCHOR', desc: 'Stable fixed benchmark datum' },
+          { z: 25.0, stratum: 'DEEP FIXED DATUM', desc: 'Zero displacement reference' },
+        ].map(item => {
+          const sigmoidDeflection = (dMax) => +(dMax / (1 + Math.exp((item.z - 8.2) / 0.72))).toFixed(2);
+          const liveDeflection = sigmoidDeflection(lastPt.displacementMm);
+          const h24Deflection = sigmoidDeflection(4.8);
+          const expTerm = Math.exp((item.z - 8.2) / 0.72);
+          const liveStrain = +((lastPt.displacementMm * expTerm) / (0.72 * Math.pow(1 + expTerm, 2))).toFixed(2);
+          const h24Strain = +((4.8 * expTerm) / (0.72 * Math.pow(1 + expTerm, 2))).toFixed(2);
+          return {
+            ...item,
+            base: 0.0,
+            h24: h24Deflection,
+            live: liveDeflection,
+            liveStrain,
+            h24Strain
+          };
+        });
+
+        // Interactive mouse tracking handler for time-series charts (Graphs 1, 2, 4, 5, 6)
+        const handleChartMouseMove = (e, graphId) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const svgX = (mouseX / rect.width) * 520;
+          const clampedX = Math.max(45, Math.min(480, svgX));
+          const fraction = (clampedX - 45) / 435;
+          const index = Math.min(data.length - 1, Math.max(0, Math.round(fraction * (data.length - 1))));
+          setHoveredGraphPoint({
+            graphId,
+            index,
+            svgX: clampedX,
+            chartPercent: ((clampedX - 45) / 435) * 100,
+            data: data[index]
+          });
+        };
+
+        // Interactive depth tracking handler for Inclinometer profile (Graph 3)
+        const handleInclinometerMouseMove = (e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const mouseY = e.clientY - rect.top;
+          const svgY = (mouseY / rect.height) * 220;
+          const clampedY = Math.max(25, Math.min(190, svgY));
+          const fraction = (clampedY - 25) / 165;
+          const depthZ = +(fraction * 25).toFixed(1);
+          let closestNode = inclinometerDepths[0];
+          let minDist = 999;
+          inclinometerDepths.forEach(node => {
+            const dist = Math.abs(node.z - depthZ);
+            if (dist < minDist) {
+              minDist = dist;
+              closestNode = node;
+            }
+          });
+          setHoveredGraphPoint({
+            graphId: 'GRAPH_3',
+            depthZ,
+            svgY: clampedY,
+            chartPercent: fraction * 100,
+            node: closestNode
+          });
+        };
+
+        const toggleChannel = (channelKey) => {
+          playTacticalAudio('click');
+          setVisibleGraphChannels(prev => ({ ...prev, [channelKey]: !prev[channelKey] }));
+        };
+
+        // Rupture asymptote calculation for Saito inverse velocity
+        const lastIdx = data.length - 1;
+        const pA = data[Math.max(0, lastIdx - 3)];
+        const pB = data[lastIdx];
+        const deltaX = 3 * (435 / (data.length - 1));
+        const deltaInvV = pB.inverseVelocity - pA.inverseVelocity;
+        const dropRate = deltaInvV < 0 ? Math.abs(deltaInvV) / deltaX : 0.04;
+        const pixelsToZero = Math.min(110, Math.max(18, pB.inverseVelocity / Math.max(0.005, dropRate)));
+        const failTargetX = Math.min(515, 480 + pixelsToZero);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -6079,8 +6206,8 @@ export default function SensorPricingPage() {
                   <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '6px', padding: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>PORE-WATER PRESSURE (u)</span>
-                      <span style={{ fontSize: '9px', color: lastPt.porePressure > 140 ? 'var(--red)' : 'var(--cyan)' }}>
-                        {lastPt.porePressure > 140 ? 'HIGH SEEPAGE' : 'ELEVATED'}
+                      <span style={{ fontSize: '9px', color: lastPt.porePressure > 135 ? 'var(--red)' : 'var(--cyan)' }}>
+                        {lastPt.porePressure > 135 ? 'HIGH SEEPAGE (CRITICAL)' : 'ELEVATED'}
                       </span>
                     </div>
                     <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
@@ -6128,29 +6255,94 @@ export default function SensorPricingPage() {
               {/* ───────────────────────────────────────────────────────── */}
               {/* GRAPH 1: PORE PRESSURE (u) VS. EFFECTIVE STRESS (σ')     */}
               {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(0, 229, 255, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: 'var(--cyan)' }}>💧</span>
-                    <span className="label-caps">1. PORE-WATER PRESSURE (u) VS. TERZAGHI EFFECTIVE STRESS (σ')</span>
+                    <span className="label-caps">1. PORE-WATER PRESSURE (u) VS. EFFECTIVE STRESS (σ')</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    σ' = σ_total - u (kPa)
-                  </span>
+                  {/* Channel toggles */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => toggleChannel('pore')}
+                      style={{
+                        background: visibleGraphChannels.pore ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+                        border: visibleGraphChannels.pore ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.1)',
+                        color: visibleGraphChannels.pore ? 'var(--cyan)' : 'var(--text-muted)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      💧 Pore (u)
+                    </button>
+                    <button
+                      onClick={() => toggleChannel('stress')}
+                      style={{
+                        background: visibleGraphChannels.stress ? 'rgba(255, 176, 32, 0.2)' : 'transparent',
+                        border: visibleGraphChannels.stress ? '1px solid var(--amber)' : '1px solid rgba(255,255,255,0.1)',
+                        color: visibleGraphChannels.stress ? 'var(--amber)' : 'var(--text-muted)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🧱 Stress (σ')
+                    </button>
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      σ' = 210 - u
+                    </span>
+                  </div>
                 </div>
-                <div className="panel-body">
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_1' && hoveredGraphPoint.data && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        left: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        top: '15px',
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      <div style={{ color: 'var(--cyan)', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⏱️ T = {hoveredGraphPoint.data.time}</span>
+                        <span style={{ color: hoveredGraphPoint.data.porePressure > 135 ? '#ff3b5c' : '#22c55e', fontSize: '9px' }}>
+                          {hoveredGraphPoint.data.porePressure > 135 ? '⚠️ LIQUEFACTION CRITICAL' : '✓ STABLE DRAINAGE'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px' }}>
+                        <div>Pore Pressure (u): <strong style={{ color: '#00e5ff' }}>{hoveredGraphPoint.data.porePressure} kPa</strong></div>
+                        <div>Effective Stress (σ'): <strong style={{ color: '#ffb020' }}>{hoveredGraphPoint.data.effectiveStress} kPa</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                        Margin to Failure: {(hoveredGraphPoint.data.effectiveStress - 50).toFixed(1)} kPa above liquefaction limit
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={(e) => handleChartMouseMove(e, 'GRAPH_1')}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
                       <defs>
                         <linearGradient id="poreGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#ff3b5c" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.05" />
-                        </linearGradient>
-                        <linearGradient id="stressGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#ffb020" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="#ffb020" stopOpacity="0.02" />
+                          <stop offset="60%" stopColor="#00e5ff" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.03" />
                         </linearGradient>
                       </defs>
+
+                      {/* Liquefaction Hazard Zone Shading (u > 135 kPa: y from 30 to 117.3) */}
+                      <rect x="45" y="30" width="435" height="87.3" fill="rgba(255, 59, 92, 0.08)" className="hazard-zone-active" />
 
                       {/* Grid Lines */}
                       {[30, 70, 110, 150, 190].map(y => (
@@ -6160,65 +6352,71 @@ export default function SensorPricingPage() {
                       <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
                       <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
 
-                      {/* Y-Axis Labels Left (Pore Pressure kPa: 100 to 180) */}
-                      <text x="40" y="34" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">180</text>
-                      <text x="40" y="74" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">160</text>
-                      <text x="40" y="114" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">140</text>
-                      <text x="40" y="154" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">120</text>
-                      <text x="40" y="193" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">100</text>
+                      {/* Y-Axis Labels Left (Pore Pressure kPa: 110 to 165, span 55) */}
+                      <text x="40" y="34" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">165</text>
+                      <text x="40" y="74" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">150</text>
+                      <text x="40" y="114" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">136</text>
+                      <text x="40" y="154" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">122</text>
+                      <text x="40" y="193" textAnchor="end" fill="var(--cyan)" fontSize="9" fontFamily="monospace">110</text>
 
-                      {/* Y-Axis Labels Right (Effective Stress kPa: 30 to 110) */}
-                      <text x="486" y="34" fill="var(--amber)" fontSize="9" fontFamily="monospace">30</text>
-                      <text x="486" y="74" fill="var(--amber)" fontSize="9" fontFamily="monospace">50</text>
-                      <text x="486" y="114" fill="var(--amber)" fontSize="9" fontFamily="monospace">70</text>
-                      <text x="486" y="154" fill="var(--amber)" fontSize="9" fontFamily="monospace">90</text>
-                      <text x="486" y="193" fill="var(--amber)" fontSize="9" fontFamily="monospace">110</text>
+                      {/* Y-Axis Labels Right (Effective Stress kPa: 50 to 105, span 55) */}
+                      <text x="486" y="34" fill="var(--amber)" fontSize="9" fontFamily="monospace">50</text>
+                      <text x="486" y="74" fill="var(--amber)" fontSize="9" fontFamily="monospace">65</text>
+                      <text x="486" y="114" fill="var(--amber)" fontSize="9" fontFamily="monospace">79</text>
+                      <text x="486" y="154" fill="var(--amber)" fontSize="9" fontFamily="monospace">93</text>
+                      <text x="486" y="193" fill="var(--amber)" fontSize="9" fontFamily="monospace">105</text>
 
-                      {/* Critical Liquefaction Threshold Line (135 kPa -> y ≈ 118) */}
-                      <line x1="45" y1="118" x2="480" y2="118" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
-                      <text x="475" y="113" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      {/* Critical Liquefaction Threshold Line (135 kPa -> y ≈ 117.3) */}
+                      <line x1="45" y1="117.3" x2="480" y2="117.3" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="112" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
                         CRITICAL LIQUEFACTION LIMIT: 135 kPa
                       </text>
 
                       {/* Area Fill for Pore Pressure */}
-                      <path
-                        d={`M 45 190 ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.porePressure - 100) / 80) * 160;
-                          return `L ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')} L 480 190 Z`}
-                        fill="url(#poreGrad)"
-                      />
+                      {visibleGraphChannels.pore && (
+                        <path
+                          d={`M 45 190 ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.porePressure - 110) / 55) * 160;
+                            return `L ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')} L 480 190 Z`}
+                          fill="url(#poreGrad)"
+                        />
+                      )}
 
                       {/* Pore Pressure Line */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.porePressure - 100) / 80) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#00e5ff"
-                        strokeWidth="2.5"
-                      />
+                      {visibleGraphChannels.pore && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.porePressure - 110) / 55) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#00e5ff"
+                          strokeWidth="2.5"
+                        />
+                      )}
 
                       {/* Effective Stress Line */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.effectiveStress - 30) / 80) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#ffb020"
-                        strokeWidth="2"
-                        strokeDasharray="2 1"
-                      />
+                      {visibleGraphChannels.stress && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.effectiveStress - 50) / 55) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#ffb020"
+                          strokeWidth="2"
+                          strokeDasharray="3 2"
+                        />
+                      )}
 
-                      {/* Pulsing Live Point for latest sample */}
-                      {(() => {
+                      {/* Pulsing Live Points */}
+                      {visibleGraphChannels.pore && (() => {
                         const lastX = 480;
-                        const lastY = 190 - ((lastPt.porePressure - 100) / 80) * 160;
+                        const lastY = 190 - ((lastPt.porePressure - 110) / 55) * 160;
                         return (
                           <g transform={`translate(${lastX}, ${lastY})`}>
                             <circle r="9" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
@@ -6227,6 +6425,33 @@ export default function SensorPricingPage() {
                           </g>
                         );
                       })()}
+
+                      {/* Interactive Crosshair when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_1' && (
+                        <g>
+                          <line x1={hoveredGraphPoint.svgX} y1="20" x2={hoveredGraphPoint.svgX} y2="190" className="graph-crosshair-line" />
+                          {visibleGraphChannels.pore && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.porePressure - 110) / 55) * 160}
+                              r="5"
+                              fill="#00e5ff"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                          {visibleGraphChannels.stress && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.effectiveStress - 50) / 55) * 160}
+                              r="5"
+                              fill="#ffb020"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                        </g>
+                      )}
                     </svg>
                   </div>
 
@@ -6245,19 +6470,88 @@ export default function SensorPricingPage() {
               {/* ───────────────────────────────────────────────────────── */}
               {/* GRAPH 2: 3D DISPLACEMENT & SAITO INVERSE VELOCITY (1/v)   */}
               {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(255, 176, 32, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(255, 176, 32, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: 'var(--amber)' }}>📐</span>
-                    <span className="label-caps">2. 3D DISPLACEMENT & SAITO INVERSE VELOCITY FORECAST (1/v → 0)</span>
+                    <span className="label-caps">2. 3D DISPLACEMENT & SAITO INVERSE VELOCITY (1/v → 0)</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                    COLLAPSE HORIZON: ~{saitoCountdownHours}h
-                  </span>
+                  {/* Mode and channel toggles */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => {
+                        playTacticalAudio('click');
+                        setSaitoScaleMode(saitoScaleMode === 'INVERSE' ? 'VELOCITY' : 'INVERSE');
+                      }}
+                      style={{
+                        background: 'rgba(255, 176, 32, 0.15)',
+                        border: '1px solid var(--amber)',
+                        color: 'var(--amber)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {saitoScaleMode === 'INVERSE' ? 'MODE: 1/v (d/mm)' : 'MODE: Velocity (mm/h)'}
+                    </button>
+                    <button
+                      onClick={() => toggleChannel('disp')}
+                      style={{
+                        background: visibleGraphChannels.disp ? 'rgba(34, 197, 94, 0.2)' : 'transparent',
+                        border: visibleGraphChannels.disp ? '1px solid #22c55e' : '1px solid rgba(255,255,255,0.1)',
+                        color: visibleGraphChannels.disp ? '#22c55e' : 'var(--text-muted)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📐 Disp
+                    </button>
+                    <span style={{ fontSize: '10px', color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                      COLLAPSE: ~{saitoCountdownHours}h
+                    </span>
+                  </div>
                 </div>
-                <div className="panel-body">
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_2' && hoveredGraphPoint.data && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        left: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        top: '15px',
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      <div style={{ color: 'var(--amber)', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⏱️ T = {hoveredGraphPoint.data.time}</span>
+                        <span className="chip chip-amber" style={{ fontSize: '8px' }}>
+                          Tertiary Creep Acceleration
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px' }}>
+                        <div>Cumulative Disp: <strong style={{ color: '#22c55e' }}>{hoveredGraphPoint.data.displacementMm} mm</strong></div>
+                        <div>Saito 1/v: <strong style={{ color: '#ff9e3b' }}>{hoveredGraphPoint.data.inverseVelocity} d/mm</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '3px', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Creep Velocity: <strong>{(1 / Math.max(0.01, hoveredGraphPoint.data.inverseVelocity)).toFixed(2)} mm/h</strong></span>
+                        <span style={{ color: '#ff3b5c' }}>Projected Rupture: <strong>~{(hoveredGraphPoint.data.inverseVelocity * 2.2).toFixed(1)} hrs</strong></span>
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={(e) => handleChartMouseMove(e, 'GRAPH_2')}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
                       {/* Grid Lines */}
                       {[30, 70, 110, 150, 190].map(y => (
                         <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
@@ -6266,62 +6560,91 @@ export default function SensorPricingPage() {
                       <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
                       <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
 
-                      {/* Y-Axis Labels Left (Cumulative Disp mm: 12 to 18 mm) */}
-                      <text x="40" y="34" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">18mm</text>
-                      <text x="40" y="86" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">16mm</text>
-                      <text x="40" y="138" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">14mm</text>
-                      <text x="40" y="193" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">12mm</text>
+                      {/* Y-Axis Labels Left (Cumulative Disp mm: 10 to 20 mm, span 10) */}
+                      <text x="40" y="34" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">20mm</text>
+                      <text x="40" y="74" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">17.5</text>
+                      <text x="40" y="114" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">15.0</text>
+                      <text x="40" y="154" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">12.5</text>
+                      <text x="40" y="193" textAnchor="end" fill="#22c55e" fontSize="9" fontFamily="monospace">10mm</text>
 
-                      {/* Y-Axis Labels Right (Saito 1/v d/mm: 0 to 16) */}
-                      <text x="486" y="34" fill="#ff9e3b" fontSize="9" fontFamily="monospace">16</text>
-                      <text x="486" y="86" fill="#ff9e3b" fontSize="9" fontFamily="monospace">10</text>
-                      <text x="486" y="138" fill="#ff9e3b" fontSize="9" fontFamily="monospace">5</text>
-                      <text x="486" y="193" fill="#ff3b5c" fontSize="9" fontFamily="monospace">0 (FAIL)</text>
+                      {/* Y-Axis Labels Right */}
+                      {saitoScaleMode === 'INVERSE' ? (
+                        <>
+                          <text x="486" y="34" fill="#ff9e3b" fontSize="9" fontFamily="monospace">7.0</text>
+                          <text x="486" y="74" fill="#ff9e3b" fontSize="9" fontFamily="monospace">5.2</text>
+                          <text x="486" y="114" fill="#ff9e3b" fontSize="9" fontFamily="monospace">3.5</text>
+                          <text x="486" y="154" fill="#ff9e3b" fontSize="9" fontFamily="monospace">1.8</text>
+                          <text x="486" y="193" fill="#ff3b5c" fontSize="9" fontFamily="monospace">0.0 (FAIL)</text>
+                        </>
+                      ) : (
+                        <>
+                          <text x="486" y="34" fill="#ff9e3b" fontSize="9" fontFamily="monospace">3.0 mm/h</text>
+                          <text x="486" y="74" fill="#ff9e3b" fontSize="9" fontFamily="monospace">2.25</text>
+                          <text x="486" y="114" fill="#ff9e3b" fontSize="9" fontFamily="monospace">1.50</text>
+                          <text x="486" y="154" fill="#ff9e3b" fontSize="9" fontFamily="monospace">0.75</text>
+                          <text x="486" y="193" fill="#ff3b5c" fontSize="9" fontFamily="monospace">0.00</text>
+                        </>
+                      )}
 
-                      {/* Saito Zero Intercept Rupture Line */}
-                      <line x1="45" y1="190" x2="480" y2="190" stroke="#ff3b5c" strokeWidth="2" />
+                      {/* Saito Zero Intercept Rupture Datum Line */}
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="#ff3b5c" strokeWidth="2.5" />
+                      <text x="350" y="185" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        SAITO FAILURE DATUM (1/v = 0)
+                      </text>
 
                       {/* Cumulative Displacement Curve (Green) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.displacementMm - 12) / 6) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#22c55e"
-                        strokeWidth="2.5"
-                      />
+                      {visibleGraphChannels.disp && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.displacementMm - 10) / 10) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2.8"
+                        />
+                      )}
 
-                      {/* Saito Inverse Velocity Line (Orange) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - (Math.max(0, d.inverseVelocity) / 16) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#ff9e3b"
-                        strokeWidth="2.5"
-                      />
+                      {/* Saito Curve (Orange) */}
+                      {visibleGraphChannels.saito && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const yVal = saitoScaleMode === 'INVERSE'
+                              ? 190 - (Math.max(0, d.inverseVelocity) / 7) * 160
+                              : 190 - (Math.min(3.0, 1 / Math.max(0.01, d.inverseVelocity)) / 3.0) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${yVal.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#ff9e3b"
+                          strokeWidth="2.8"
+                        />
+                      )}
 
                       {/* Saito Linear Rupture Projection Ray towards 1/v = 0 */}
-                      {(() => {
+                      {saitoScaleMode === 'INVERSE' && (() => {
                         const lastX = 480;
-                        const lastY = 190 - (Math.max(0, lastPt.inverseVelocity) / 16) * 160;
-                        const projX = Math.min(515, lastX + 30);
+                        const lastY = 190 - (Math.max(0, lastPt.inverseVelocity) / 7) * 160;
                         return (
                           <g>
-                            <line x1={lastX} y1={lastY} x2={projX} y2="190" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="3 2" />
-                            <polygon points={`${projX},186 ${projX+4},190 ${projX},194 ${projX-4},190`} fill="#ff3b5c" />
+                            <line x1={lastX} y1={lastY} x2={failTargetX} y2="190" stroke="#ff3b5c" strokeWidth="2" strokeDasharray="4 2" />
+                            <circle cx={failTargetX} cy="190" r="7" fill="rgba(255, 59, 92, 0.4)" className="live-point-pulse" />
+                            <circle cx={failTargetX} cy="190" r="3.5" fill="#ff3b5c" />
+                            <polygon points={`${failTargetX},184 ${failTargetX+4},190 ${failTargetX},196 ${failTargetX-4},190`} fill="#ff3b5c" />
+                            <text x={Math.min(490, failTargetX - 6)} y="178" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                              🎯 RUPTURE INTERCEPT
+                            </text>
                           </g>
                         );
                       })()}
 
                       {/* Live Dot on Saito Curve */}
-                      {(() => {
+                      {visibleGraphChannels.saito && (() => {
                         const lastX = 480;
-                        const lastY = 190 - (Math.max(0, lastPt.inverseVelocity) / 16) * 160;
+                        const lastY = saitoScaleMode === 'INVERSE'
+                          ? 190 - (Math.max(0, lastPt.inverseVelocity) / 7) * 160
+                          : 190 - (Math.min(3.0, 1 / Math.max(0.01, lastPt.inverseVelocity)) / 3.0) * 160;
                         return (
                           <g transform={`translate(${lastX}, ${lastY})`}>
                             <circle r="8" fill="rgba(255, 158, 59, 0.4)" className="live-point-pulse" />
@@ -6330,6 +6653,36 @@ export default function SensorPricingPage() {
                           </g>
                         );
                       })()}
+
+                      {/* Interactive Crosshair when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_2' && (
+                        <g>
+                          <line x1={hoveredGraphPoint.svgX} y1="20" x2={hoveredGraphPoint.svgX} y2="190" className="graph-crosshair-line" />
+                          {visibleGraphChannels.disp && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.displacementMm - 10) / 10) * 160}
+                              r="5"
+                              fill="#22c55e"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                          {visibleGraphChannels.saito && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={saitoScaleMode === 'INVERSE'
+                                ? 190 - (Math.max(0, hoveredGraphPoint.data.inverseVelocity) / 7) * 160
+                                : 190 - (Math.min(3.0, 1 / Math.max(0.01, hoveredGraphPoint.data.inverseVelocity)) / 3.0) * 160
+                              }
+                              r="5"
+                              fill="#ff9e3b"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                        </g>
+                      )}
                     </svg>
                   </div>
 
@@ -6339,7 +6692,7 @@ export default function SensorPricingPage() {
                       <span style={{ color: '#ff9e3b' }}>● Saito 1/v: <strong>{lastPt.inverseVelocity} d/mm</strong></span>
                     </div>
                     <span className="chip chip-amber" style={{ fontSize: '9px' }}>
-                      J. Saito Creep Law: d(1/v)/dt &lt; 0
+                      J. Saito Creep Law: d(1/v)/dt &lt; 0 (Accelerating Tertiary)
                     </span>
                   </div>
                 </div>
@@ -6348,28 +6701,93 @@ export default function SensorPricingPage() {
               {/* ───────────────────────────────────────────────────────── */}
               {/* GRAPH 3: BOREHOLE INCLINOMETER DEPTH DEFLECTION PROFILE   */}
               {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(34, 197, 94, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(34, 197, 94, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#22c55e' }}>🕳️</span>
                     <span className="label-caps">3. BOREHOLE INCLINOMETER PROFILE VS. DEPTH (0m - 25m)</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: 'var(--red)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                    ⚠️ SHEAR PLANE DETECTED AT 8.2m DEPTH
-                  </span>
+                  {/* Mode Switcher */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => {
+                        playTacticalAudio('click');
+                        setInclinometerMode(inclinometerMode === 'CUMULATIVE' ? 'STRAIN_RATE' : 'CUMULATIVE');
+                      }}
+                      style={{
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        border: '1px solid #22c55e',
+                        color: '#22c55e',
+                        padding: '2px 8px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {inclinometerMode === 'CUMULATIVE' ? 'SHOW INCREMENTAL STRAIN (%/m)' : 'SHOW CUMULATIVE DEFLECTION (mm)'}
+                    </button>
+                    <span style={{ fontSize: '10px', color: 'var(--red)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                      ⚠️ SHEAR HORIZON: 8.2m
+                    </span>
+                  </div>
                 </div>
-                <div className="panel-body">
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_3' && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        right: '25px',
+                        top: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      <div style={{ color: '#22c55e', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>🕳️ Depth: {hoveredGraphPoint.depthZ}m</span>
+                        <span style={{ color: hoveredGraphPoint.depthZ >= 7.5 && hoveredGraphPoint.depthZ <= 9.0 ? '#ff3b5c' : '#22c55e', fontSize: '9px' }}>
+                          {hoveredGraphPoint.depthZ >= 7.5 && hoveredGraphPoint.depthZ <= 9.0 ? '⚠️ SHEAR FAILURE HORIZON' : '✓ COMPETENT STRATUM'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                        Stratum: <strong style={{ color: '#fff' }}>{hoveredGraphPoint.node?.stratum}</strong>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px', marginTop: '2px' }}>
+                        <div>Live Deflection: <strong style={{ color: '#22c55e' }}>{hoveredGraphPoint.node?.live} mm</strong></div>
+                        <div>Shear Strain: <strong style={{ color: '#ff3b5c' }}>{hoveredGraphPoint.node?.liveStrain} %/m</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {hoveredGraphPoint.node?.desc}
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={handleInclinometerMouseMove}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
+                      <defs>
+                        <linearGradient id="strainGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#ffb020" stopOpacity="0.1" />
+                          <stop offset="100%" stopColor="#ff3b5c" stopOpacity="0.4" />
+                        </linearGradient>
+                      </defs>
+
                       {/* Stratigraphy Shading Bands */}
-                      {/* Topsoil & Colluvium: 0 - 4m -> y: 25 to 51 */}
-                      <rect x="75" y="25" width="415" height="26" fill="rgba(180, 120, 60, 0.12)" />
-                      {/* Weathered Siltstone: 4 - 8.2m -> y: 51 to 78 */}
-                      <rect x="75" y="51" width="415" height="27" fill="rgba(210, 160, 60, 0.14)" />
-                      {/* Shear Zone Highlight: 8.0 - 9.0m -> y: 77 to 84 */}
-                      <rect x="75" y="77" width="415" height="8" fill="rgba(255, 59, 92, 0.3)" />
-                      {/* Bedrock Anchor: 12 - 25m -> y: 104 to 190 */}
-                      <rect x="75" y="104" width="415" height="86" fill="rgba(60, 100, 160, 0.1)" />
+                      {/* Topsoil & Colluvium: 0 - 4m -> y: 25 to 51.4 */}
+                      <rect x="75" y="25" width="415" height="26.4" fill="rgba(180, 120, 60, 0.12)" />
+                      {/* Weathered Siltstone: 4 - 7.5m -> y: 51.4 to 74.5 */}
+                      <rect x="75" y="51.4" width="415" height="23.1" fill="rgba(210, 160, 60, 0.14)" />
+                      {/* Critical Shear Zone Highlight: 7.5 - 9.0m -> y: 74.5 to 84.4 */}
+                      <rect x="75" y="74.5" width="415" height="9.9" fill="rgba(255, 59, 92, 0.35)" className="hazard-zone-active" />
+                      {/* Fractured Quartzite: 9.0 - 14m -> y: 84.4 to 117.4 */}
+                      <rect x="75" y="84.4" width="415" height="33.0" fill="rgba(100, 120, 160, 0.12)" />
+                      {/* Bedrock Anchor Datum: 14 - 25m -> y: 117.4 to 190 */}
+                      <rect x="75" y="117.4" width="415" height="72.6" fill="rgba(60, 100, 160, 0.14)" />
 
                       {/* Depth Grid Lines */}
                       {[0, 5, 8.2, 12, 16, 20, 25].map(z => {
@@ -6384,78 +6802,141 @@ export default function SensorPricingPage() {
                         );
                       })}
 
-                      {/* Vertical Datum Line (0mm Deflection -> x = 115) */}
-                      <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.3)" />
-                      <line x1="195" y1="25" x2="195" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+                      {/* Vertical Datum Line (0mm or 0% -> x = 115) */}
+                      <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
+                      <line x1="205" y1="25" x2="205" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
                       <line x1="295" y1="25" x2="295" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
-                      <line x1="395" y1="25" x2="395" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+                      <line x1="385" y1="25" x2="385" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
+                      <line x1="475" y1="25" x2="475" y2="190" stroke="rgba(255,255,255,0.06)" strokeDasharray="2 2" />
 
-                      {/* X-Axis Deflection Labels */}
-                      <text x="115" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">0mm</text>
-                      <text x="195" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">5mm</text>
-                      <text x="295" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">10mm</text>
-                      <text x="395" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">15mm</text>
+                      {/* X-Axis Labels */}
+                      {inclinometerMode === 'CUMULATIVE' ? (
+                        <>
+                          <text x="115" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">0mm</text>
+                          <text x="205" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">5mm</text>
+                          <text x="295" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">10mm</text>
+                          <text x="385" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">15mm</text>
+                          <text x="475" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">20mm</text>
+                        </>
+                      ) : (
+                        <>
+                          <text x="115" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">0%/m</text>
+                          <text x="205" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">1.5%</text>
+                          <text x="295" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">3.0%</text>
+                          <text x="385" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">4.5%</text>
+                          <text x="475" y="202" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">6.0%/m</text>
+                        </>
+                      )}
 
                       {/* Shear Plane Tag */}
-                      <text x="485" y="74" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
-                        ◀ SLIP INTERFACE @ 8.2m
+                      <text x="485" y="72" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        ◀ BASAL SLICKENSIDE @ 8.2m
                       </text>
 
-                      {/* Baseline Profile (T0: 0mm all depths) */}
-                      <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeDasharray="3 3" />
+                      {inclinometerMode === 'CUMULATIVE' ? (
+                        <>
+                          {/* Baseline Profile (T0: 0mm all depths) */}
+                          <line x1="115" y1="25" x2="115" y2="190" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="3 3" />
 
-                      {/* 24-Hour Ago Profile (Cyan) */}
-                      <path
-                        d={`M ${inclinometerDepths.map((p, i) => {
-                          const y = 25 + (p.z / 25) * 165;
-                          const x = 115 + (p.h24 / 20) * 370;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#00e5ff"
-                        strokeWidth="1.8"
-                        strokeDasharray="2 1"
-                      />
-
-                      {/* Live Profile (Green turning Red in shear zone) */}
-                      <path
-                        d={`M ${inclinometerDepths.map((p, i) => {
-                          const y = 25 + (p.z / 25) * 165;
-                          const x = 115 + (p.live / 20) * 370;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#22c55e"
-                        strokeWidth="2.8"
-                      />
-
-                      {/* Live Nodes on the Profile */}
-                      {inclinometerDepths.map((p, i) => {
-                        const y = 25 + (p.z / 25) * 165;
-                        const x = 115 + (p.live / 20) * 370;
-                        const isShear = p.z === 8.2;
-                        return (
-                          <circle
-                            key={i}
-                            cx={x}
-                            cy={y}
-                            r={isShear ? 5 : 2.5}
-                            fill={isShear ? '#ff3b5c' : '#22c55e'}
-                            className={isShear ? 'live-point-pulse' : ''}
+                          {/* 24-Hour Ago Profile (Cyan) */}
+                          <path
+                            d={`M ${inclinometerDepths.map((p, i) => {
+                              const y = 25 + (p.z / 25) * 165;
+                              const x = 115 + (p.h24 / 20) * 360;
+                              return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="#00e5ff"
+                            strokeWidth="1.8"
+                            strokeDasharray="2 1"
                           />
-                        );
-                      })}
+
+                          {/* Live Profile (Green smooth sigmoid) */}
+                          <path
+                            d={`M ${inclinometerDepths.map((p, i) => {
+                              const y = 25 + (p.z / 25) * 165;
+                              const x = 115 + (p.live / 20) * 360;
+                              return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="#22c55e"
+                            strokeWidth="2.8"
+                          />
+
+                          {/* Live Nodes on the Profile */}
+                          {inclinometerDepths.map((p, i) => {
+                            const y = 25 + (p.z / 25) * 165;
+                            const x = 115 + (p.live / 20) * 360;
+                            const isShear = p.z === 8.2;
+                            return (
+                              <circle
+                                key={i}
+                                cx={x}
+                                cy={y}
+                                r={isShear ? 6 : 3}
+                                fill={isShear ? '#ff3b5c' : '#22c55e'}
+                                className={isShear ? 'live-point-pulse' : ''}
+                              />
+                            );
+                          })}
+                        </>
+                      ) : (
+                        <>
+                          {/* Incremental Shear Strain Profile (Bell Curve localized at 8.2m) */}
+                          <path
+                            d={`M 115 190 ${inclinometerDepths.map(p => {
+                              const y = 25 + (p.z / 25) * 165;
+                              const x = 115 + (p.liveStrain / 6.0) * 360;
+                              return `L ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')} L 115 25 Z`}
+                            fill="url(#strainGrad)"
+                          />
+                          <path
+                            d={`M ${inclinometerDepths.map((p, i) => {
+                              const y = 25 + (p.z / 25) * 165;
+                              const x = 115 + (p.liveStrain / 6.0) * 360;
+                              return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="#ff3b5c"
+                            strokeWidth="2.8"
+                          />
+                          {inclinometerDepths.map((p, i) => {
+                            const y = 25 + (p.z / 25) * 165;
+                            const x = 115 + (p.liveStrain / 6.0) * 360;
+                            const isPeak = p.z === 8.2;
+                            return (
+                              <circle
+                                key={i}
+                                cx={x}
+                                cy={y}
+                                r={isPeak ? 6 : 3}
+                                fill={isPeak ? '#ff3b5c' : '#ffb020'}
+                                className={isPeak ? 'live-point-pulse' : ''}
+                              />
+                            );
+                          })}
+                        </>
+                      )}
+
+                      {/* Interactive Guideline when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_3' && (
+                        <g>
+                          <line x1="75" y1={hoveredGraphPoint.svgY} x2="490" y2={hoveredGraphPoint.svgY} stroke="#22c55e" strokeWidth="1" strokeDasharray="3 2" />
+                          <circle cx="115" cy={hoveredGraphPoint.svgY} r="4" fill="#22c55e" stroke="#fff" strokeWidth="1.5" />
+                        </g>
+                      )}
                     </svg>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
                     <div style={{ display: 'flex', gap: '14px' }}>
-                      <span style={{ color: '#22c55e' }}>● Live Deflection: <strong>{lastPt.displacementMm} mm</strong></span>
-                      <span style={{ color: '#00e5ff' }}>-- 24h Ago: <strong>4.8 mm</strong></span>
-                      <span style={{ color: 'var(--text-muted)' }}>- - Baseline: <strong>0.0 mm</strong></span>
+                      <span style={{ color: '#22c55e' }}>● Surface Deflection: <strong>{lastPt.displacementMm} mm</strong></span>
+                      <span style={{ color: '#ff3b5c' }}>● Shear Strain Peak (8.2m): <strong>4.92 %/m</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>- - Datum Anchor (25m): <strong>0.0 mm</strong></span>
                     </div>
                     <span style={{ color: 'var(--cyan)', fontSize: '10px' }}>
-                      IPI Transducers: 12-Node Smart String
+                      IPI Transducers: 12-Node Smart MEMS String
                     </span>
                   </div>
                 </div>
@@ -6464,23 +6945,289 @@ export default function SensorPricingPage() {
               {/* ───────────────────────────────────────────────────────── */}
               {/* GRAPH 4: PRECIPITATION HYETOGRAPH & CAINE I-D THRESHOLD   */}
               {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(96, 165, 250, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(96, 165, 250, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#60a5fa' }}>🌧️</span>
                     <span className="label-caps">4. PRECIPITATION HYETOGRAPH & CAINE I-D COLLAPSE CRITERION</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>
-                    I = 14.82 · D^(-0.39) (mm/hr)
-                  </span>
+                  {/* Mode switcher */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => {
+                        playTacticalAudio('click');
+                        const modes = ['BOTH', 'RATE_ONLY', 'CUMULATIVE_ONLY'];
+                        const nextIdx = (modes.indexOf(rainfallGraphMode) + 1) % modes.length;
+                        setRainfallGraphMode(modes[nextIdx]);
+                      }}
+                      style={{
+                        background: 'rgba(56, 189, 248, 0.15)',
+                        border: '1px solid #38bdf8',
+                        color: '#38bdf8',
+                        padding: '2px 8px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      MODE: {rainfallGraphMode}
+                    </button>
+                    <span style={{ fontSize: '10px', color: '#60a5fa', fontFamily: 'var(--font-mono)' }}>
+                      I = 14.82 · D^(-0.39) (mm/hr)
+                    </span>
+                  </div>
                 </div>
-                <div className="panel-body">
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_4' && hoveredGraphPoint.data && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        left: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        top: '15px',
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      <div style={{ color: '#60a5fa', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⏱️ T = {hoveredGraphPoint.data.time}</span>
+                        <span style={{ color: hoveredGraphPoint.data.rainfallRate > 22 ? '#ff3b5c' : '#60a5fa', fontSize: '9px' }}>
+                          {hoveredGraphPoint.data.rainfallRate > 22 ? '⚡ CLOUDBURST SURGE' : 'STEADY PRECIPITATION'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px' }}>
+                        <div>Instant Rate: <strong style={{ color: '#38bdf8' }}>{hoveredGraphPoint.data.rainfallRate} mm/hr</strong></div>
+                        <div>Cumulative Rain: <strong style={{ color: '#93c5fd' }}>{hoveredGraphPoint.data.cumulativeRain} mm</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                        Caine Margin: {hoveredGraphPoint.data.rainfallRate > 22 ? `+${(hoveredGraphPoint.data.rainfallRate - 22).toFixed(1)} mm/hr above threshold` : `${(22 - hoveredGraphPoint.data.rainfallRate).toFixed(1)} mm/hr safety margin`}
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={(e) => handleChartMouseMove(e, 'GRAPH_4')}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
                       <defs>
                         <linearGradient id="rainBarGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.85" />
-                          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.3" />
+                          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.9" />
+                          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.4" />
+                        </linearGradient>
+                        <linearGradient id="rainCriticalGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ff3b5c" stopOpacity="0.95" />
+                          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.5" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Storm Threshold Hazard Zone (Rain Rate > 22 mm/h: y from 30 to 131.3) */}
+                      <rect x="45" y="30" width="435" height="101.3" fill="rgba(56, 189, 248, 0.05)" />
+
+                      {/* Grid Lines */}
+                      {[30, 70, 110, 150, 190].map(y => (
+                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      ))}
+                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
+
+                      {/* Y-Axis Labels Left (Rainfall Rate mm/hr: 0 to 60) */}
+                      <text x="40" y="34" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">60mm</text>
+                      <text x="40" y="74" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">45mm</text>
+                      <text x="40" y="114" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">30mm</text>
+                      <text x="40" y="154" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">15mm</text>
+                      <text x="40" y="193" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">0mm</text>
+
+                      {/* Y-Axis Labels Right (Cumulative mm: 195 to 255, span 60) */}
+                      <text x="486" y="34" fill="#93c5fd" fontSize="9" fontFamily="monospace">255mm</text>
+                      <text x="486" y="74" fill="#93c5fd" fontSize="9" fontFamily="monospace">240mm</text>
+                      <text x="486" y="114" fill="#93c5fd" fontSize="9" fontFamily="monospace">225mm</text>
+                      <text x="486" y="154" fill="#93c5fd" fontSize="9" fontFamily="monospace">210mm</text>
+                      <text x="486" y="193" fill="#93c5fd" fontSize="9" fontFamily="monospace">195mm</text>
+
+                      {/* Caine Empirical Landslide Trigger Line (22 mm/h -> y ≈ 131.3) */}
+                      <line x1="45" y1="131.3" x2="480" y2="131.3" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="126" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        CAINE 1980 COLLAPSE THRESHOLD (22 mm/h)
+                      </text>
+
+                      {/* Rainfall Intensity Hyetograph Bars */}
+                      {(rainfallGraphMode === 'BOTH' || rainfallGraphMode === 'RATE_ONLY') && data.map((d, i) => {
+                        const x = 45 + (i / (data.length - 1)) * 435;
+                        const barH = (d.rainfallRate / 60) * 160;
+                        const y = 190 - barH;
+                        const isSevere = d.rainfallRate > 22;
+                        return (
+                          <rect
+                            key={i}
+                            x={x - 6}
+                            y={y}
+                            width="12"
+                            height={barH}
+                            fill={isSevere ? 'url(#rainCriticalGrad)' : 'url(#rainBarGrad)'}
+                            className={isSevere ? 'hyetograph-bar-pulse' : ''}
+                            rx="2"
+                          />
+                        );
+                      })}
+
+                      {/* Cumulative Rainfall S-Curve */}
+                      {(rainfallGraphMode === 'BOTH' || rainfallGraphMode === 'CUMULATIVE_ONLY') && (
+                        <>
+                          <path
+                            d={`M 45 190 ${data.map((d, i) => {
+                              const x = 45 + (i / (data.length - 1)) * 435;
+                              const y = 190 - ((d.cumulativeRain - 195) / 60) * 160;
+                              return `L ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')} L 480 190 Z`}
+                            fill="rgba(147, 197, 253, 0.08)"
+                          />
+                          <path
+                            d={`M ${data.map((d, i) => {
+                              const x = 45 + (i / (data.length - 1)) * 435;
+                              const y = 190 - ((d.cumulativeRain - 195) / 60) * 160;
+                              return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="#93c5fd"
+                            strokeWidth="2.5"
+                          />
+                        </>
+                      )}
+
+                      {/* Live Dot on Cumulative Curve */}
+                      {(rainfallGraphMode === 'BOTH' || rainfallGraphMode === 'CUMULATIVE_ONLY') && (() => {
+                        const lastX = 480;
+                        const lastY = 190 - ((lastPt.cumulativeRain - 195) / 60) * 160;
+                        return (
+                          <g transform={`translate(${lastX}, ${lastY})`}>
+                            <circle r="7" fill="rgba(147, 197, 253, 0.4)" className="live-point-pulse" />
+                            <circle r="3.5" fill="#93c5fd" />
+                            <circle r="1" fill="#fff" />
+                          </g>
+                        );
+                      })()}
+
+                      {/* Interactive Crosshair when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_4' && (
+                        <g>
+                          <line x1={hoveredGraphPoint.svgX} y1="20" x2={hoveredGraphPoint.svgX} y2="190" className="graph-crosshair-line" />
+                          {hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.cumulativeRain - 195) / 60) * 160}
+                              r="5"
+                              fill="#93c5fd"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                        </g>
+                      )}
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', gap: '14px' }}>
+                      <span style={{ color: '#38bdf8' }}>▮ Instantaneous Rate: <strong>{lastPt.rainfallRate} mm/hr</strong></span>
+                      <span style={{ color: '#93c5fd' }}>● Cumulative Rain: <strong>{lastPt.cumulativeRain} mm</strong></span>
+                    </div>
+                    <span className="chip chip-red" style={{ fontSize: '9px' }}>
+                      CRITICAL ANTECEDENT SATURATION (API 164.2mm)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ───────────────────────────────────────────────────────── */}
+              {/* GRAPH 5: MICRO-SEISMIC ACOUSTIC EMISSION & PPV            */}
+              {/* ───────────────────────────────────────────────────────── */}
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(217, 70, 239, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#d946ef' }}>⚡</span>
+                    <span className="label-caps">5. MICRO-SEISMIC ACOUSTIC EMISSION (150kHz) & PPV VELOCITY</span>
+                  </div>
+                  {/* Channel toggles */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={() => toggleChannel('aeHits')}
+                      style={{
+                        background: visibleGraphChannels.aeHits ? 'rgba(217, 70, 239, 0.2)' : 'transparent',
+                        border: visibleGraphChannels.aeHits ? '1px solid #d946ef' : '1px solid rgba(255,255,255,0.1)',
+                        color: visibleGraphChannels.aeHits ? '#d946ef' : 'var(--text-muted)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ AE Hits
+                    </button>
+                    <button
+                      onClick={() => toggleChannel('ppv')}
+                      style={{
+                        background: visibleGraphChannels.ppv ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+                        border: visibleGraphChannels.ppv ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.1)',
+                        color: visibleGraphChannels.ppv ? 'var(--cyan)' : 'var(--text-muted)',
+                        padding: '2px 7px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      〰️ PPV Wave
+                    </button>
+                    <span style={{ fontSize: '10px', color: '#d946ef', fontFamily: 'var(--font-mono)' }}>
+                      KAISER EFFECT ACTIVE
+                    </span>
+                  </div>
+                </div>
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_5' && hoveredGraphPoint.data && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        left: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        top: '15px',
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      <div style={{ color: '#d946ef', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⏱️ T = {hoveredGraphPoint.data.time}</span>
+                        <span style={{ color: hoveredGraphPoint.data.ppvVelocity >= 20 ? '#ff3b5c' : '#22c55e', fontSize: '9px' }}>
+                          {hoveredGraphPoint.data.ppvVelocity >= 20 ? '⚠️ DIN 4150 LIMIT EXCEEDED' : '✓ STABLE VIBRATION'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px' }}>
+                        <div>AE Hit Rate: <strong style={{ color: '#d946ef' }}>{hoveredGraphPoint.data.aeHits} hits/min</strong></div>
+                        <div>PPV Velocity: <strong style={{ color: '#00e5ff' }}>{hoveredGraphPoint.data.ppvVelocity} mm/s</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                        Acoustic Energy Density: {hoveredGraphPoint.data.aeHits > 70 ? 'Tertiary Micro-Fracture Acoustic Clustering' : 'Baseline Secondary Creep Noise'}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={(e) => handleChartMouseMove(e, 'GRAPH_5')}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
+                      <defs>
+                        <linearGradient id="aeBarGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.95" />
+                          <stop offset="100%" stopColor="#d946ef" stopOpacity="0.4" />
                         </linearGradient>
                       </defs>
 
@@ -6492,127 +7239,30 @@ export default function SensorPricingPage() {
                       <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
                       <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
 
-                      {/* Y-Axis Labels Left (Rainfall Rate mm/hr: 0 to 50) */}
-                      <text x="40" y="34" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">50mm</text>
-                      <text x="40" y="86" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">35mm</text>
-                      <text x="40" y="138" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">20mm</text>
-                      <text x="40" y="193" textAnchor="end" fill="#38bdf8" fontSize="9" fontFamily="monospace">0mm</text>
-
-                      {/* Y-Axis Labels Right (Cumulative mm: 200 to 230) */}
-                      <text x="486" y="34" fill="#93c5fd" fontSize="9" fontFamily="monospace">230mm</text>
-                      <text x="486" y="86" fill="#93c5fd" fontSize="9" fontFamily="monospace">220mm</text>
-                      <text x="486" y="138" fill="#93c5fd" fontSize="9" fontFamily="monospace">210mm</text>
-                      <text x="486" y="193" fill="#93c5fd" fontSize="9" fontFamily="monospace">200mm</text>
-
-                      {/* Caine Empirical Landslide Trigger Line (22 mm/h -> y ≈ 120) */}
-                      <line x1="45" y1="120" x2="480" y2="120" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
-                      <text x="475" y="115" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
-                        CAINE 1980 COLLAPSE THRESHOLD (22 mm/h)
-                      </text>
-
-                      {/* Rainfall Intensity Hyetograph Bars */}
-                      {data.map((d, i) => {
-                        const x = 48 + (i / (data.length - 1)) * 425;
-                        const barH = (d.rainfallRate / 50) * 155;
-                        const y = 190 - barH;
-                        return (
-                          <rect
-                            key={i}
-                            x={x - 6}
-                            y={y}
-                            width="12"
-                            height={barH}
-                            fill="url(#rainBarGrad)"
-                            rx="2"
-                          />
-                        );
-                      })}
-
-                      {/* Cumulative Rainfall Line */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 48 + (i / (data.length - 1)) * 425;
-                          const y = 190 - ((d.cumulativeRain - 200) / 30) * 155;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#93c5fd"
-                        strokeWidth="2.5"
-                      />
-
-                      {/* Live Dot on Cumulative Curve */}
-                      {(() => {
-                        const lastX = 473;
-                        const lastY = 190 - ((lastPt.cumulativeRain - 200) / 30) * 155;
-                        return (
-                          <g transform={`translate(${lastX}, ${lastY})`}>
-                            <circle r="7" fill="rgba(147, 197, 253, 0.4)" className="live-point-pulse" />
-                            <circle r="3.5" fill="#93c5fd" />
-                            <circle r="1" fill="#fff" />
-                          </g>
-                        );
-                      })()}
-                    </svg>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
-                    <div style={{ display: 'flex', gap: '14px' }}>
-                      <span style={{ color: '#38bdf8' }}>▮ Instantaneous Rate: <strong>{lastPt.rainfallRate} mm/hr</strong></span>
-                      <span style={{ color: '#93c5fd' }}>● Cumulative Rain: <strong>{lastPt.cumulativeRain} mm</strong></span>
-                    </div>
-                    <span className="chip chip-red" style={{ fontSize: '9px' }}>
-                      CRITICAL ANTECEDENT SATURATION
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ───────────────────────────────────────────────────────── */}
-              {/* GRAPH 5: MICRO-SEISMIC ACOUSTIC EMISSION & PPV            */}
-              {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(217, 70, 239, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#d946ef' }}>⚡</span>
-                    <span className="label-caps">5. MICRO-SEISMIC ACOUSTIC EMISSION (PAC 150kHz) & PPV VELOCITY</span>
-                  </div>
-                  <span style={{ fontSize: '10px', color: '#d946ef', fontFamily: 'var(--font-mono)' }}>
-                    FRACTURE ENERGY ACOUSTICS
-                  </span>
-                </div>
-                <div className="panel-body">
-                  <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
-                      {/* Grid Lines */}
-                      {[30, 70, 110, 150, 190].map(y => (
-                        <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
-                      ))}
-                      <line x1="45" y1="20" x2="45" y2="190" stroke="rgba(255,255,255,0.2)" />
-                      <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
-                      <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
-
                       {/* Y-Axis Labels Left (AE Hits/min: 0 to 120) */}
                       <text x="40" y="34" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">120</text>
-                      <text x="40" y="86" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">80</text>
-                      <text x="40" y="138" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">40</text>
+                      <text x="40" y="74" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">90</text>
+                      <text x="40" y="114" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">60</text>
+                      <text x="40" y="154" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">30</text>
                       <text x="40" y="193" textAnchor="end" fill="#d946ef" fontSize="9" fontFamily="monospace">0</text>
 
                       {/* Y-Axis Labels Right (PPV mm/s: 0 to 30) */}
                       <text x="486" y="34" fill="#00e5ff" fontSize="9" fontFamily="monospace">30</text>
-                      <text x="486" y="86" fill="#00e5ff" fontSize="9" fontFamily="monospace">20</text>
-                      <text x="486" y="138" fill="#00e5ff" fontSize="9" fontFamily="monospace">10</text>
+                      <text x="486" y="74" fill="#00e5ff" fontSize="9" fontFamily="monospace">22.5</text>
+                      <text x="486" y="114" fill="#00e5ff" fontSize="9" fontFamily="monospace">15.0</text>
+                      <text x="486" y="154" fill="#00e5ff" fontSize="9" fontFamily="monospace">7.5</text>
                       <text x="486" y="193" fill="#00e5ff" fontSize="9" fontFamily="monospace">0</text>
 
-                      {/* DIN 4150 Ground Vibration Limit (20 mm/s -> y ≈ 86) */}
-                      <line x1="45" y1="86" x2="480" y2="86" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
-                      <text x="475" y="81" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
-                        DIN 4150 STRUCTURAL RISK (20 mm/s)
+                      {/* DIN 4150 Ground Vibration Limit (20 mm/s -> y ≈ 83.3) */}
+                      <line x1="45" y1="83.3" x2="480" y2="83.3" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="78" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                        DIN 4150 STRUCTURAL DAMAGE LIMIT (20 mm/s)
                       </text>
 
                       {/* AE Hits Vertical Columns */}
-                      {data.map((d, i) => {
-                        const x = 48 + (i / (data.length - 1)) * 425;
-                        const barH = (Math.min(120, d.aeHits) / 120) * 155;
+                      {visibleGraphChannels.aeHits && data.map((d, i) => {
+                        const x = 45 + (i / (data.length - 1)) * 435;
+                        const barH = (Math.min(120, d.aeHits) / 120) * 160;
                         const y = 190 - barH;
                         return (
                           <rect
@@ -6621,28 +7271,30 @@ export default function SensorPricingPage() {
                             y={y}
                             width="8"
                             height={barH}
-                            fill="rgba(217, 70, 239, 0.6)"
+                            fill="url(#aeBarGrad)"
                             rx="1"
                           />
                         );
                       })}
 
                       {/* PPV Waveform Trace */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 48 + (i / (data.length - 1)) * 425;
-                          const y = 190 - (d.ppvVelocity / 30) * 155;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#00e5ff"
-                        strokeWidth="2.2"
-                      />
+                      {visibleGraphChannels.ppv && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - (d.ppvVelocity / 30) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#00e5ff"
+                          strokeWidth="2.4"
+                        />
+                      )}
 
                       {/* Live Dot on PPV */}
-                      {(() => {
-                        const lastX = 473;
-                        const lastY = 190 - (lastPt.ppvVelocity / 30) * 155;
+                      {visibleGraphChannels.ppv && (() => {
+                        const lastX = 480;
+                        const lastY = 190 - (lastPt.ppvVelocity / 30) * 160;
                         return (
                           <g transform={`translate(${lastX}, ${lastY})`}>
                             <circle r="7" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
@@ -6651,6 +7303,23 @@ export default function SensorPricingPage() {
                           </g>
                         );
                       })()}
+
+                      {/* Interactive Crosshair when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_5' && (
+                        <g>
+                          <line x1={hoveredGraphPoint.svgX} y1="20" x2={hoveredGraphPoint.svgX} y2="190" className="graph-crosshair-line" />
+                          {visibleGraphChannels.ppv && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - (hoveredGraphPoint.data.ppvVelocity / 30) * 160}
+                              r="5"
+                              fill="#00e5ff"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                        </g>
+                      )}
                     </svg>
                   </div>
 
@@ -6660,7 +7329,7 @@ export default function SensorPricingPage() {
                       <span style={{ color: '#00e5ff' }}>● Particle Velocity: <strong>{lastPt.ppvVelocity} mm/s</strong></span>
                     </div>
                     <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
-                      Transducer: Piezoelectric 150kHz
+                      Transducer: Piezoelectric 150kHz Resonance Transducer
                     </span>
                   </div>
                 </div>
@@ -6669,19 +7338,82 @@ export default function SensorPricingPage() {
               {/* ───────────────────────────────────────────────────────── */}
               {/* GRAPH 6: MULTI-DEPTH SOIL MOISTURE SATURATION GRADIENT   */}
               {/* ───────────────────────────────────────────────────────── */}
-              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(168, 85, 247, 0.25)' }}>
-                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="panel graph-card-interactive" style={{ background: '#070b12', border: '1px solid rgba(168, 85, 247, 0.25)', position: 'relative' }}>
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#a855f7' }}>🌱</span>
-                    <span className="label-caps">6. MULTI-DEPTH SOIL VWC (%) SATURATION GRADIENT (10cm - 100cm)</span>
+                    <span className="label-caps">6. MULTI-DEPTH SOIL VWC (%) SATURATION GRADIENT</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: '#a855f7', fontFamily: 'var(--font-mono)' }}>
-                    WETTING FRONT VELOCITY: 4.2 cm/hr
-                  </span>
+                  {/* Channel depth toggles */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {[
+                      { key: 'vwc10', label: '10cm', color: '#00e5ff' },
+                      { key: 'vwc30', label: '30cm', color: '#22c55e' },
+                      { key: 'vwc60', label: '60cm', color: '#ffb020' },
+                      { key: 'vwc100', label: '100cm', color: '#c084fc' }
+                    ].map(ch => (
+                      <button
+                        key={ch.key}
+                        onClick={() => toggleChannel(ch.key)}
+                        style={{
+                          background: visibleGraphChannels[ch.key] ? `${ch.color}22` : 'transparent',
+                          border: visibleGraphChannels[ch.key] ? `1px solid ${ch.color}` : '1px solid rgba(255,255,255,0.1)',
+                          color: visibleGraphChannels[ch.key] ? ch.color : 'var(--text-muted)',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {ch.label}
+                      </button>
+                    ))}
+                    <span style={{ fontSize: '10px', color: '#a855f7', fontFamily: 'var(--font-mono)' }}>
+                      v_w = 4.2 cm/hr
+                    </span>
+                  </div>
                 </div>
-                <div className="panel-body">
+
+                <div className="panel-body" style={{ position: 'relative' }}>
+                  {/* Floating HUD Tooltip */}
+                  {hoveredGraphPoint?.graphId === 'GRAPH_6' && hoveredGraphPoint.data && (
+                    <div
+                      className="graph-tooltip-box"
+                      style={{
+                        left: `${Math.min(75, Math.max(15, hoveredGraphPoint.chartPercent))}%`,
+                        top: '15px',
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      <div style={{ color: '#c084fc', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⏱️ T = {hoveredGraphPoint.data.time}</span>
+                        <span style={{ color: hoveredGraphPoint.data.vwc10cm >= 85 ? '#ff3b5c' : '#22c55e', fontSize: '9px' }}>
+                          {hoveredGraphPoint.data.vwc10cm >= 85 ? '⚠️ FIELD SATURATION (LIQUEFACTION)' : 'MOISTURE INFILTRATION'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '10px' }}>
+                        <div>10cm: <strong style={{ color: '#00e5ff' }}>{hoveredGraphPoint.data.vwc10cm}%</strong></div>
+                        <div>30cm: <strong style={{ color: '#22c55e' }}>{hoveredGraphPoint.data.vwc30cm}%</strong></div>
+                        <div>60cm: <strong style={{ color: '#ffb020' }}>{hoveredGraphPoint.data.vwc60cm}%</strong></div>
+                        <div>100cm: <strong style={{ color: '#c084fc' }}>{hoveredGraphPoint.data.vwc100cm}%</strong></div>
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                        Downward Wetting Front Rate: 4.2 cm/hr | Shear Plane Recharge (100cm): {hoveredGraphPoint.data.vwc100cm}%
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ height: '220px', width: '100%', position: 'relative' }}>
-                    <svg viewBox="0 0 520 220" style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      viewBox="0 0 520 220"
+                      style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
+                      onMouseMove={(e) => handleChartMouseMove(e, 'GRAPH_6')}
+                      onMouseLeave={() => setHoveredGraphPoint(null)}
+                    >
+                      {/* Soil Saturation Hazard Zone (>85% VWC: y from 30 to 90) */}
+                      <rect x="45" y="30" width="435" height="60" fill="rgba(168, 85, 247, 0.08)" />
+
                       {/* Grid Lines */}
                       {[30, 70, 110, 150, 190].map(y => (
                         <line key={y} x1="45" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
@@ -6690,70 +7422,78 @@ export default function SensorPricingPage() {
                       <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
                       <line x1="45" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.2)" />
 
-                      {/* Y-Axis Labels Left (VWC %: 60 to 100%) */}
+                      {/* Y-Axis Labels Left (VWC %: 60 to 100%, span 40) */}
                       <text x="40" y="34" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">100%</text>
                       <text x="40" y="74" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">90%</text>
                       <text x="40" y="114" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">80%</text>
                       <text x="40" y="154" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">70%</text>
                       <text x="40" y="193" textAnchor="end" fill="var(--text-muted)" fontSize="9" fontFamily="monospace">60%</text>
 
-                      {/* Saturation / Field Capacity Limit (85% VWC -> y ≈ 94) */}
-                      <line x1="45" y1="94" x2="480" y2="94" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
-                      <text x="475" y="89" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      {/* Saturation / Field Capacity Limit (85% VWC -> y = 90) */}
+                      <line x1="45" y1="90" x2="480" y2="90" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <text x="475" y="85" textAnchor="end" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
                         SOIL FIELD SATURATION CAPACITY (85% VWC)
                       </text>
 
                       {/* 10cm Depth Curve (Cyan) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.vwc10cm - 60) / 40) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#00e5ff"
-                        strokeWidth="2.5"
-                      />
+                      {visibleGraphChannels.vwc10 && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.vwc10cm - 60) / 40) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#00e5ff"
+                          strokeWidth="2.5"
+                        />
+                      )}
 
                       {/* 30cm Depth Curve (Green) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.vwc30cm - 60) / 40) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#22c55e"
-                        strokeWidth="2"
-                      />
+                      {visibleGraphChannels.vwc30 && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.vwc30cm - 60) / 40) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2.2"
+                        />
+                      )}
 
                       {/* 60cm Depth Curve (Amber) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.vwc60cm - 60) / 40) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#ffb020"
-                        strokeWidth="2"
-                      />
+                      {visibleGraphChannels.vwc60 && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.vwc60cm - 60) / 40) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#ffb020"
+                          strokeWidth="2.0"
+                        />
+                      )}
 
                       {/* 100cm Depth Curve (Purple) */}
-                      <path
-                        d={`M ${data.map((d, i) => {
-                          const x = 45 + (i / (data.length - 1)) * 435;
-                          const y = 190 - ((d.vwc100cm - 60) / 40) * 160;
-                          return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-                        }).join(' ')}`}
-                        fill="none"
-                        stroke="#c084fc"
-                        strokeWidth="2"
-                        strokeDasharray="3 2"
-                      />
+                      {visibleGraphChannels.vwc100 && (
+                        <path
+                          d={`M ${data.map((d, i) => {
+                            const x = 45 + (i / (data.length - 1)) * 435;
+                            const y = 190 - ((d.vwc100cm - 60) / 40) * 160;
+                            return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                          }).join(' ')}`}
+                          fill="none"
+                          stroke="#c084fc"
+                          strokeWidth="2.0"
+                          strokeDasharray="4 2"
+                        />
+                      )}
 
                       {/* Pulsing Live Dot on 10cm */}
-                      {(() => {
+                      {visibleGraphChannels.vwc10 && (() => {
                         const lastX = 480;
                         const lastY = 190 - ((lastPt.vwc10cm - 60) / 40) * 160;
                         return (
@@ -6764,6 +7504,53 @@ export default function SensorPricingPage() {
                           </g>
                         );
                       })()}
+
+                      {/* Interactive Crosshair when hovered */}
+                      {hoveredGraphPoint?.graphId === 'GRAPH_6' && (
+                        <g>
+                          <line x1={hoveredGraphPoint.svgX} y1="20" x2={hoveredGraphPoint.svgX} y2="190" className="graph-crosshair-line" />
+                          {visibleGraphChannels.vwc10 && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.vwc10cm - 60) / 40) * 160}
+                              r="4"
+                              fill="#00e5ff"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                          {visibleGraphChannels.vwc30 && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.vwc30cm - 60) / 40) * 160}
+                              r="4"
+                              fill="#22c55e"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                          {visibleGraphChannels.vwc60 && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.vwc60cm - 60) / 40) * 160}
+                              r="4"
+                              fill="#ffb020"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                          {visibleGraphChannels.vwc100 && hoveredGraphPoint.data && (
+                            <circle
+                              cx={hoveredGraphPoint.svgX}
+                              cy={190 - ((hoveredGraphPoint.data.vwc100cm - 60) / 40) * 160}
+                              r="4"
+                              fill="#c084fc"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                            />
+                          )}
+                        </g>
+                      )}
                     </svg>
                   </div>
 
@@ -6775,7 +7562,7 @@ export default function SensorPricingPage() {
                       <span style={{ color: '#c084fc' }}>-- 100cm: <strong>{lastPt.vwc100cm}%</strong></span>
                     </div>
                     <span style={{ color: 'var(--cyan)', fontSize: '10px' }}>
-                      Sentek Drill & Drop TDR
+                      Sentek Drill & Drop TDR Probe • Multi-Depth Capacitance
                     </span>
                   </div>
                 </div>
