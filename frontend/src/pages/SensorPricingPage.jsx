@@ -1180,8 +1180,15 @@ export default function SensorPricingPage() {
   const [simHour, setSimHour] = useState(12.0); // 12:00 PM Solar Noon Peak
   const [simSpeed, setSimSpeed] = useState(1); // 0 = pause, 1 = 1x, 10 = 10x, 60 = 60x
   const [liveBatterySoc, setLiveBatterySoc] = useState(88.4);
-  const [showDiagnosticsPanel, setShowDiagnosticsPanel] = useState(false);
+  const [showDiagnosticsPanel, setShowDiagnosticsPanel] = useState(true);
   const [zeroCalibrated, setZeroCalibrated] = useState(false);
+  const [diagnosticScanActive, setDiagnosticScanActive] = useState(false);
+  const [scanStage, setScanStage] = useState(0); // 0=idle, 1=excitation, 2=sweep, 3=fft, 4=wavelet, 5=poly, 6=certified
+  const [scanProgress, setScanProgress] = useState(100);
+  const [diagViewMode, setDiagViewMode] = useState('OSCILLOSCOPE'); // 'OSCILLOSCOPE' | 'FFT_SPECTRUM' | 'PHASE_SPACE' | 'CALIBRATION'
+  const [selectedDiagAlgorithm, setSelectedDiagAlgorithm] = useState('FFT'); // 'FFT' | 'WAVELET' | 'POLYNOMIAL' | 'KALMAN'
+  const [injectedNoise, setInjectedNoise] = useState(false);
+  const [diagOscTick, setDiagOscTick] = useState(0);
   const [spotlightThumbCategory, setSpotlightThumbCategory] = useState('ALL');
   const [spotlightVisualMode, setSpotlightVisualMode] = useState('OPTICAL'); // 'OPTICAL' | 'THERMAL' | 'LIDAR'
   const [graphTimeWindow, setGraphTimeWindow] = useState('LIVE');
@@ -1313,6 +1320,99 @@ export default function SensorPricingPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // Oscilloscope live sweep animation tick
+  useEffect(() => {
+    if (!showDiagnosticsPanel) return;
+    const timer = setInterval(() => {
+      setDiagOscTick(prev => (prev + 1) % 200);
+    }, 60);
+    return () => clearInterval(timer);
+  }, [showDiagnosticsPanel]);
+
+  // Automated Multi-Stage Diagnostic Scan Sequencer
+  const handleRunDiagnosticScan = () => {
+    if (diagnosticScanActive) return;
+    playTacticalAudio('alert');
+    setDiagnosticScanActive(true);
+    setScanStage(1);
+    setScanProgress(18);
+
+    setTimeout(() => {
+      setScanStage(2);
+      setScanProgress(38);
+    }, 700);
+
+    setTimeout(() => {
+      setScanStage(3);
+      setScanProgress(62);
+    }, 1400);
+
+    setTimeout(() => {
+      setScanStage(4);
+      setScanProgress(82);
+    }, 2100);
+
+    setTimeout(() => {
+      setScanStage(5);
+      setScanProgress(96);
+    }, 2800);
+
+    setTimeout(() => {
+      playTacticalAudio('click');
+      setScanStage(6);
+      setScanProgress(100);
+      setDiagnosticScanActive(false);
+    }, 3600);
+  };
+
+  // Export ISO 18674 Laboratory Calibration Certificate
+  const handleDownloadCalibrationCert = () => {
+    playTacticalAudio('click');
+    const certData = {
+      certificate_id: `ISO18674-CERT-GEO-${spotlightItem.id}-2026`,
+      standard: "ISO 18674-4: Geotechnical Investigation & Field Monitoring - Vibrating Wire & Piezometer Systems",
+      issued_date: new Date().toISOString(),
+      instrument_details: {
+        id: spotlightItem.id,
+        name: spotlightItem.name,
+        model: spotlightItem.model,
+        serial_number: `SN-GEO-${(spotlightItem.id * 9187).toString(16).toUpperCase()}`,
+        category: spotlightItem.category,
+        interface: spotlightItem.interface,
+        rated_accuracy: spotlightItem.accuracy,
+        ingress_protection: spotlightItem.ingress
+      },
+      automated_scan_results: {
+        resonant_frequency_f0_hz: 2418.62,
+        quality_factor_q: 142.8,
+        damping_ratio_zeta: 0.0182,
+        signal_to_noise_ratio_db: injectedNoise ? 34.2 : 51.4,
+        coil_resistance_ohms: 182.4,
+        insulation_resistance_megohms: 540.0,
+        thermistor_temperature_c: 18.4,
+        zero_drift_tare_offset: zeroCalibrated ? 0.000 : 0.012
+      },
+      calibration_polynomial: {
+        equation: "P = A*f^2 + B*f + C + D*(T - T0)",
+        A: -0.000342,
+        B: 1.2842,
+        C: -14.21,
+        D: 0.0384,
+        non_linearity_corridor_pct_fs: 0.038
+      },
+      validation_status: "PASSED • CERTIFIED ACCURATE WITHIN ±0.05% FULL SCALE",
+      lead_geotechnical_engineer: "Dr. Sarah Chen, Ph.D., P.E. (Chief Instrumentation Scientist)"
+    };
+
+    const blob = new Blob([JSON.stringify(certData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ISO18674_CALIBRATION_CERT_${spotlightItem.model.replace(/[\/\s]/g, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
 
@@ -2148,63 +2248,552 @@ export default function SensorPricingPage() {
                 </button>
               </div>
 
-              {/* Collapsible Live Instrument Diagnostics Panel */}
+              {/* Collapsible Enhanced Live Instrument Diagnostics & Algorithm Analysis Center */}
               {showDiagnosticsPanel && (
                 <div style={{
-                  marginTop: '14px',
-                  background: 'rgba(4, 7, 12, 0.85)',
+                  marginTop: '16px',
+                  background: 'linear-gradient(135deg, rgba(4, 8, 14, 0.98), rgba(8, 14, 22, 0.98))',
                   border: '1px solid var(--cyan)',
-                  borderRadius: '6px',
-                  padding: '12px 16px',
-                  boxShadow: '0 4px 16px rgba(0, 229, 255, 0.15)'
+                  borderRadius: '8px',
+                  padding: '16px 20px',
+                  boxShadow: '0 8px 32px rgba(0, 229, 255, 0.18)',
+                  position: 'relative'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                      REAL-TIME TRANSDUCER TEST-BENCH • {spotlightItem.model}
-                    </span>
-                    <span className="chip chip-green" style={{ fontSize: '9px' }}>STATUS: NOMINAL (PASS)</span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 180px', gap: '14px', alignItems: 'center' }}>
-                    {/* Live Oscilloscope Trace */}
-                    <div style={{ height: '54px', background: '#020406', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.3)', position: 'relative', overflow: 'hidden' }}>
-                      <div className="oscilloscope-beam" />
-                      <svg viewBox="0 0 300 50" style={{ width: '100%', height: '100%' }}>
-                        <path
-                          d="M 0 25 Q 25 10 50 25 T 100 25 T 150 25 T 200 25 T 250 25 T 300 25"
-                          fill="none"
-                          stroke="#00e5ff"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                      <div style={{ position: 'absolute', bottom: '2px', left: '6px', fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                        SNR: 48.4 dB • JITTER: 0.04%
-                      </div>
+                  {/* Top Header: Title & Action Controls */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: diagnosticScanActive ? 'var(--amber)' : injectedNoise ? 'var(--red)' : '#22c55e',
+                        boxShadow: diagnosticScanActive ? '0 0 10px var(--amber)' : injectedNoise ? '0 0 10px var(--red)' : '0 0 10px #22c55e',
+                        animation: diagnosticScanActive ? 'livePointPulse 1.2s infinite' : 'none'
+                      }} />
+                      <span style={{ fontSize: '12px', color: '#fff', fontWeight: 800, fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
+                        TRANSDUCER SCANNING & ALGORITHM ANALYSIS LAB • {spotlightItem.model}
+                      </span>
+                      <span className={`chip ${injectedNoise ? 'chip-red' : diagnosticScanActive ? 'chip-amber' : 'chip-green'}`} style={{ fontSize: '9px' }}>
+                        {diagnosticScanActive
+                          ? `SCANNING (STAGE ${scanStage}/5)`
+                          : injectedNoise
+                          ? '50Hz EMI NOISE INJECTED'
+                          : zeroCalibrated
+                          ? 'ZERO OFFSET CALIBRATED'
+                          : 'STATUS: NOMINAL (PASS)'}
+                      </span>
                     </div>
 
-                    {/* Calibration & Zero Drift Controls */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={handleRunDiagnosticScan}
+                        disabled={diagnosticScanActive}
+                        className="btn btn-primary"
+                        style={{
+                          padding: '5px 12px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-mono)',
+                          background: diagnosticScanActive ? 'rgba(255, 176, 32, 0.2)' : undefined,
+                          borderColor: diagnosticScanActive ? 'var(--amber)' : undefined,
+                          color: diagnosticScanActive ? 'var(--amber)' : undefined
+                        }}
+                      >
+                        {diagnosticScanActive ? '⏳ EXECUTING SCAN...' : '⚡ RUN ALGORITHM SCAN'}
+                      </button>
+
                       <button
                         onClick={() => {
                           playTacticalAudio('alert');
                           setZeroCalibrated(true);
-                          setTimeout(() => setZeroCalibrated(false), 2500);
+                          setTimeout(() => setZeroCalibrated(false), 3000);
                         }}
                         className="btn"
                         style={{
-                          padding: '6px 10px',
-                          fontSize: '10px',
-                          background: zeroCalibrated ? 'rgba(34, 197, 94, 0.2)' : 'rgba(0, 229, 255, 0.1)',
-                          border: zeroCalibrated ? '1px solid #22c55e' : '1px solid var(--cyan)',
-                          color: zeroCalibrated ? '#22c55e' : 'var(--cyan)',
-                          justifyContent: 'center'
+                          padding: '5px 10px',
+                          fontSize: '11px',
+                          fontFamily: 'var(--font-mono)',
+                          background: zeroCalibrated ? 'rgba(34, 197, 94, 0.25)' : 'rgba(255,255,255,0.06)',
+                          border: zeroCalibrated ? '1px solid #22c55e' : '1px solid var(--border-default)',
+                          color: zeroCalibrated ? '#22c55e' : 'var(--text-primary)'
                         }}
                       >
-                        {zeroCalibrated ? '✓ ZERO OFFSET LOCKED' : '⚡ ZERO-DRIFT CALIBRATE'}
+                        {zeroCalibrated ? '✓ ZERO LOCKED' : '✨ AUTO-ZERO TARE'}
                       </button>
-                      <span style={{ fontSize: '9px', color: 'var(--text-secondary)', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
-                        BUS: {spotlightItem.interface || 'RS-485 / Modbus'}
+
+                      <button
+                        onClick={() => {
+                          playTacticalAudio('alarm');
+                          setInjectedNoise(!injectedNoise);
+                        }}
+                        className="btn"
+                        style={{
+                          padding: '5px 10px',
+                          fontSize: '11px',
+                          fontFamily: 'var(--font-mono)',
+                          background: injectedNoise ? 'rgba(255, 59, 92, 0.25)' : 'rgba(255,255,255,0.06)',
+                          border: injectedNoise ? '1px solid var(--red)' : '1px solid var(--border-default)',
+                          color: injectedNoise ? 'var(--red)' : 'var(--text-secondary)'
+                        }}
+                      >
+                        {injectedNoise ? '⚠️ NOISE ACTIVE' : '⚡ INJECT EMI NOISE'}
+                      </button>
+
+                      <button
+                        onClick={handleDownloadCalibrationCert}
+                        className="btn"
+                        style={{
+                          padding: '5px 10px',
+                          fontSize: '11px',
+                          fontFamily: 'var(--font-mono)',
+                          background: 'rgba(0, 229, 255, 0.1)',
+                          border: '1px solid var(--border-cyan)',
+                          color: 'var(--cyan)'
+                        }}
+                        title="Download ISO 18674 Laboratory Calibration Certificate JSON"
+                      >
+                        📜 EXPORT CERT
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Multi-Stage Algorithm Pipeline Tracker */}
+                  <div style={{
+                    marginBottom: '14px',
+                    background: 'rgba(0,0,0,0.45)',
+                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    border: '1px solid var(--border-subtle)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        AUTOMATED ALGORITHM SCAN PIPELINE:
                       </span>
+                      <span style={{ fontSize: '10px', color: diagnosticScanActive ? 'var(--amber)' : '#22c55e', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                        {diagnosticScanActive
+                          ? `PROGRESS: ${scanProgress}% • STAGE ${scanStage} OF 5 RUNNING`
+                          : 'PIPELINE READY • ALL 5 TESTS VERIFIED'}
+                      </span>
+                    </div>
+
+                    {/* Stage Pipeline Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '8px' }}>
+                      {[
+                        { num: 1, label: 'COIL EXCITATION', sub: '35mA Pluck Pulse' },
+                        { num: 2, label: 'FREQ SWEEP', sub: '800-3200 Hz' },
+                        { num: 3, label: 'RADIX-2 FFT', sub: 'Peak f0 Lock' },
+                        { num: 4, label: 'WAVELET FILTER', sub: 'db4 Denoise' },
+                        { num: 5, label: 'POLY CALIBRATION', sub: 'Temp Correction' },
+                      ].map(st => {
+                        const isCurrent = scanStage === st.num;
+                        const isDone = scanStage > st.num || (!diagnosticScanActive && scanStage === 6);
+                        return (
+                          <div
+                            key={st.num}
+                            className={isCurrent ? 'diag-stage-active' : ''}
+                            style={{
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              background: isCurrent ? 'rgba(0, 229, 255, 0.15)' : isDone ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.02)',
+                              border: isCurrent ? '1px solid var(--cyan)' : isDone ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid var(--border-subtle)',
+                              transition: 'all 0.2s ease',
+                              textAlign: 'center'
+                            }}
+                          >
+                            <div style={{
+                              fontSize: '9px',
+                              fontWeight: 800,
+                              color: isCurrent ? 'var(--cyan)' : isDone ? '#22c55e' : 'var(--text-muted)',
+                              fontFamily: 'var(--font-mono)'
+                            }}>
+                              {isDone ? '✓ ' : ''}{st.num}. {st.label}
+                            </div>
+                            <div style={{ fontSize: '8px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                              {st.sub}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Animated Progress Bar */}
+                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${scanProgress}%`,
+                        background: diagnosticScanActive ? 'linear-gradient(90deg, #00e5ff, #ffb020, #00e5ff)' : '#22c55e',
+                        backgroundSize: '200% 100%',
+                        animation: diagnosticScanActive ? 'batteryChargeFlow 1.5s linear infinite' : 'none',
+                        transition: 'width 0.4s ease'
+                      }} />
+                    </div>
+                  </div>
+
+                  {/* Visualizer Mode Switcher Tabs */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.4)', padding: '2px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                      {[
+                        { id: 'OSCILLOSCOPE', icon: '🌊', label: 'TIME OSCILLOSCOPE (0-20ms)' },
+                        { id: 'FFT_SPECTRUM', icon: '📊', label: 'FFT SPECTRUM (800-3200Hz)' },
+                        { id: 'PHASE_SPACE', icon: '🌀', label: 'PHASE ATTRACTOR (dx/dt vs x)' },
+                        { id: 'CALIBRATION', icon: '📈', label: 'POLYNOMIAL CORRIDOR (±0.05% FS)' }
+                      ].map(tab => (
+                        <button
+                          key={tab.id}
+                          onClick={() => { playTacticalAudio('click'); setDiagViewMode(tab.id); }}
+                          style={{
+                            background: diagViewMode === tab.id ? 'var(--cyan)' : 'transparent',
+                            color: diagViewMode === tab.id ? '#000' : 'var(--text-secondary)',
+                            border: 'none',
+                            borderRadius: '3px',
+                            padding: '4px 10px',
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-mono)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>{tab.icon}</span> {tab.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Secondary Algorithm Selector Pills */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>ACTIVE DSP:</span>
+                      {[
+                        { id: 'FFT', label: 'Radix-2 FFT' },
+                        { id: 'WAVELET', label: 'db4 Wavelet' },
+                        { id: 'POLYNOMIAL', label: 'Polynomial' },
+                        { id: 'KALMAN', label: 'Kalman' }
+                      ].map(alg => (
+                        <button
+                          key={alg.id}
+                          onClick={() => { playTacticalAudio('click'); setSelectedDiagAlgorithm(alg.id); }}
+                          style={{
+                            padding: '2px 6px',
+                            borderRadius: '3px',
+                            fontSize: '9px',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-mono)',
+                            cursor: 'pointer',
+                            background: selectedDiagAlgorithm === alg.id ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+                            color: selectedDiagAlgorithm === alg.id ? 'var(--cyan)' : 'var(--text-muted)',
+                            border: selectedDiagAlgorithm === alg.id ? '1px solid var(--cyan)' : '1px solid transparent'
+                          }}
+                        >
+                          {alg.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Main Visualizer Stage */}
+                  <div style={{
+                    height: '145px',
+                    background: '#020508',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(0, 229, 255, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    marginBottom: '12px'
+                  }}>
+                    {/* Visualizer 1: Time Domain Oscilloscope */}
+                    {diagViewMode === 'OSCILLOSCOPE' && (
+                      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                        <div className="oscilloscope-beam" />
+                        <svg viewBox="0 0 600 140" style={{ width: '100%', height: '100%' }}>
+                          {/* Grid Lines */}
+                          {[20, 50, 70, 90, 120].map(y => (
+                            <line key={y} x1="0" y1={y} x2="600" y2={y} stroke={y === 70 ? 'rgba(0, 229, 255, 0.25)' : 'rgba(255,255,255,0.05)'} strokeDasharray={y === 70 ? 'none' : '3 3'} />
+                          ))}
+                          {[100, 200, 300, 400, 500].map(x => (
+                            <line key={x} x1={x} y1="0" x2={x} y2="140" stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
+                          ))}
+
+                          {/* Zero-voltage reference */}
+                          <line x1="0" y1="70" x2="600" y2="70" stroke="rgba(0, 229, 255, 0.35)" />
+                          <text x="10" y="66" fill="rgba(0, 229, 255, 0.6)" fontSize="9" fontFamily="monospace">0.0V REF</text>
+                          <text x="10" y="24" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">+2.5V</text>
+                          <text x="10" y="132" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">-2.5V</text>
+
+                          {/* Raw Noisy Waveform (When Noise Injected) */}
+                          {injectedNoise && (
+                            <path
+                              d={`M ${Array.from({ length: 60 }).map((_, i) => {
+                                const x = i * 10;
+                                const decay = Math.exp(-x / 240);
+                                const sin1 = Math.sin((x + diagOscTick * 3) * 0.12);
+                                const emi = Math.sin(x * 0.05) * 22 + Math.sin(x * 0.15) * 12;
+                                const y = 70 - (decay * sin1 * 40 + emi);
+                                return `${i === 0 ? '' : 'L'} ${x} ${y.toFixed(1)}`;
+                              }).join(' ')}`}
+                              fill="none"
+                              stroke="rgba(255, 59, 92, 0.65)"
+                              strokeWidth="1.5"
+                            />
+                          )}
+
+                          {/* Filtered Resonant Sinusoidal Pluck Waveform */}
+                          <path
+                            className="oscilloscope-trace"
+                            d={`M ${Array.from({ length: 120 }).map((_, i) => {
+                              const x = i * 5;
+                              const decay = Math.exp(-x / 220);
+                              const sinVal = Math.sin((x + diagOscTick * 4) * 0.12);
+                              const jitter = (Math.sin(x * 3.4) * 0.4);
+                              const y = 70 - (decay * sinVal * 46 + jitter);
+                              return `${i === 0 ? '' : 'L'} ${x} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke={injectedNoise ? '#22c55e' : '#00e5ff'}
+                            strokeWidth="2.2"
+                          />
+
+                          {/* Damping Envelope Curve (Dashed) */}
+                          <path
+                            d={`M ${Array.from({ length: 60 }).map((_, i) => {
+                              const x = i * 10;
+                              const decay = Math.exp(-x / 220) * 46;
+                              return `${i === 0 ? '' : 'L'} ${x} ${70 - decay}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="rgba(255, 176, 32, 0.5)"
+                            strokeWidth="1"
+                            strokeDasharray="3 2"
+                          />
+                        </svg>
+
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '6px',
+                          left: '10px',
+                          display: 'flex',
+                          gap: '12px',
+                          fontSize: '9px',
+                          color: 'var(--text-secondary)',
+                          fontFamily: 'var(--font-mono)'
+                        }}>
+                          <span style={{ color: injectedNoise ? '#22c55e' : '#00e5ff' }}>
+                            ● WAVEFORM: <strong>2,418.6 Hz</strong>
+                          </span>
+                          <span>DAMPING: <strong>ζ = 0.018</strong></span>
+                          <span>SNR: <strong style={{ color: injectedNoise ? 'var(--red)' : '#22c55e' }}>{injectedNoise ? '34.2 dB (NOISY)' : '51.4 dB (EXCELLENT)'}</strong></span>
+                          <span>SAMPLE RATE: <strong>250 kS/s</strong></span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Visualizer 2: FFT Power Spectrum Analyzer */}
+                    {diagViewMode === 'FFT_SPECTRUM' && (
+                      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                        {diagnosticScanActive && <div className="freq-sweep-bar" />}
+                        <svg viewBox="0 0 600 140" style={{ width: '100%', height: '100%' }}>
+                          {/* Frequency Grid Lines */}
+                          {[25, 55, 85, 115].map(y => (
+                            <line key={y} x1="45" y1={y} x2="580" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                          ))}
+                          <line x1="45" y1="15" x2="45" y2="120" stroke="rgba(255,255,255,0.2)" />
+                          <line x1="45" y1="120" x2="580" y2="120" stroke="rgba(255,255,255,0.2)" />
+
+                          {/* Y-Axis (Power in dBm) */}
+                          <text x="40" y="28" textAnchor="end" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">+10</text>
+                          <text x="40" y="58" textAnchor="end" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">-20</text>
+                          <text x="40" y="88" textAnchor="end" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">-50</text>
+                          <text x="40" y="118" textAnchor="end" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">-80</text>
+
+                          {/* X-Axis (Frequency in Hz) */}
+                          <text x="45" y="132" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">800Hz</text>
+                          <text x="178" y="132" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">1400Hz</text>
+                          <text x="312" y="132" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">2000Hz</text>
+                          <text x="414" y="132" textAnchor="middle" fill="var(--cyan)" fontSize="8" fontWeight="bold" fontFamily="monospace">2418Hz (f0)</text>
+                          <text x="545" y="132" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">3000Hz</text>
+
+                          {/* Power Spectrum Baseline Noise Floor */}
+                          <path
+                            d={`M 45 120 ${Array.from({ length: 54 }).map((_, i) => {
+                              const x = 45 + i * 10;
+                              // Resonant peak around x ≈ 414 (2418 Hz)
+                              const dist = Math.abs(x - 414);
+                              const peak = dist < 25 ? Math.exp(-Math.pow(dist / 8, 2)) * 95 : 0;
+                              const emiPeak = injectedNoise && Math.abs(x - 65) < 12 ? 65 : 0;
+                              const noise = Math.random() * 8;
+                              const y = 118 - (peak + emiPeak + noise);
+                              return `L ${x} ${y.toFixed(1)}`;
+                            }).join(' ')} L 580 120 Z`}
+                            fill="rgba(0, 229, 255, 0.15)"
+                            stroke="#00e5ff"
+                            strokeWidth="1.8"
+                          />
+
+                          {/* Peak Lock Marker */}
+                          <line x1="414" y1="20" x2="414" y2="120" stroke="#ffb020" strokeWidth="1.2" strokeDasharray="3 2" />
+                          <circle cx="414" cy="23" r="4" fill="#ffb020" className="live-point-pulse" />
+                          <text x="422" y="32" fill="#ffb020" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                            RESONANT PEAK: 2,418.62 Hz (Q = 142.8)
+                          </text>
+
+                          {/* EMI Spike Callout if noise injected */}
+                          {injectedNoise && (
+                            <g>
+                              <line x1="65" y1="52" x2="65" y2="120" stroke="#ff3b5c" strokeWidth="1.5" strokeDasharray="2 2" />
+                              <text x="70" y="58" fill="#ff3b5c" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                                ⚠️ 50Hz MAINS EMI
+                              </text>
+                            </g>
+                          )}
+                        </svg>
+
+                        <div style={{ position: 'absolute', top: '8px', right: '12px', fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                          RADIX-2 FFT • 2048 SAMPLES • BLACKMAN-HARRIS WINDOW
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Visualizer 3: Phase-Space Attractor (dx/dt vs x) */}
+                    {diagViewMode === 'PHASE_SPACE' && (
+                      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                        <svg viewBox="0 0 600 140" style={{ width: '100%', height: '100%' }}>
+                          {/* Crosshairs */}
+                          <line x1="300" y1="10" x2="300" y2="130" stroke="rgba(255,255,255,0.15)" strokeDasharray="2 2" />
+                          <line x1="50" y1="70" x2="550" y2="70" stroke="rgba(255,255,255,0.15)" strokeDasharray="2 2" />
+                          <text x="306" y="20" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">VELOCITY dx/dt</text>
+                          <text x="540" y="66" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">POSITION x</text>
+
+                          {/* Stable Inward Damped Spiral Attractor */}
+                          <path
+                            d={`M ${Array.from({ length: 120 }).map((_, i) => {
+                              const theta = i * 0.15;
+                              const r = 58 * Math.exp(-theta * 0.14);
+                              const x = 300 + r * Math.cos(theta);
+                              const y = 70 + r * Math.sin(theta) * 0.85;
+                              return `${i === 0 ? '' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                            }).join(' ')}`}
+                            fill="none"
+                            stroke="#00e5ff"
+                            strokeWidth="1.8"
+                          />
+
+                          {/* Equilibrium Center Fixed Point */}
+                          <circle cx="300" cy="70" r="3" fill="#22c55e" />
+                          <text x="308" y="78" fill="#22c55e" fontSize="8" fontFamily="monospace">STABLE ATTRACTOR (0, 0)</text>
+
+                          {/* Orbiting Operating Dot */}
+                          {(() => {
+                            const t = (diagOscTick * 0.08) % 15;
+                            const r = 58 * Math.exp(-t * 0.14);
+                            const dotX = 300 + r * Math.cos(t);
+                            const dotY = 70 + r * Math.sin(t) * 0.85;
+                            return (
+                              <g transform={`translate(${dotX}, ${dotY})`}>
+                                <circle r="6" fill="rgba(0, 229, 255, 0.4)" className="live-point-pulse" />
+                                <circle r="3" fill="#00e5ff" />
+                              </g>
+                            );
+                          })()}
+                        </svg>
+
+                        <div style={{ position: 'absolute', bottom: '6px', left: '12px', fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                          LYAPUNOV EXPONENT: <strong>λ = -0.042 (STABLE LIMIT CYCLE)</strong> • NO CHAOTIC HYSTERESIS
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Visualizer 4: Polynomial Linearity & Residual Error Corridor */}
+                    {diagViewMode === 'CALIBRATION' && (
+                      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                        <svg viewBox="0 0 600 140" style={{ width: '100%', height: '100%' }}>
+                          {/* Tolerance Corridor Bounds */}
+                          <line x1="50" y1="120" x2="550" y2="20" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="3 3" />
+                          <polygon points="50,123 550,23 550,17 50,117" fill="rgba(34, 197, 94, 0.08)" />
+
+                          {/* 5 Factory Calibration Standard Nodes */}
+                          {[
+                            { p: 0, x: 50, y: 120, label: '0 kPa (0%)' },
+                            { p: 75, x: 175, y: 95, label: '75 kPa (25%)' },
+                            { p: 150, x: 300, y: 70, label: '150 kPa (50%)' },
+                            { p: 225, x: 425, y: 45, label: '225 kPa (75%)' },
+                            { p: 300, x: 550, y: 20, label: '300 kPa (100%)' }
+                          ].map((node, i) => (
+                            <g key={i}>
+                              <circle cx={node.x} cy={node.y} r="4" fill="#00e5ff" />
+                              <text x={node.x} y={node.y + 14} textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="monospace">
+                                {node.label}
+                              </text>
+                            </g>
+                          ))}
+
+                          {/* Operating Point on Curve */}
+                          <circle cx="280" cy="74" r="6" fill="#ffb020" className="live-point-pulse" />
+                          <text x="290" y="72" fill="#ffb020" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                            CURRENT LIVE HEAD: 142.8 kPa (RESIDUAL: +0.024 kPa)
+                          </text>
+
+                          {/* Tolerance Band Legend */}
+                          <text x="50" y="15" fill="#22c55e" fontSize="8" fontFamily="monospace">
+                            ±0.05% FULL-SCALE CALIBRATION CORRIDOR (ISO 18674-4 CERTIFIED)
+                          </text>
+                        </svg>
+
+                        <div style={{ position: 'absolute', bottom: '6px', right: '12px', fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                          POLYNOMIAL: P = A·f² + B·f + C + D·ΔT
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Strip: Hardware Electrical Health & Algorithm Metadata */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr)) 1.2fr', gap: '10px', alignItems: 'center' }}>
+                    {/* Stat 1: Coil Resistance */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>COIL RESISTANCE</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                        182.4 Ω <span style={{ fontSize: '9px', color: '#22c55e' }}>PASS</span>
+                      </div>
+                    </div>
+
+                    {/* Stat 2: Isolation Resistance */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>ISOLATION MEGGER</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#22c55e', fontFamily: 'var(--font-mono)' }}>
+                        &gt; 500 MΩ <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>@500V</span>
+                      </div>
+                    </div>
+
+                    {/* Stat 3: Loop Capacitance */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>CABLE CAPACITANCE</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                        48.2 pF/m
+                      </div>
+                    </div>
+
+                    {/* Stat 4: Thermistor Core Temp */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>NTC CORE TEMP</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#ffb020', fontFamily: 'var(--font-mono)' }}>
+                        18.4°C
+                      </div>
+                    </div>
+
+                    {/* Algorithm Formulation Description */}
+                    <div style={{ background: 'rgba(0, 229, 255, 0.04)', padding: '6px 10px', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                      <div style={{ fontSize: '9px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                        {selectedDiagAlgorithm === 'FFT' && 'RADIX-2 FFT PEAK DETECTOR (Radix-2 Cooley-Tukey, 2048 Bins)'}
+                        {selectedDiagAlgorithm === 'WAVELET' && 'DAUBECHIES (db4) MULTI-RESOLUTION WAVELET FILTER (De-noises 50Hz EMI)'}
+                        {selectedDiagAlgorithm === 'POLYNOMIAL' && 'ISO 18674-4 SECOND-ORDER POLYNOMIAL TEMPERATURE CALIBRATION'}
+                        {selectedDiagAlgorithm === 'KALMAN' && 'DISCRETE KALMAN FILTER WITH DRIFT STATE COVARIANCE ESTIMATION'}
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                        {selectedDiagAlgorithm === 'FFT' && 'f0 = argmax(|X[k]|²) • Latency: 1.24ms • Memory: 4.8KB RAM on ARM Cortex-M7'}
+                        {selectedDiagAlgorithm === 'WAVELET' && 'Thresholding: Soft universal λ = σ√(2ln N) • Suppresses powerline hum by 28.6 dB'}
+                        {selectedDiagAlgorithm === 'POLYNOMIAL' && 'P = A·f² + B·f + C + D·(T - T0) • Zero thermal drift correction enabled'}
+                        {selectedDiagAlgorithm === 'KALMAN' && 'x̂ₖ = A·x̂ₖ₋₁ + Kₖ·(yₖ - C·A·x̂ₖ₋₁) • 365-day sensor drift < 0.05% FS'}
+                      </div>
                     </div>
                   </div>
                 </div>
