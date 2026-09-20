@@ -446,15 +446,19 @@ const createNerMarkerIcon = (hotspot, isSelected) => {
 const createLocationScanningIcon = (hotspot, scanAngle, scanMode) => {
   const isCritical = hotspot.risk_score >= 85;
   const color = isCritical ? '#ff3b5c' : '#00e5ff';
+  // Compute live scan point offset from hotspot center based on azimuth
+  const scanLat = (hotspot.lat + Math.sin((scanAngle * Math.PI) / 180) * 0.012).toFixed(5);
+  const scanLon = (hotspot.lon + Math.cos((scanAngle * Math.PI) / 180) * 0.014).toFixed(5);
   return L.divIcon({
     className: 'custom-location-radar-marker',
     html: `
       <div class="location-radar-hud">
-        <div class="location-radar-cone"></div>
+        <div class="location-radar-cone" style="transform: rotate(${scanAngle}deg);"></div>
         <div class="location-radar-rings"></div>
         <div class="location-target-reticle" style="border-color: ${color};"></div>
         <div class="location-radar-label" style="border-color: ${color}; color: ${color};">
-          📡 ${scanMode}: ${hotspot.name.split(' ')[0]} [${scanAngle}°]
+          📡 ${scanMode} | AZ: ${scanAngle}°<br/>
+          <span style="font-size:9px;opacity:0.85;">${scanLat}°N ${scanLon}°E</span>
         </div>
       </div>
     `,
@@ -1918,36 +1922,75 @@ export default function LandslideDetectionPage() {
               {isScanning && scanMode === 'LIDAR' && <div className="ner-lidar-sweep-bar" />}
 
               {/* Real-Time Scanning HUD Telemetry Overlay (Top-Left) */}
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                left: '52px',
-                zIndex: 1000,
-                background: 'rgba(5, 11, 18, 0.90)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(0, 229, 255, 0.4)',
-                borderRadius: '6px',
-                padding: '8px 14px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                color: '#fff',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
-                pointerEvents: 'none'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isScanning ? 'var(--cyan)' : '#888', display: 'inline-block', boxShadow: isScanning ? '0 0 10px var(--cyan)' : 'none' }} />
-                  <strong style={{ color: 'var(--cyan)' }}>{isScanning ? (isAutoPatrol ? '🔄 AUTO-PATROL ACTIVE' : '● REAL-TIME LOCATION RADAR') : '⏸ SCANNER PAUSED'}</strong>
-                  <span style={{ color: 'var(--text-muted)' }}>| TARGET: {selectedHotspot?.name.split('/')[0].trim()}</span>
-                  <span style={{ color: 'var(--text-muted)' }}>| AZ: {scanAngle}°</span>
-                  <span style={{ color: 'var(--amber)' }}>| DEPTH: {currentScanDepth}m</span>
-                </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                  {scanStage}
-                </div>
-                <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
-                  <div style={{ width: `${scanProgress}%`, height: '100%', background: 'linear-gradient(90deg, var(--cyan), #38bdf8)', transition: 'width 0.1s linear' }} />
-                </div>
-              </div>
+              {(() => {
+                const scanLat = selectedHotspot ? (selectedHotspot.lat + Math.sin((scanAngle * Math.PI) / 180) * 0.012).toFixed(5) : '0.00000';
+                const scanLon = selectedHotspot ? (selectedHotspot.lon + Math.cos((scanAngle * Math.PI) / 180) * 0.014).toFixed(5) : '0.00000';
+                const mapLayerLabels = { DARK: '🌙 DARK TACTICAL', SATELLITE: '🛰️ SATELLITE LIVE', TOPO: '⛰️ TOPO DEM', STREET: '🗺️ STREET OSM' };
+                return (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    left: '52px',
+                    zIndex: 1000,
+                    background: 'rgba(5, 11, 18, 0.92)',
+                    backdropFilter: 'blur(10px)',
+                    border: `1px solid ${isScanning ? 'rgba(0, 229, 255, 0.55)' : 'rgba(255,59,92,0.4)'}`,
+                    borderRadius: '6px',
+                    padding: '8px 14px',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    color: '#fff',
+                    boxShadow: isScanning ? '0 4px 24px rgba(0,229,255,0.2)' : '0 4px 20px rgba(0,0,0,0.7)',
+                    pointerEvents: 'none',
+                    minWidth: '360px'
+                  }}>
+                    {/* Row 1: Status + Mode */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isScanning ? 'var(--cyan)' : '#888', display: 'inline-block', boxShadow: isScanning ? '0 0 10px var(--cyan)' : 'none', flexShrink: 0 }} />
+                      <strong style={{ color: 'var(--cyan)', fontSize: '10px' }}>
+                        {isScanning ? (isAutoPatrol ? '🔄 AUTO-PATROL' : `● ${scanMode} SCAN`) : '⏸ PAUSED'}
+                      </strong>
+                      <span style={{ fontSize: '9px', color: 'rgba(0,229,255,0.6)', background: 'rgba(0,229,255,0.08)', padding: '1px 5px', borderRadius: '2px', border: '1px solid rgba(0,229,255,0.2)' }}>
+                        {mapLayerLabels[mapLayer]}
+                      </span>
+                    </div>
+                    {/* Row 2: Live Coordinates */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '5px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                        <span style={{ fontSize: '8px', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>SCAN COORDINATES</span>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#00e5ff', letterSpacing: '0.02em' }}>
+                          {scanLat}°N &nbsp; {scanLon}°E
+                        </span>
+                      </div>
+                      <div style={{ width: '1px', height: '28px', background: 'rgba(0,229,255,0.2)' }} />
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>AZ</span>
+                          <span style={{ fontSize: '11px', fontWeight: 800, color: '#38bdf8' }}>{scanAngle}°</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>DEPTH</span>
+                          <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--amber)' }}>{currentScanDepth}m</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>TARGET</span>
+                          <span style={{ fontSize: '11px', fontWeight: 800, color: selectedHotspot?.risk_score >= 85 ? '#ff3b5c' : '#fff' }}>
+                            {selectedHotspot?.name.split(' ')[0] || '---'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Row 3: Scan Stage */}
+                    <div style={{ fontSize: '9px', color: 'rgba(0,229,255,0.7)', marginTop: '5px', borderTop: '1px solid rgba(0,229,255,0.1)', paddingTop: '4px' }}>
+                      ▶ {scanStage}
+                    </div>
+                    {/* Row 4: Progress Bar */}
+                    <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginTop: '5px', overflow: 'hidden' }}>
+                      <div style={{ width: `${scanProgress}%`, height: '100%', background: 'linear-gradient(90deg, var(--cyan), #38bdf8, #22c55e)', transition: 'width 0.1s linear', boxShadow: '0 0 6px var(--cyan)' }} />
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Floating Map Legend */}
               <div style={{ position: 'absolute', bottom: '16px', left: '16px', zIndex: 1000, background: 'rgba(4, 9, 16, 0.88)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '6px', padding: '10px 14px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
@@ -1965,6 +2008,61 @@ export default function LandslideDetectionPage() {
                     <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
                     <span>Score &lt; 70: Stable Equilibrium (FoS &gt; 1.25)</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Map-Layer Context Panel (Top Right) — Dynamic per active layer */}
+              <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1000, background: 'rgba(4, 9, 16, 0.90)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '10px 13px', fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#cbd5e1', minWidth: '185px', pointerEvents: 'none' }}>
+                {mapLayer === 'SATELLITE' && (
+                  <>
+                    <div style={{ color: '#38bdf8', fontWeight: 800, marginBottom: '5px', fontSize: '9px' }}>🛰️ ESRI MAXAR SATELLITE</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '9px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>NDVI STRESS:</span><span style={{ color: (0.24 + Math.sin(liveTelemetryTick * 0.6) * 0.05) > 0.28 ? '#22c55e' : '#f59e0b', fontWeight: 700 }}>{(0.24 + Math.sin(liveTelemetryTick * 0.6) * 0.05).toFixed(2)}</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>CLOUD COVER:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>{(18 + Math.cos(liveTelemetryTick * 0.4) * 6).toFixed(0)}%</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>RESOLUTION:</span><span style={{ color: '#00e5ff', fontWeight: 700 }}>0.5m GSD</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>PASS TIME:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>06:14 IST</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>BAND:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>RGB + NIR</span></div>
+                    </div>
+                  </>
+                )}
+                {mapLayer === 'TOPO' && (
+                  <>
+                    <div style={{ color: '#10b981', fontWeight: 800, marginBottom: '5px', fontSize: '9px' }}>⛰️ ESRI TOPO DEM</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '9px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>ELEVATION:</span><span style={{ color: '#22c55e', fontWeight: 700 }}>{selectedHotspot?.elevation_m || 842} m ASL</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>SLOPE:</span><span style={{ color: '#ffb020', fontWeight: 700 }}>{selectedHotspot?.slope_deg || 44}°</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>RELIEF:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>1,840 m</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>CURVATURE:</span><span style={{ color: '#d946ef', fontWeight: 700 }}>{selectedHotspot?.curvature?.toFixed(3) || '-0.032'} m⁻¹</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>CONTOUR INT:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>20 m</span></div>
+                    </div>
+                  </>
+                )}
+                {mapLayer === 'DARK' && (
+                  <>
+                    <div style={{ color: '#00e5ff', fontWeight: 800, marginBottom: '5px', fontSize: '9px' }}>🌙 DARK TACTICAL GRID</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '9px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>GRID REF:</span><span style={{ color: '#00e5ff', fontWeight: 700 }}>45R TL {Math.floor(scanAngle * 180).toString().slice(-4)}</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>UTM ZONE:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>45N / 46N</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>ACTIVE SITES:</span><span style={{ color: '#ff3b5c', fontWeight: 700 }}>{filteredHotspots.filter(h => h.risk_score >= 85).length} CRITICAL</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>UPLINK:</span><span style={{ color: '#22c55e', fontWeight: 700 }}>LoRaWAN OK</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>RADAR PING:</span><span style={{ color: '#00e5ff', fontWeight: 700 }}>{(22 + (liveTelemetryTick % 5)).toFixed(0)} ms</span></div>
+                    </div>
+                  </>
+                )}
+                {mapLayer === 'STREET' && (
+                  <>
+                    <div style={{ color: '#f59e0b', fontWeight: 800, marginBottom: '5px', fontSize: '9px' }}>🗺️ ROAD VULNERABILITY MAP</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '9px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>NH BLOCKED:</span><span style={{ color: '#ff3b5c', fontWeight: 700 }}>NH-37, NH-10</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>BRIDGES AT RISK:</span><span style={{ color: '#ffb020', fontWeight: 700 }}>3 FLAGGED</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>ROAD SCORE:</span><span style={{ color: '#f59e0b', fontWeight: 700 }}>64/100 HIGH</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>EVAC ROUTE:</span><span style={{ color: '#22c55e', fontWeight: 700 }}>NH-102 OPEN</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>TRAFFIC:</span><span style={{ color: '#94a3b8', fontWeight: 700 }}>MODERATE</span></div>
+                    </div>
+                  </>
+                )}
+                <div style={{ marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '5px', fontSize: '8px', color: 'var(--text-muted)' }}>
+                  MAP EPOCH: {new Date().toLocaleDateString('en-IN')}
                 </div>
               </div>
             </div>
@@ -2064,24 +2162,63 @@ export default function LandslideDetectionPage() {
             {/* TAB CONTENT 1: LIVE SCAN ANALYTICS */}
             {locationTab === 'SCAN_ANALYTICS' && selectedHotspot && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* Target Information Card */}
+                {/* Target Information Card with Live GPS Coordinates */}
                 <div className="panel ner-card-glass" style={{ padding: '12px', border: `1px solid ${selectedHotspot.risk_score >= 85 ? '#ff3b5c' : 'var(--cyan)'}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className={`chip ${selectedHotspot.risk_score >= 85 ? 'chip-red' : 'chip-amber'}`} style={{ fontSize: '9px', fontWeight: 800 }}>
                       {selectedHotspot.alert_level} • SCORE {selectedHotspot.risk_score}/100
                     </span>
-                    <span style={{ fontSize: '9px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
-                      📍 {selectedHotspot.lat.toFixed(4)}°N, {selectedHotspot.lon.toFixed(4)}°E
+                    <span style={{ fontSize: '8px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      {isScanning ? '● LIVE' : '⏸ IDLE'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginTop: '6px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '5px' }}>
                     {selectedHotspot.name}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     {selectedHotspot.district}, {selectedHotspot.state} ({selectedHotspot.highway})
                   </div>
+                  {/* Live GPS Coordinate Readout */}
+                  <div style={{ marginTop: '8px', background: 'rgba(0,229,255,0.06)', borderRadius: '4px', border: '1px solid rgba(0,229,255,0.2)', padding: '6px 8px' }}>
+                    <div style={{ fontSize: '8px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '4px', letterSpacing: '0.08em' }}>
+                      📡 LIVE SCAN POSITION
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                      <div>
+                        <div style={{ fontSize: '8px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>BASE (HOTSPOT)</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                          {selectedHotspot.lat.toFixed(5)}°N
+                        </div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                          {selectedHotspot.lon.toFixed(5)}°E
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '8px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SCAN POINT (AZ: {scanAngle}°)</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)', transition: 'color 0.3s' }}>
+                          {(selectedHotspot.lat + Math.sin((scanAngle * Math.PI) / 180) * 0.012).toFixed(5)}°N
+                        </div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)', transition: 'color 0.3s' }}>
+                          {(selectedHotspot.lon + Math.cos((scanAngle * Math.PI) / 180) * 0.014).toFixed(5)}°E
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginTop: '5px' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '3px 5px', borderRadius: '3px' }}>
+                        <div style={{ fontSize: '7px', color: 'var(--text-muted)' }}>ELEV (ASL)</div>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#22c55e' }}>{selectedHotspot.elevation_m}m</div>
+                      </div>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '3px 5px', borderRadius: '3px' }}>
+                        <div style={{ fontSize: '7px', color: 'var(--text-muted)' }}>PROBE DEPTH</div>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--amber)' }}>{currentScanDepth}m</div>
+                      </div>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '3px 5px', borderRadius: '3px' }}>
+                        <div style={{ fontSize: '7px', color: 'var(--text-muted)' }}>SCAN AZ</div>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#d946ef' }}>{scanAngle}°</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
                 {/* Real-Time Signal Oscilloscope & Spectral Echo Return */}
                 <div className="panel ner-card-glass" style={{ padding: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
