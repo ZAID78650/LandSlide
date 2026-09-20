@@ -441,6 +441,27 @@ const createNerMarkerIcon = (hotspot, isSelected) => {
   });
 };
 
+// Custom DivIcon for Location-Anchored Scanning Radar Beam & Reticle
+const createLocationScanningIcon = (hotspot, scanAngle, scanMode) => {
+  const isCritical = hotspot.risk_score >= 85;
+  const color = isCritical ? '#ff3b5c' : '#00e5ff';
+  return L.divIcon({
+    className: 'custom-location-radar-marker',
+    html: `
+      <div class="location-radar-hud">
+        <div class="location-radar-cone"></div>
+        <div class="location-radar-rings"></div>
+        <div class="location-target-reticle" style="border-color: ${color};"></div>
+        <div class="location-radar-label" style="border-color: ${color}; color: ${color};">
+          📡 ${scanMode}: ${hotspot.name.split(' ')[0]} [${scanAngle}°]
+        </div>
+      </div>
+    `,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0]
+  });
+};
+
 export default function LandslideDetectionPage() {
   // Navigation & Filter States
   const [selectedState, setSelectedState] = useState('ALL');
@@ -492,6 +513,10 @@ export default function LandslideDetectionPage() {
   const [scanAngle, setScanAngle] = useState(124);
   const [showScanConsole, setShowScanConsole] = useState(false);
   const [isDeepScanning, setIsDeepScanning] = useState(false);
+  const [isAutoPatrol, setIsAutoPatrol] = useState(false);
+  const [scanSpeed, setScanSpeed] = useState(1);
+  const [locationTab, setLocationTab] = useState('SCAN_ANALYTICS'); // 'SCAN_ANALYTICS' | 'SLOPE_LIST'
+  const [currentScanDepth, setCurrentScanDepth] = useState(8.2);
   const [scanLogs, setScanLogs] = useState([
     { time: '05:22:10', tag: 'SYS', msg: 'Multi-tiered NER Geotechnical Scanner initialized on 9.4 GHz X-band.' },
     { time: '05:22:14', tag: 'LIDAR', msg: 'Point cloud density: 124.6 pts/m² across Tupul Ijai River scarp.' },
@@ -667,6 +692,69 @@ export default function LandslideDetectionPage() {
       ]);
     }, 4500);
   };
+
+  // Export Real-Time Geotechnical Scan Telemetry
+  const handleExportScanData = () => {
+    if (!selectedHotspot) return;
+    playTacticalAudio('click');
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+      hotspot: selectedHotspot,
+      scan_telemetry: {
+        mode: scanMode,
+        azimuth: scanAngle,
+        current_depth_m: currentScanDepth,
+        timestamp: new Date().toISOString(),
+        logs: scanLogs.slice(0, 15)
+      }
+    }, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `NER_SCAN_${selectedHotspot.id}_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  // Auto-Patrol Sequencer: Cycles across 8 states / 10 hotspots
+  useEffect(() => {
+    if (!isAutoPatrol || !isScanning) return;
+    const patrolTimer = setInterval(() => {
+      setHotspots(currentHotspots => {
+        if (!currentHotspots || currentHotspots.length === 0) return currentHotspots;
+        setSelectedHotspot(prev => {
+          const currentIndex = currentHotspots.findIndex(h => h.id === prev?.id);
+          const nextIndex = (currentIndex + 1) % currentHotspots.length;
+          const nextHotspot = currentHotspots[nextIndex];
+          setMapCenter([nextHotspot.lat, nextHotspot.lon]);
+          playTacticalAudio('sonar');
+          setScanLogs(prevLogs => [
+            {
+              time: new Date().toLocaleTimeString(),
+              tag: 'PATROL',
+              msg: `Auto-patrol repositioned to [${nextHotspot.name}] (${nextHotspot.state}) • FoS: ${nextHotspot.factor_of_safety}`
+            },
+            ...prevLogs.slice(0, 19)
+          ]);
+          return nextHotspot;
+        });
+        return currentHotspots;
+      });
+    }, 7000 / scanSpeed);
+
+    return () => clearInterval(patrolTimer);
+  }, [isAutoPatrol, isScanning, scanSpeed]);
+
+  // Subsurface depth scan animation
+  useEffect(() => {
+    if (!isScanning) return;
+    const depthTimer = setInterval(() => {
+      setCurrentScanDepth(prev => {
+        const next = +(prev + 0.4 * scanSpeed).toFixed(1);
+        return next > 25.0 ? 0.5 : next;
+      });
+    }, 140);
+    return () => clearInterval(depthTimer);
+  }, [isScanning, scanSpeed]);
 
   // Filtered Hotspots based on State, Highway, and Risk Triage
   const filteredHotspots = useMemo(() => {
@@ -1179,10 +1267,59 @@ export default function LandslideDetectionPage() {
                   {isScanning ? '⏸ PAUSE SCAN' : '▶ RESUME SCAN'}
                 </button>
 
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SCAN MODE:</span>
+                {/* Auto-Patrol Multi-Location Sequencer Toggle */}
+                <button
+                  onClick={() => {
+                    playTacticalAudio('sonar');
+                    setIsAutoPatrol(!isAutoPatrol);
+                  }}
+                  style={{
+                    background: isAutoPatrol ? 'rgba(0, 229, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
+                    color: isAutoPatrol ? 'var(--cyan)' : 'var(--text-muted)',
+                    border: `1px solid ${isAutoPatrol ? 'var(--cyan)' : 'rgba(255,255,255,0.12)'}`,
+                    borderRadius: '4px',
+                    padding: '4px 10px',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-mono)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isAutoPatrol ? '#22c55e' : '#64748b', boxShadow: isAutoPatrol ? '0 0 8px #22c55e' : 'none' }} />
+                  {isAutoPatrol ? '🔄 AUTO-PATROL ON' : '▶ AUTO-PATROL (8 STATES)'}
+                </button>
+
+                {/* Scan Speed Selector */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: 'rgba(255,255,255,0.04)', padding: '2px 4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', padding: '0 2px' }}>SPEED:</span>
+                  {[1, 2, 4].map(spd => (
+                    <button
+                      key={spd}
+                      onClick={() => setScanSpeed(spd)}
+                      style={{
+                        background: scanSpeed === spd ? 'var(--cyan)' : 'transparent',
+                        color: scanSpeed === spd ? '#000' : 'var(--text-secondary)',
+                        border: 'none',
+                        borderRadius: '2px',
+                        padding: '2px 6px',
+                        fontSize: '9px',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {spd}x
+                    </button>
+                  ))}
+                </div>
+
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginLeft: '4px' }}>SCAN MODE:</span>
                 {[
-                  { id: 'LIDAR', label: '📡 LiDAR (120 pts/m²)' },
-                  { id: 'INSAR', label: '🛰️ InSAR Phase' },
+                  { id: 'LIDAR', label: '📡 LiDAR' },
+                  { id: 'INSAR', label: '🛰️ InSAR' },
                   { id: 'HYDRO', label: '💧 TDR Hydrology' },
                   { id: 'ACOUSTIC', label: '⚡ Acoustic AE' },
                   { id: 'DOPPLER', label: '🌧️ Doppler' }
@@ -1210,6 +1347,14 @@ export default function LandslideDetectionPage() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {selectedHotspot && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 8px', background: 'rgba(0, 229, 255, 0.08)', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.3)', fontSize: '10px', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>🎯 LOCKED:</span>
+                    <span style={{ color: '#fff', fontWeight: 700 }}>{selectedHotspot.name.split('/')[0].trim()}</span>
+                    <span style={{ color: 'var(--amber)', fontSize: '9px' }}>[{selectedHotspot.state}]</span>
+                  </div>
+                )}
+
                 <button
                   onClick={handleTriggerDeepScan}
                   disabled={isDeepScanning}
@@ -1221,7 +1366,7 @@ export default function LandslideDetectionPage() {
                     background: isDeepScanning ? 'var(--amber)' : undefined
                   }}
                 >
-                  {isDeepScanning ? '⏳ SCANNING...' : `🎯 DEEP SCAN [${selectedHotspot?.district || 'SLOPE'}]`}
+                  {isDeepScanning ? '⏳ SCANNING...' : `🎯 DEEP SCAN`}
                 </button>
 
                 <button
@@ -1246,43 +1391,22 @@ export default function LandslideDetectionPage() {
             </div>
 
             {/* Dynamic Scrolling Telemetry Ticker */}
-            <div style={{
-              overflow: 'hidden',
-              background: 'rgba(3, 7, 14, 0.98)',
-              borderBottom: '1px solid rgba(0, 229, 255, 0.15)',
-              padding: '4px 0',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <div style={{ padding: '0 10px', fontSize: '9px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', borderRight: '1px solid rgba(0, 229, 255, 0.2)', zIndex: 10, background: 'rgba(3, 7, 14, 0.98)' }}>
+            <div className="ner-ticker-container">
+              <div style={{ padding: '0 10px', fontSize: '9px', fontWeight: 800, color: 'var(--cyan)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', borderRight: '1px solid rgba(0, 229, 255, 0.2)', zIndex: 10, background: 'rgba(3, 7, 14, 0.98)', height: '100%', display: 'flex', alignItems: 'center' }}>
                 📡 LIVE TELEMETRY
               </div>
               <div className="ner-ticker-track" style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-                <span style={{ marginRight: '30px' }}>
-                  • [TUPUL MANIPUR] Pore: {(144.2 + Math.sin(liveTelemetryTick)*0.8).toFixed(1)} kPa (▲) | FoS: 0.82 CRITICAL | InSAR: -34.2 mm/yr | Rain 24h: 184mm
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [DIMA HASAO ASSAM] IPI Tilt: +0.38° | Wetting Front: 62cm | VWC: 86.2% (LIQUEFACTION RISK) | 7-day API: 312mm
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [PAGLAJHORA NH-10 SIKKIM] GNSS &Delta;Z: -14.2mm | Ru: 0.68 | Rupture Horizon: ~2.1 hrs (Saito 1/v)
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [MANGAN-CHUNGTHANG] Debris Mass: 840,000 m³ | Acoustic Hits: 94 cpm (Clustering) | Status: WARNING
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [CHERRAPUNJI MEGHALAYA] 24h Deluge: 285mm | Caine I-D Threshold: EXCEEDED | Surface Runoff: Peak
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [SELA PASS ARUNACHAL] Permafrost Thaw: +1.2°C | Rockfall Acoustic: 18 hits/hr | LoRaWAN Link: 99.8%
-                </span>
-                {/* Loop Duplicate for Smooth Scroll */}
-                <span style={{ marginRight: '30px' }}>
-                  • [TUPUL MANIPUR] Pore: {(144.2 + Math.sin(liveTelemetryTick)*0.8).toFixed(1)} kPa (▲) | FoS: 0.82 CRITICAL | InSAR: -34.2 mm/yr | Rain 24h: 184mm
-                </span>
-                <span style={{ marginRight: '30px' }}>
-                  • [DIMA HASAO ASSAM] IPI Tilt: +0.38° | Wetting Front: 62cm | VWC: 86.2% (LIQUEFACTION RISK) | 7-day API: 312mm
-                </span>
+                <span>• [TUPUL MANIPUR] Pore: {(144.2 + Math.sin(liveTelemetryTick)*0.8).toFixed(1)} kPa (▲) | FoS: 0.82 CRITICAL | InSAR: -34.2 mm/yr | Rain 24h: 184mm</span>
+                <span>• [DIMA HASAO ASSAM] IPI Tilt: +0.38° | Wetting Front: 62cm | VWC: 86.2% (LIQUEFACTION RISK) | 7-day API: 312mm</span>
+                <span>• [PAGLAJHORA NH-10 SIKKIM] GNSS &Delta;Z: -14.2mm | Ru: 0.68 | Rupture Horizon: ~2.1 hrs (Saito 1/v)</span>
+                <span>• [MANGAN-CHUNGTHANG] Debris Mass: 840,000 m³ | Acoustic Hits: 94 cpm (Clustering) | Status: WARNING</span>
+                <span>• [CHERRAPUNJI MEGHALAYA] 24h Deluge: 285mm | Caine I-D Threshold: EXCEEDED | Surface Runoff: Peak</span>
+                <span>• [SELA PASS ARUNACHAL] Permafrost Thaw: +1.2°C | Rockfall Acoustic: 18 hits/hr | LoRaWAN Link: 99.8%</span>
+                {/* Loop Duplicate for Smooth Ribbon Scroll */}
+                <span>• [TUPUL MANIPUR] Pore: {(144.2 + Math.sin(liveTelemetryTick)*0.8).toFixed(1)} kPa (▲) | FoS: 0.82 CRITICAL | InSAR: -34.2 mm/yr | Rain 24h: 184mm</span>
+                <span>• [DIMA HASAO ASSAM] IPI Tilt: +0.38° | Wetting Front: 62cm | VWC: 86.2% (LIQUEFACTION RISK) | 7-day API: 312mm</span>
+                <span>• [PAGLAJHORA NH-10 SIKKIM] GNSS &Delta;Z: -14.2mm | Ru: 0.68 | Rupture Horizon: ~2.1 hrs (Saito 1/v)</span>
+                <span>• [MANGAN-CHUNGTHANG] Debris Mass: 840,000 m³ | Acoustic Hits: 94 cpm (Clustering) | Status: WARNING</span>
               </div>
             </div>
 
@@ -1302,14 +1426,14 @@ export default function LandslideDetectionPage() {
                     <TileLayer
                       url={apiKeys.carto 
                         ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=${apiKeys.carto}`
-                        : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                        : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{x}"
                       }
                       attribution="Tiles &copy; Esri &mdash; DeLorme, NAVTEQ"
                       maxZoom={16}
                     />
                     {!apiKeys.carto && (
                       <TileLayer
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{x}"
                         attribution=""
                         maxZoom={16}
                       />
@@ -1318,14 +1442,14 @@ export default function LandslideDetectionPage() {
                 )}
                 {mapLayer === 'SATELLITE' && (
                   <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}"
                     attribution="Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics"
                     maxZoom={18}
                   />
                 )}
                 {mapLayer === 'TOPO' && (
                   <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{x}"
                     attribution="Tiles &copy; Esri &mdash; USGS, Esri"
                     maxZoom={18}
                   />
@@ -1376,6 +1500,15 @@ export default function LandslideDetectionPage() {
                   );
                 })}
 
+                {/* Location-Anchored Scanning Radar HUD Marker (Pinned directly at selected hotspot) */}
+                {isScanning && selectedHotspot && (
+                  <Marker
+                    position={[selectedHotspot.lat, selectedHotspot.lon]}
+                    icon={createLocationScanningIcon(selectedHotspot, scanAngle, scanMode)}
+                    interactive={false}
+                  />
+                )}
+
                 {/* Hazard Buffer Circle around selected hotspot */}
                 {selectedHotspot && (
                   <Circle
@@ -1390,9 +1523,6 @@ export default function LandslideDetectionPage() {
                   />
                 )}
               </MapContainer>
-
-              {/* Real-Time Radar Sweep Beam Cone Overlay */}
-              {isScanning && <div className="ner-radar-sweep-cone" />}
 
               {/* Real-Time LiDAR Curtain Overlay */}
               {isScanning && scanMode === 'LIDAR' && <div className="ner-lidar-sweep-bar" />}
@@ -1416,10 +1546,10 @@ export default function LandslideDetectionPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isScanning ? 'var(--cyan)' : '#888', display: 'inline-block', boxShadow: isScanning ? '0 0 10px var(--cyan)' : 'none' }} />
-                  <strong style={{ color: 'var(--cyan)' }}>{isScanning ? '● REAL-TIME SCANNING ACTIVE' : '⏸ SCANNER PAUSED'}</strong>
-                  <span style={{ color: 'var(--text-muted)' }}>| MODE: {scanMode}</span>
-                  <span style={{ color: 'var(--text-muted)' }}>| AZIMUTH: {scanAngle}°</span>
-                  <span style={{ color: 'var(--amber)' }}>| ECHOES: {(18.4 + (scanAngle % 12)*0.8).toFixed(1)}k/s</span>
+                  <strong style={{ color: 'var(--cyan)' }}>{isScanning ? (isAutoPatrol ? '🔄 AUTO-PATROL ACTIVE' : '● REAL-TIME LOCATION RADAR') : '⏸ SCANNER PAUSED'}</strong>
+                  <span style={{ color: 'var(--text-muted)' }}>| TARGET: {selectedHotspot?.name.split('/')[0].trim()}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>| AZ: {scanAngle}°</span>
+                  <span style={{ color: 'var(--amber)' }}>| DEPTH: {currentScanDepth}m</span>
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                   {scanStage}
@@ -1491,126 +1621,358 @@ export default function LandslideDetectionPage() {
             )}
           </div>
 
-          {/* Right Hotspot Dossier & Sector List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: '620px', overflowY: 'auto' }}>
+          {/* Right Hotspot Dossier & Sector List / Live Scan Analytics */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '620px', overflowY: 'auto' }}>
             
-            {/* Custom Location Search */}
-            <div className="panel ner-card-glass" style={{ padding: '12px' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 700, marginBottom: '6px' }}>
-                🔍 COORDINATES / LOCATION TELEMETRY SEARCH
-              </div>
-              <LocationSearch onLocationSelect={handleCustomLocation} />
+            {/* Sub-Tab Switcher: Scan Analytics vs Monitored Slopes */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', background: 'rgba(5, 11, 20, 0.85)', padding: '4px', borderRadius: '6px', border: '1px solid rgba(0, 229, 255, 0.2)', flexShrink: 0 }}>
+              <button
+                onClick={() => { playTacticalAudio('click'); setLocationTab('SCAN_ANALYTICS'); }}
+                style={{
+                  padding: '7px 8px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: locationTab === 'SCAN_ANALYTICS' ? 'rgba(0, 229, 255, 0.22)' : 'transparent',
+                  color: locationTab === 'SCAN_ANALYTICS' ? 'var(--cyan)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: locationTab === 'SCAN_ANALYTICS' ? 'var(--cyan)' : '#666', boxShadow: locationTab === 'SCAN_ANALYTICS' ? '0 0 6px var(--cyan)' : 'none' }} />
+                📡 SCAN ANALYTICS
+              </button>
+              <button
+                onClick={() => { playTacticalAudio('click'); setLocationTab('SLOPE_LIST'); }}
+                style={{
+                  padding: '7px 8px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: locationTab === 'SLOPE_LIST' ? 'rgba(0, 229, 255, 0.22)' : 'transparent',
+                  color: locationTab === 'SLOPE_LIST' ? 'var(--cyan)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                🏔️ SLOPES ({filteredHotspots.length})
+              </button>
             </div>
 
-            {/* Selected Hotspot Detailed Inspector Card */}
-            {selectedHotspot && (
-              <div className="panel ner-card-glass" style={{ padding: '14px', border: `1px solid ${selectedHotspot.risk_score >= 85 ? '#ff3b5c' : 'var(--cyan)'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <span className={`chip ${selectedHotspot.risk_score >= 85 ? 'chip-red' : 'chip-amber'}`} style={{ fontSize: '9px', fontWeight: 800 }}>
-                    {selectedHotspot.alert_level} • SCORE {selectedHotspot.risk_score}/100
-                  </span>
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    ID: {selectedHotspot.id}
-                  </span>
+            {/* TAB CONTENT 1: LIVE SCAN ANALYTICS */}
+            {locationTab === 'SCAN_ANALYTICS' && selectedHotspot && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Target Information Card */}
+                <div className="panel ner-card-glass" style={{ padding: '12px', border: `1px solid ${selectedHotspot.risk_score >= 85 ? '#ff3b5c' : 'var(--cyan)'}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className={`chip ${selectedHotspot.risk_score >= 85 ? 'chip-red' : 'chip-amber'}`} style={{ fontSize: '9px', fontWeight: 800 }}>
+                      {selectedHotspot.alert_level} • SCORE {selectedHotspot.risk_score}/100
+                    </span>
+                    <span style={{ fontSize: '9px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                      📍 {selectedHotspot.lat.toFixed(4)}°N, {selectedHotspot.lon.toFixed(4)}°E
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginTop: '6px' }}>
+                    {selectedHotspot.name}
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {selectedHotspot.district}, {selectedHotspot.state} ({selectedHotspot.highway})
+                  </div>
                 </div>
 
-                <div style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginTop: '6px' }}>
-                  {selectedHotspot.name}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--cyan)', marginTop: '2px' }}>
-                  📍 {selectedHotspot.district}, {selectedHotspot.state}
+                {/* Real-Time Signal Oscilloscope & Spectral Echo Return */}
+                <div className="panel ner-card-glass" style={{ padding: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--cyan)', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+                      ⚡ {scanMode} REAL-TIME ECHO OSCILLOSCOPE
+                    </span>
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      AZ: {scanAngle}° | 9.4 GHz
+                    </span>
+                  </div>
+
+                  {/* Animated Waveform SVG */}
+                  <div style={{ position: 'relative', width: '100%', height: '65px', background: '#020610', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                    <svg width="100%" height="65" viewBox="0 0 320 65" preserveAspectRatio="none" style={{ display: 'block' }}>
+                      <defs>
+                        <linearGradient id="liveWaveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.4" />
+                          <stop offset="50%" stopColor="#38bdf8" stopOpacity="1" />
+                          <stop offset="100%" stopColor={selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#22c55e'} stopOpacity="0.9" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="32" x2="320" y2="32" stroke="rgba(0, 229, 255, 0.15)" strokeDasharray="3 3" />
+                      <line x1="80" y1="0" x2="80" y2="65" stroke="rgba(0, 229, 255, 0.08)" />
+                      <line x1="160" y1="0" x2="160" y2="65" stroke="rgba(0, 229, 255, 0.08)" />
+                      <line x1="240" y1="0" x2="240" y2="65" stroke="rgba(0, 229, 255, 0.08)" />
+                      <path
+                        d={Array.from({ length: 33 }, (_, i) => {
+                          const x = (i / 32) * 320;
+                          const freq = scanMode === 'LIDAR' ? 0.7 : scanMode === 'INSAR' ? 0.3 : 0.5;
+                          const amp = scanMode === 'ACOUSTIC' && (i % 6 === 0) ? 24 : 15;
+                          const y = 32 + Math.sin(i * freq + liveTelemetryTick * 2.2) * amp * (isScanning ? 1 : 0.15);
+                          return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                        }).join(' ')}
+                        fill="none"
+                        stroke="url(#liveWaveGrad)"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                    <div style={{ position: 'absolute', bottom: '3px', right: '6px', fontSize: '8px', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>
+                      SNR: {(38.2 + (scanAngle % 5) * 0.4).toFixed(1)} dB • {isScanning ? 'STREAMING' : 'IDLE'}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginTop: '8px', fontSize: '9px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '4px 6px', borderRadius: '3px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>PULSE REP:</span>
+                      <div style={{ color: '#fff', fontWeight: 800 }}>120 kHz</div>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '4px 6px', borderRadius: '3px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>COHERENCE:</span>
+                      <div style={{ color: 'var(--cyan)', fontWeight: 800 }}>0.89 &gamma;</div>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '4px 6px', borderRadius: '3px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>RETURN:</span>
+                      <div style={{ color: selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#22c55e', fontWeight: 800 }}>-14.2 dBm</div>
+                    </div>
+                  </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
-                  <div>Elevation: <strong style={{ color: '#fff' }}>{selectedHotspot.elevation_m} m</strong></div>
-                  <div>Slope Angle: <strong style={{ color: '#ffb020' }}>{selectedHotspot.slope_deg}°</strong></div>
-                  <div>Highway: <strong style={{ color: '#fff' }}>{selectedHotspot.highway}</strong></div>
-                  <div>River Basin: <strong style={{ color: '#60a5fa' }}>{selectedHotspot.river_basin}</strong></div>
-                  <div>Mohr FoS: <strong style={{ color: selectedHotspot.factor_of_safety < 1 ? '#ff3b5c' : '#22c55e' }}>{selectedHotspot.factor_of_safety}</strong></div>
-                  <div>Pore Ru: <strong style={{ color: '#ffb020' }}>{selectedHotspot.pore_pressure_ru}</strong></div>
-                  <div>InSAR LOS: <strong style={{ color: '#d946ef' }}>{selectedHotspot.insar_los_velocity}</strong></div>
-                  <div>Soil VWC: <strong style={{ color: '#22c55e' }}>{selectedHotspot.soil_vwc_pct}%</strong></div>
-                </div>
-
-                <div style={{ marginTop: '10px', padding: '8px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px', fontSize: '10px', color: 'var(--text-secondary)' }}>
-                  <strong style={{ color: 'var(--cyan)' }}>Geological Strata:</strong> {selectedHotspot.strata}
-                </div>
-
-                <div style={{ marginTop: '8px', padding: '8px', background: 'rgba(255, 59, 92, 0.08)', borderLeft: '3px solid #ff3b5c', borderRadius: '4px', fontSize: '10px', color: '#ff8598' }}>
-                  <strong>Root Cause:</strong> {selectedHotspot.root_cause_narrative}
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                  <button
-                    onClick={handleTriggerDeepScan}
-                    disabled={isDeepScanning}
-                    style={{
-                      width: '100%',
-                      background: isDeepScanning ? 'rgba(255, 176, 32, 0.2)' : 'rgba(0, 229, 255, 0.15)',
-                      color: isDeepScanning ? 'var(--amber)' : 'var(--cyan)',
-                      border: `1px solid ${isDeepScanning ? 'var(--amber)' : 'var(--cyan)'}`,
-                      padding: '8px',
-                      borderRadius: '4px',
-                      fontSize: '11px',
+                {/* Subsurface Stratigraphy & Shear Depth Profiler (0m to 25m) */}
+                <div className="panel ner-card-glass" style={{ padding: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--cyan)', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+                      🕳️ SUBSURFACE STRATA PROFILER (0 - 25m)
+                    </span>
+                    <span style={{
+                      fontSize: '9px',
                       fontWeight: 800,
                       fontFamily: 'var(--font-mono)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    {isDeepScanning ? '⏳ SCANNING SUBSURFACE...' : '⚡ INITIATE DEEP SUBSURFACE SCAN'}
-                  </button>
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      background: currentScanDepth >= 7.8 && currentScanDepth <= 8.8 ? 'rgba(255,59,92,0.25)' : 'rgba(0,229,255,0.15)',
+                      color: currentScanDepth >= 7.8 && currentScanDepth <= 8.8 ? '#ff3b5c' : 'var(--cyan)',
+                      border: `1px solid ${currentScanDepth >= 7.8 && currentScanDepth <= 8.8 ? '#ff3b5c' : 'transparent'}`
+                    }}>
+                      DEPTH: {currentScanDepth}m {currentScanDepth >= 7.8 && currentScanDepth <= 8.8 ? '⚠️ SHEAR PLANE' : ''}
+                    </span>
+                  </div>
+
+                  {/* Vertical Stratigraphy Bar with Moving Probe Cursor */}
+                  <div style={{ position: 'relative', height: '110px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
+                    {/* Layer 1: 0m - 3.5m (14%) */}
+                    <div style={{ height: '14%', background: 'rgba(180, 130, 70, 0.25)', borderBottom: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '8px', color: '#e2e8f0', justifyContent: 'space-between' }}>
+                      <span>0.0m - 3.5m: Colluvial Overburden / Clay Silt</span>
+                      <span style={{ color: 'var(--cyan)' }}>VWC {selectedHotspot.soil_vwc_pct}%</span>
+                    </div>
+
+                    {/* Layer 2: 3.5m - 8.2m (19%) */}
+                    <div style={{ height: '19%', background: 'rgba(120, 90, 60, 0.35)', borderBottom: '1px solid rgba(255,59,92,0.4)', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '8px', color: '#e2e8f0', justifyContent: 'space-between' }}>
+                      <span>3.5m - 8.2m: Weathered Siltstone / Shale Gouge</span>
+                      <span style={{ color: 'var(--amber)' }}>Ru {selectedHotspot.pore_pressure_ru}</span>
+                    </div>
+
+                    {/* Critical Shear Horizon Highlight Line at 8.2m (~33% depth) */}
+                    <div style={{ height: '8px', background: 'rgba(255, 59, 92, 0.45)', borderTop: '1px solid #ff3b5c', borderBottom: '1px solid #ff3b5c', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '8px', color: '#fff', fontWeight: 800, justifyContent: 'space-between' }}>
+                      <span>⚠️ 8.2m: CRITICAL SHEAR FAILURE PLANE</span>
+                      <span style={{ color: '#fff' }}>&Delta;S {selectedHotspot.ground_displacement_mm}mm</span>
+                    </div>
+
+                    {/* Layer 3: 8.2m - 18.0m (39%) */}
+                    <div style={{ height: '39%', background: 'rgba(70, 75, 90, 0.35)', borderBottom: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '8px', color: '#cbd5e1', justifyContent: 'space-between' }}>
+                      <span>8.2m - 18.0m: Jointed Sandstone / Siltstone Beds</span>
+                      <span style={{ color: '#94a3b8' }}>&tau; {selectedHotspot.shear_stress_kpa} kPa</span>
+                    </div>
+
+                    {/* Layer 4: 18.0m - 25.0m (28%) */}
+                    <div style={{ flex: 1, background: 'rgba(40, 50, 70, 0.45)', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '8px', color: '#94a3b8', justifyContent: 'space-between' }}>
+                      <span>18.0m - 25.0m: Competent Metasedimentary Basement</span>
+                      <span style={{ color: '#22c55e' }}>FoS &gt; 2.1</span>
+                    </div>
+
+                    {/* Moving Laser Probe Cursor */}
+                    <div style={{
+                      position: 'absolute',
+                      top: `${Math.min(96, Math.max(2, (currentScanDepth / 25) * 100))}%`,
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      background: '#00e5ff',
+                      boxShadow: '0 0 10px #00e5ff, 0 0 20px #00e5ff',
+                      transition: 'top 0.12s linear',
+                      zIndex: 5
+                    }} />
+                  </div>
+
+                  {/* Geotechnical Live Readings */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '10px', fontSize: '10px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 8px', borderRadius: '4px', borderLeft: `3px solid ${selectedHotspot.factor_of_safety < 1 ? '#ff3b5c' : '#22c55e'}` }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>MOHR-COULOMB FoS</div>
+                      <div style={{ fontSize: '14px', fontWeight: 900, color: selectedHotspot.factor_of_safety < 1 ? '#ff3b5c' : '#22c55e' }}>
+                        {selectedHotspot.factor_of_safety}
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 8px', borderRadius: '4px', borderLeft: '3px solid #ffb020' }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>SAITO 1/v VELOCITY</div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffb020' }}>
+                        {(0.038 + (liveTelemetryTick % 5) * 0.002).toFixed(3)} mm⁻¹·h
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '10px' }}>
+                    <button
+                      onClick={handleTriggerDeepScan}
+                      disabled={isDeepScanning}
+                      style={{
+                        background: isDeepScanning ? 'rgba(255, 176, 32, 0.2)' : 'rgba(0, 229, 255, 0.18)',
+                        color: isDeepScanning ? 'var(--amber)' : 'var(--cyan)',
+                        border: `1px solid ${isDeepScanning ? 'var(--amber)' : 'var(--cyan)'}`,
+                        borderRadius: '4px',
+                        padding: '6px 8px',
+                        fontSize: '9px',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isDeepScanning ? '⏳ PROBING...' : '⚡ TRIGGER DEEP SCAN'}
+                    </button>
+
+                    <button
+                      onClick={handleExportScanData}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '4px',
+                        padding: '6px 8px',
+                        fontSize: '9px',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-mono)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📥 EXPORT JSON
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Quick Sector Selector List */}
-            <div className="panel ner-card-glass" style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '11px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
-                MONITORED SLOPES ({filteredHotspots.length})
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {filteredHotspots.map(h => (
-                  <div
-                    key={h.id}
-                    onClick={() => handleSelectHotspot(h)}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: '5px',
-                      background: selectedHotspot?.id === h.id ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255,255,255,0.03)',
-                      border: selectedHotspot?.id === h.id ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.06)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      transition: 'all 0.12s ease'
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '11px', fontWeight: 700, color: selectedHotspot?.id === h.id ? '#00e5ff' : '#fff' }}>
-                        {h.name}
-                      </div>
-                      <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                        {h.state} • {h.highway}
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: h.risk_score >= 85 ? '#ff3b5c' : '#ffb020', fontFamily: 'var(--font-mono)' }}>
-                        {h.risk_score}
+            {/* TAB CONTENT 2: MONITORED SLOPES LIST & INSPECTOR */}
+            {locationTab === 'SLOPE_LIST' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Custom Location Search */}
+                <div className="panel ner-card-glass" style={{ padding: '10px' }}>
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 700, marginBottom: '6px' }}>
+                    🔍 COORDINATES / LOCATION TELEMETRY SEARCH
+                  </div>
+                  <LocationSearch onLocationSelect={handleCustomLocation} />
+                </div>
+
+                {/* Selected Hotspot Detailed Inspector Card */}
+                {selectedHotspot && (
+                  <div className="panel ner-card-glass" style={{ padding: '12px', border: `1px solid ${selectedHotspot.risk_score >= 85 ? '#ff3b5c' : 'var(--cyan)'}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span className={`chip ${selectedHotspot.risk_score >= 85 ? 'chip-red' : 'chip-amber'}`} style={{ fontSize: '9px', fontWeight: 800 }}>
+                        {selectedHotspot.alert_level} • SCORE {selectedHotspot.risk_score}/100
                       </span>
-                      <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>
-                        FoS {h.factor_of_safety}
-                      </div>
+                      <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        ID: {selectedHotspot.id}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '6px' }}>
+                      {selectedHotspot.name}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--cyan)', marginTop: '2px' }}>
+                      📍 {selectedHotspot.district}, {selectedHotspot.state}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '10px', fontSize: '10px', fontFamily: 'var(--font-mono)' }}>
+                      <div>Elevation: <strong style={{ color: '#fff' }}>{selectedHotspot.elevation_m} m</strong></div>
+                      <div>Slope Angle: <strong style={{ color: '#ffb020' }}>{selectedHotspot.slope_deg}°</strong></div>
+                      <div>Highway: <strong style={{ color: '#fff' }}>{selectedHotspot.highway}</strong></div>
+                      <div>River Basin: <strong style={{ color: '#60a5fa' }}>{selectedHotspot.river_basin}</strong></div>
+                      <div>Mohr FoS: <strong style={{ color: selectedHotspot.factor_of_safety < 1 ? '#ff3b5c' : '#22c55e' }}>{selectedHotspot.factor_of_safety}</strong></div>
+                      <div>Pore Ru: <strong style={{ color: '#ffb020' }}>{selectedHotspot.pore_pressure_ru}</strong></div>
+                      <div>InSAR LOS: <strong style={{ color: '#d946ef' }}>{selectedHotspot.insar_los_velocity}</strong></div>
+                      <div>Soil VWC: <strong style={{ color: '#22c55e' }}>{selectedHotspot.soil_vwc_pct}%</strong></div>
+                    </div>
+
+                    <div style={{ marginTop: '8px', padding: '6px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px', fontSize: '9px', color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: 'var(--cyan)' }}>Strata:</strong> {selectedHotspot.strata}
+                    </div>
+
+                    <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(255, 59, 92, 0.08)', borderLeft: '3px solid #ff3b5c', borderRadius: '4px', fontSize: '9px', color: '#ff8598' }}>
+                      <strong>Root Cause:</strong> {selectedHotspot.root_cause_narrative}
                     </div>
                   </div>
-                ))}
+                )}
+
+                {/* Quick Sector Selector List */}
+                <div className="panel ner-card-glass" style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)', marginBottom: '6px' }}>
+                    MONITORED SLOPES ({filteredHotspots.length})
+                  </div>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {filteredHotspots.map(h => (
+                      <div
+                        key={h.id}
+                        onClick={() => handleSelectHotspot(h)}
+                        style={{
+                          padding: '6px 8px',
+                          borderRadius: '4px',
+                          background: selectedHotspot?.id === h.id ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255,255,255,0.03)',
+                          border: selectedHotspot?.id === h.id ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.06)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'all 0.12s ease'
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: '10px', fontWeight: 700, color: selectedHotspot?.id === h.id ? '#00e5ff' : '#fff' }}>
+                            {h.name}
+                          </div>
+                          <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>
+                            {h.state} • {h.highway}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 800, color: h.risk_score >= 85 ? '#ff3b5c' : '#ffb020', fontFamily: 'var(--font-mono)' }}>
+                            {h.risk_score}
+                          </span>
+                          <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>
+                            FoS {h.factor_of_safety}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
+
         </div>
       )}
 

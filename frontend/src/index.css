@@ -1971,19 +1971,150 @@ select.form-input {
   z-index: 400;
 }
 
-@keyframes tickerScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.ner-ticker-container {
+  overflow: hidden;
+  background: rgba(3, 7, 14, 0.98);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.18);
+  height: 28px;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .ner-ticker-track {
   display: flex;
   width: max-content;
-  animation: tickerScroll 28s linear infinite;
+  white-space: nowrap;
+  animation: tickerScroll 32s linear infinite;
+  align-items: center;
+}
+
+.ner-ticker-track span {
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .ner-ticker-track:hover {
   animation-play-state: paused;
+}
+
+/* Location-Anchored Scanning Marker HUD */
+.location-radar-hud {
+  position: relative;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.location-radar-cone {
+  position: absolute;
+  top: -140px;
+  left: -140px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(0, 229, 255, 0.45) 0deg,
+    rgba(0, 229, 255, 0.16) 35deg,
+    rgba(0, 229, 255, 0.02) 70deg,
+    transparent 90deg,
+    transparent 360deg
+  );
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.25);
+  animation: radarSweepRotate 3.2s linear infinite;
+  pointer-events: none;
+}
+
+.location-radar-rings {
+  position: absolute;
+  top: -140px;
+  left: -140px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.location-radar-rings::before {
+  content: '';
+  position: absolute;
+  top: 45px;
+  left: 45px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.25);
+}
+
+.location-radar-rings::after {
+  content: '';
+  position: absolute;
+  top: 90px;
+  left: 90px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+}
+
+@keyframes targetReticlePulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 8px #00e5ff); }
+}
+
+.location-target-reticle {
+  position: absolute;
+  top: -24px;
+  left: -24px;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--cyan);
+  border-radius: 4px;
+  animation: targetReticlePulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.location-target-reticle::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--cyan);
+  border-left: 2px solid var(--cyan);
+}
+
+.location-target-reticle::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid var(--cyan);
+  border-right: 2px solid var(--cyan);
+}
+
+.location-radar-label {
+  position: absolute;
+  top: -46px;
+  left: -90px;
+  width: 180px;
+  text-align: center;
+  background: rgba(4, 9, 18, 0.94);
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--cyan);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
 }
 
 .ner-modal-overlay {
