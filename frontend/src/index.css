@@ -1450,15 +1450,27 @@ select.form-input {
   to { width: 100%; }
 }
 
-/* ─── Free Dark Map Trick (OSM Invert) ───────────────────────── */
-/* This safely turns free, standard light OpenStreetMap tiles into a perfect dark theme map! */
+/* ─── Map Tile Filter Controls ───────────────────────── */
 .leaflet-container {
   background: var(--bg-void, #040a08) !important;
 }
 
-/* We specifically target .leaflet-tile-pane so that markers and popups are NOT inverted */
+/* By default, don't invert true-color tiles (Satellite, Topo DEM, Esri Canvas) */
 .leaflet-tile-pane {
+  filter: none;
+}
+
+/* Only invert when explicitly styled as osm-dark or invert-tiles */
+.leaflet-container.osm-dark .leaflet-tile-pane,
+.leaflet-tile-pane.invert-tiles {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%) grayscale(20%);
+}
+
+.leaflet-container.satellite-map .leaflet-tile-pane,
+.leaflet-container.topo-map .leaflet-tile-pane,
+.leaflet-container.dark-map .leaflet-tile-pane,
+.leaflet-container.no-filter .leaflet-tile-pane {
+  filter: none !important;
 }
 
 /* ─── Sensor Hardware Catalog & Intelligence Animations ──────── */

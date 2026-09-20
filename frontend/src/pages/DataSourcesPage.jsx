@@ -361,7 +361,7 @@ export default function DataSourcesPage() {
               {sensors.map((s) => {
                 const sensorColor = colorMap[s.sensor_type] || 'var(--cyan)';
                 return (
-                  <div key={s.id} onClick={() => handleSelect(s)} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', background: selected?.id === s.id ? 'rgba(0,229,255,0.06)' : 'transparent', borderLeft: selected?.id === s.id ? `3px solid ${sensorColor}` : '3px solid transparent', transition: 'all 0.15s' }}>
+                  <div key={s.id} onClick={() => setSelected(s)} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', background: selected?.id === s.id ? 'rgba(0,229,255,0.06)' : 'transparent', borderLeft: selected?.id === s.id ? `3px solid ${sensorColor}` : '3px solid transparent', transition: 'all 0.15s' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ fontSize: 14, color: sensorColor }}>{iconMap[s.sensor_type] || '◈'}</span>

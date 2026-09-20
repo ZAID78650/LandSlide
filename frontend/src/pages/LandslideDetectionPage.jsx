@@ -15,7 +15,8 @@ import {
   AreaChart, Area, CartesianGrid, LineChart, Line, BarChart, Bar,
   ReferenceLine, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, Polyline, Tooltip as LeafletTooltip, useMap } from 'react-leaflet';
+import TerrainMap3D from '../components/Map/TerrainMap3D';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -481,13 +482,18 @@ export default function LandslideDetectionPage() {
   const [lastSyncTime, setLastSyncTime] = useState(new Date().toLocaleTimeString());
 
   // Map & GIS Layers
+  const [viewDimension, setViewDimension] = useState('2D'); // '2D' | '3D'
   const [mapLayer, setMapLayer] = useState('DARK'); // 'DARK' (No Watermark default) | 'SATELLITE' | 'TOPO' | 'STREET' | 'CARTO'
   const [activeOverlays, setActiveOverlays] = useState({
     rainfallRadar: true,
-    soilSaturation: false,
+    soilSaturation: true,
     insarVelocity: true,
+    faultLines: true,
+    highways: true,
     hazardPolygons: true
   });
+  const [isSimulatingDeluge, setIsSimulatingDeluge] = useState(false);
+  const [isSimulatingEarthquake, setIsSimulatingEarthquake] = useState(false);
   const [mapCenter, setMapCenter] = useState([24.8584, 93.6375]);
   const [mapZoom, setMapZoom] = useState(8);
 
@@ -713,6 +719,46 @@ export default function LandslideDetectionPage() {
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+  };
+
+  // Real-Time Deluge Simulation Event (150mm Cloudburst Injection)
+  const handleSimulateDeluge = () => {
+    playTacticalAudio('alarm');
+    setIsSimulatingDeluge(true);
+    const now = new Date().toLocaleTimeString();
+    setScanLogs(prev => [
+      { time: now, tag: 'CRITICAL', msg: '🚨 DELUGE SIMULATION: Cloudburst of 185mm/6h injected across Barak & Teesta Basins! Pore water pressures spiking.' },
+      ...prev
+    ]);
+    setSelectedHotspot(prev => prev ? {
+      ...prev,
+      rainfall_24h_mm: +(prev.rainfall_24h_mm + 140).toFixed(1),
+      pore_pressure_ru: 0.88,
+      factor_of_safety: 0.68,
+      risk_score: 98,
+      alert_level: 'CRITICAL'
+    } : prev);
+    setTimeout(() => setIsSimulatingDeluge(false), 8000);
+  };
+
+  // Real-Time Seismic Tremor Simulation (M5.4 Kopili Fault Rupture)
+  const handleSimulateEarthquake = () => {
+    playTacticalAudio('alarm');
+    setIsSimulatingEarthquake(true);
+    const now = new Date().toLocaleTimeString();
+    setScanLogs(prev => [
+      { time: now, tag: 'CRITICAL', msg: '⚡ SEISMIC SIMULATION: M5.4 Tremor detected on Kopili Fault Zone (Depth 12km). Dynamic shear acceleration destabilizing colluvium.' },
+      ...prev
+    ]);
+    setSelectedHotspot(prev => prev ? {
+      ...prev,
+      ground_displacement_mm: +(prev.ground_displacement_mm + 45.5).toFixed(1),
+      insar_los_velocity: "-68.4 mm/yr",
+      factor_of_safety: 0.62,
+      risk_score: 99,
+      alert_level: 'CRITICAL'
+    } : prev);
+    setTimeout(() => setIsSimulatingEarthquake(false), 8000);
   };
 
   // Auto-Patrol Sequencer: Cycles across 8 states / 10 hotspots
@@ -1203,18 +1249,88 @@ export default function LandslideDetectionPage() {
           {/* Main Leaflet Map Container */}
           <div className="panel" style={{ padding: '0', overflow: 'hidden', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '10px', height: '640px', display: 'flex', flexDirection: 'column' }}>
             {/* Map Controls Header */}
-            <div style={{ padding: '10px 16px', background: 'rgba(5, 11, 18, 0.96)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ padding: '8px 14px', background: 'rgba(5, 11, 18, 0.96)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span className="label-caps" style={{ color: 'var(--cyan)' }}>GIS TERRAIN VIEWER</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                  Centered: Northeastern India (Lat: {mapCenter[0].toFixed(3)}, Lon: {mapCenter[1].toFixed(3)})
-                </span>
+                
+                {/* 2D vs 3D Dimension Mode Toggle */}
+                <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', padding: '2px', borderRadius: '4px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                  <button
+                    onClick={() => { playTacticalAudio('click'); setViewDimension('2D'); }}
+                    style={{
+                      background: viewDimension === '2D' ? 'var(--cyan)' : 'transparent',
+                      color: viewDimension === '2D' ? '#000' : 'var(--text-muted)',
+                      border: 'none',
+                      borderRadius: '3px',
+                      padding: '3px 8px',
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      fontFamily: 'var(--font-mono)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🗺️ 2D GIS
+                  </button>
+                  <button
+                    onClick={() => { playTacticalAudio('sonar'); setViewDimension('3D'); }}
+                    style={{
+                      background: viewDimension === '3D' ? 'var(--cyan)' : 'transparent',
+                      color: viewDimension === '3D' ? '#000' : 'var(--text-muted)',
+                      border: 'none',
+                      borderRadius: '3px',
+                      padding: '3px 8px',
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      fontFamily: 'var(--font-mono)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🏔️ 3D DIGITAL TWIN
+                  </button>
+                </div>
+
+                {/* Real-Time Stress / Event Simulation Buttons */}
+                <button
+                  onClick={handleSimulateDeluge}
+                  disabled={isSimulatingDeluge}
+                  style={{
+                    background: isSimulatingDeluge ? 'rgba(56, 189, 248, 0.3)' : 'rgba(56, 189, 248, 0.12)',
+                    color: '#38bdf8',
+                    border: '1px solid rgba(56, 189, 248, 0.4)',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-mono)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isSimulatingDeluge ? '🌧️ DELUGE ACTIVE...' : '🌧️ TEST MONSOON (150mm)'}
+                </button>
+
+                <button
+                  onClick={handleSimulateEarthquake}
+                  disabled={isSimulatingEarthquake}
+                  style={{
+                    background: isSimulatingEarthquake ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.12)',
+                    color: '#ef4444',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-mono)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isSimulatingEarthquake ? '⚡ QUAKE ACTIVE...' : '⚡ TEST M5.4 TREMOR'}
+                </button>
               </div>
 
-              {/* Map Layer Switchers (Zero-Watermark by default) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* Map Layer Switchers (Zero-Watermark) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                 {[
-                  { id: 'DARK', label: '🌙 Dark Tactical (No Watermark)' },
+                  { id: 'DARK', label: '🌙 Dark Tactical' },
                   { id: 'SATELLITE', label: '🛰️ Satellite' },
                   { id: 'TOPO', label: '⛰️ Topo DEM' },
                   { id: 'STREET', label: '🗺️ Street OSM' }
@@ -1227,7 +1343,7 @@ export default function LandslideDetectionPage() {
                       color: mapLayer === ly.id ? '#000' : 'var(--text-muted)',
                       border: 'none',
                       borderRadius: '3px',
-                      padding: '4px 9px',
+                      padding: '4px 8px',
                       fontSize: '10px',
                       fontWeight: 700,
                       cursor: 'pointer',
@@ -1238,6 +1354,43 @@ export default function LandslideDetectionPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* GIS Overlays Toggle Strip */}
+            <div style={{ padding: '4px 14px', background: 'rgba(3, 7, 14, 0.95)', borderBottom: '1px solid rgba(0, 229, 255, 0.15)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>GIS OVERLAYS:</span>
+              {[
+                { key: 'rainfallRadar', label: '🌧️ Rain Radar', color: '#38bdf8' },
+                { key: 'insarVelocity', label: '🛰️ InSAR LOS Creep', color: '#ec4899' },
+                { key: 'soilSaturation', label: '💧 Soil Saturation', color: '#10b981' },
+                { key: 'faultLines', label: '⚡ Tectonic Faults & Thrusts', color: '#ef4444' },
+                { key: 'highways', label: '🚧 Strategic Highway Segments', color: '#f59e0b' }
+              ].map(ov => (
+                <button
+                  key={ov.key}
+                  onClick={() => {
+                    playTacticalAudio('click');
+                    setActiveOverlays(prev => ({ ...prev, [ov.key]: !prev[ov.key] }));
+                  }}
+                  style={{
+                    background: activeOverlays[ov.key] ? `${ov.color}25` : 'rgba(255,255,255,0.03)',
+                    color: activeOverlays[ov.key] ? ov.color : 'var(--text-muted)',
+                    border: `1px solid ${activeOverlays[ov.key] ? ov.color : 'rgba(255,255,255,0.08)'}`,
+                    borderRadius: '3px',
+                    padding: '2px 7px',
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: activeOverlays[ov.key] ? ov.color : '#555' }} />
+                  {ov.label}
+                </button>
+              ))}
             </div>
 
             {/* Real-Time Scanning Controls Ribbon */}
@@ -1410,119 +1563,356 @@ export default function LandslideDetectionPage() {
               </div>
             </div>
 
-            {/* Interactive Leaflet Map Container */}
+            {/* Interactive 2D Leaflet / 3D Digital Twin Map Viewport */}
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-              <MapContainer
-                center={mapCenter}
-                zoom={mapZoom}
-                style={{ height: '100%', width: '100%', background: '#0a1929' }}
-                zoomControl={true}
-              >
-                <MapPanController center={mapCenter} zoom={mapZoom} />
+              {viewDimension === '3D' ? (
+                <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+                  <TerrainMap3D incidents={hotspots} />
+                  <div style={{ position: 'absolute', top: '12px', left: '16px', zIndex: 10, background: 'rgba(5, 11, 20, 0.85)', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cyan)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#fff' }}>
+                    <span style={{ color: 'var(--cyan)', fontWeight: 800 }}>🏔️ 3D DIGITAL TWIN ACTIVE</span> • Interactive LiDAR Mesh Orbit
+                  </div>
+                </div>
+              ) : (
+                <MapContainer
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  className={`ner-map-container ${mapLayer.toLowerCase()}-map no-invert`}
+                  style={{ height: '100%', width: '100%', background: '#0a1929' }}
+                  zoomControl={true}
+                >
+                  <MapPanController center={mapCenter} zoom={mapZoom} />
 
-                {/* Base Tile Layers (Zero-Watermark Esri Dark Canvas & Esri World Imagery) */}
-                {mapLayer === 'DARK' && (
-                  <>
-                    <TileLayer
-                      url={apiKeys.carto 
-                        ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=${apiKeys.carto}`
-                        : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{x}"
-                      }
-                      attribution="Tiles &copy; Esri &mdash; DeLorme, NAVTEQ"
-                      maxZoom={16}
-                    />
-                    {!apiKeys.carto && (
+                  {/* Base Tile Layers (Zero-Watermark Esri Dark Canvas, Satellite, Topo DEM, Street OSM) */}
+                  {mapLayer === 'DARK' && (
+                    <>
                       <TileLayer
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{x}"
-                        attribution=""
+                        key="DARK_BASE"
+                        url={apiKeys.carto 
+                          ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=${apiKeys.carto}`
+                          : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                        }
+                        attribution="Tiles &copy; Esri &mdash; DeLorme, NAVTEQ"
                         maxZoom={16}
                       />
-                    )}
-                  </>
-                )}
-                {mapLayer === 'SATELLITE' && (
-                  <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}"
-                    attribution="Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics"
-                    maxZoom={18}
-                  />
-                )}
-                {mapLayer === 'TOPO' && (
-                  <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{x}"
-                    attribution="Tiles &copy; Esri &mdash; USGS, Esri"
-                    maxZoom={18}
-                  />
-                )}
-                {mapLayer === 'STREET' && (
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution="&copy; OpenStreetMap contributors"
-                    maxZoom={19}
-                  />
-                )}
+                      {!apiKeys.carto && (
+                        <TileLayer
+                          key="DARK_REF"
+                          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                          attribution=""
+                          maxZoom={16}
+                        />
+                      )}
+                    </>
+                  )}
+                  {mapLayer === 'SATELLITE' && (
+                    <TileLayer
+                      key="SATELLITE"
+                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                      attribution="Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics"
+                      maxZoom={19}
+                    />
+                  )}
+                  {mapLayer === 'TOPO' && (
+                    <TileLayer
+                      key="TOPO"
+                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                      attribution="Tiles &copy; Esri &mdash; USGS, Esri"
+                      maxZoom={18}
+                    />
+                  )}
+                  {mapLayer === 'STREET' && (
+                    <TileLayer
+                      key="STREET"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution="&copy; OpenStreetMap contributors"
+                      maxZoom={19}
+                    />
+                  )}
 
-                {/* Markers for all Filtered NER Hotspots */}
-                {filteredHotspots.map(hotspot => {
-                  const isSelected = selectedHotspot?.id === hotspot.id;
-                  return (
+                  {/* GIS OVERLAY 1: NER Tectonic Faults & Thrusts */}
+                  {activeOverlays.faultLines && (
+                    <>
+                      {/* Main Boundary Thrust (MBT) */}
+                      <Polyline
+                        positions={[
+                          [27.35, 91.8], [27.20, 92.5], [27.12, 93.4], [27.28, 94.2], [27.85, 95.3], [28.25, 96.2]
+                        ]}
+                        pathOptions={{ color: '#ef4444', weight: 2.5, dashArray: '6, 6' }}
+                      >
+                        <LeafletTooltip sticky>⚡ Main Boundary Thrust (MBT) - Active Himalayan Rupture</LeafletTooltip>
+                      </Polyline>
+
+                      {/* Main Central Thrust (MCT) */}
+                      <Polyline
+                        positions={[
+                          [27.70, 88.1], [27.95, 88.6], [28.05, 89.2], [28.35, 93.0], [28.65, 95.0]
+                        ]}
+                        pathOptions={{ color: '#dc2626', weight: 3, dashArray: '8, 4' }}
+                      >
+                        <LeafletTooltip sticky>⚡ Main Central Thrust (MCT) - High Himalayan Decollement</LeafletTooltip>
+                      </Polyline>
+
+                      {/* Kopili Fault Zone */}
+                      <Polyline
+                        positions={[
+                          [26.85, 92.2], [26.20, 92.8], [25.70, 93.2], [25.10, 93.6]
+                        ]}
+                        pathOptions={{ color: '#f59e0b', weight: 3 }}
+                      >
+                        <LeafletTooltip sticky>⚡ Kopili Fault Zone - Active Intraplate Seismogenic Zone</LeafletTooltip>
+                      </Polyline>
+
+                      {/* Dauki Fault (Meghalaya Plateau) */}
+                      <Polyline
+                        positions={[
+                          [25.18, 90.0], [25.16, 91.0], [25.15, 91.8], [25.17, 92.5], [25.12, 93.1]
+                        ]}
+                        pathOptions={{ color: '#f97316', weight: 3 }}
+                      >
+                        <LeafletTooltip sticky>⚡ Dauki Fault - Steep Southerly Scarp of Shillong Plateau</LeafletTooltip>
+                      </Polyline>
+
+                      {/* Naga Thrust */}
+                      <Polyline
+                        positions={[
+                          [27.20, 95.5], [26.75, 94.8], [26.15, 94.2], [25.75, 93.8], [24.95, 93.2]
+                        ]}
+                        pathOptions={{ color: '#a855f7', weight: 2.5, dashArray: '5, 5' }}
+                      >
+                        <LeafletTooltip sticky>⚡ Naga Thrust - Schuppen Belt Frontal Margin</LeafletTooltip>
+                      </Polyline>
+                    </>
+                  )}
+
+                  {/* GIS OVERLAY 2: Strategic Highway Corridors */}
+                  {activeOverlays.highways && (
+                    <>
+                      {/* NH-10 Sikkim Lifeline */}
+                      <Polyline
+                        positions={[
+                          [26.88, 88.45], [26.984, 88.384], [27.08, 88.42], [27.15, 88.48], [27.33, 88.61]
+                        ]}
+                        pathOptions={{ color: '#00e5ff', weight: 4 }}
+                      >
+                        <LeafletTooltip sticky>🚧 NH-10 (Sevoke-Gangtok) - Chronic Slide Corridor</LeafletTooltip>
+                      </Polyline>
+
+                      {/* NH-29 Nagaland */}
+                      <Polyline
+                        positions={[
+                          [25.90, 93.73], [25.82, 93.88], [25.72, 94.02], [25.67, 94.11], [25.55, 94.15]
+                        ]}
+                        pathOptions={{ color: '#38bdf8', weight: 4 }}
+                      >
+                        <LeafletTooltip sticky>🚧 NH-29 (Dimapur-Kohima) - Dzüdza River Subsidence Corridor</LeafletTooltip>
+                      </Polyline>
+
+                      {/* NH-37 Manipur */}
+                      <Polyline
+                        positions={[
+                          [24.80, 93.12], [24.78, 93.45], [24.81, 93.65], [24.786, 93.712], [24.81, 93.94]
+                        ]}
+                        pathOptions={{ color: '#f43f5e', weight: 4 }}
+                      >
+                        <LeafletTooltip sticky>🚧 NH-37 (Jiribam-Imphal) - Tupul Scarp Critical Lifeline</LeafletTooltip>
+                      </Polyline>
+
+                      {/* NH-415 Arunachal */}
+                      <Polyline
+                        positions={[
+                          [27.10, 93.78], [27.09, 93.68], [27.08, 93.61]
+                        ]}
+                        pathOptions={{ color: '#10b981', weight: 4 }}
+                      >
+                        <LeafletTooltip sticky>🚧 NH-415 (Itanagar Capital Expressway)</LeafletTooltip>
+                      </Polyline>
+                    </>
+                  )}
+
+                  {/* GIS OVERLAY 3: Doppler Rain Radar Storm Cells */}
+                  {activeOverlays.rainfallRadar && (
+                    <>
+                      <Circle
+                        center={[25.298, 91.582]}
+                        radius={28000}
+                        pathOptions={{
+                          color: '#0284c7',
+                          fillColor: '#38bdf8',
+                          fillOpacity: 0.30 + Math.sin(liveTelemetryTick * 2) * 0.08,
+                          weight: 1.5,
+                          dashArray: '4, 4'
+                        }}
+                      >
+                        <LeafletTooltip sticky>🌧️ DOPPLER RADAR: Cherrapunji Extreme Deluge Cell (285mm / 24h)</LeafletTooltip>
+                      </Circle>
+
+                      <Circle
+                        center={[24.786, 93.712]}
+                        radius={18000}
+                        pathOptions={{
+                          color: '#dc2626',
+                          fillColor: '#ef4444',
+                          fillOpacity: 0.28 + Math.cos(liveTelemetryTick * 1.5) * 0.08,
+                          weight: 1.5
+                        }}
+                      >
+                        <LeafletTooltip sticky>🌧️ DOPPLER RADAR: Tupul Catchment Convective Storm Cell (184mm / 24h)</LeafletTooltip>
+                      </Circle>
+
+                      <Circle
+                        center={[25.183, 93.018]}
+                        radius={22000}
+                        pathOptions={{
+                          color: '#d97706',
+                          fillColor: '#f59e0b',
+                          fillOpacity: 0.25,
+                          weight: 1.5
+                        }}
+                      >
+                        <LeafletTooltip sticky>🌧️ DOPPLER RADAR: Haflong Heavy Rainfall Band (215mm / 24h)</LeafletTooltip>
+                      </Circle>
+                    </>
+                  )}
+
+                  {/* GIS OVERLAY 4: Copernicus InSAR LOS Deformation Heatmap */}
+                  {activeOverlays.insarVelocity && (
+                    <>
+                      <Circle
+                        center={[24.786, 93.712]}
+                        radius={5000}
+                        pathOptions={{
+                          color: '#d946ef',
+                          fillColor: '#ec4899',
+                          fillOpacity: 0.22,
+                          weight: 2,
+                          dashArray: '3, 3'
+                        }}
+                      >
+                        <LeafletTooltip sticky>🛰️ COPERNICUS InSAR: -34.2 mm/yr Line-of-Sight Subsidence</LeafletTooltip>
+                      </Circle>
+
+                      <Circle
+                        center={[26.984, 88.384]}
+                        radius={4200}
+                        pathOptions={{
+                          color: '#d946ef',
+                          fillColor: '#ec4899',
+                          fillOpacity: 0.25,
+                          weight: 2,
+                          dashArray: '3, 3'
+                        }}
+                      >
+                        <LeafletTooltip sticky>🛰️ COPERNICUS InSAR: -42.0 mm/yr Critical Slope Creep</LeafletTooltip>
+                      </Circle>
+
+                      <Circle
+                        center={[23.736, 92.717]}
+                        radius={3800}
+                        pathOptions={{
+                          color: '#d946ef',
+                          fillColor: '#ec4899',
+                          fillOpacity: 0.20,
+                          weight: 2,
+                          dashArray: '3, 3'
+                        }}
+                      >
+                        <LeafletTooltip sticky>🛰️ COPERNICUS InSAR: -28.4 mm/yr Urban Slide Subsidence</LeafletTooltip>
+                      </Circle>
+                    </>
+                  )}
+
+                  {/* GIS OVERLAY 5: High-VWC Soil Moisture Saturation Zones */}
+                  {activeOverlays.soilSaturation && (
+                    <>
+                      <Circle
+                        center={[24.786, 93.712]}
+                        radius={7000}
+                        pathOptions={{
+                          color: '#059669',
+                          fillColor: '#10b981',
+                          fillOpacity: 0.20,
+                          weight: 1.5
+                        }}
+                      >
+                        <LeafletTooltip sticky>💧 SOIL VWC: 88.4% Saturated Liquefaction Field</LeafletTooltip>
+                      </Circle>
+                      <Circle
+                        center={[25.183, 93.018]}
+                        radius={8500}
+                        pathOptions={{
+                          color: '#059669',
+                          fillColor: '#10b981',
+                          fillOpacity: 0.22,
+                          weight: 1.5
+                        }}
+                      >
+                        <LeafletTooltip sticky>💧 SOIL VWC: 91.2% Saturated Weathered Colluvium</LeafletTooltip>
+                      </Circle>
+                    </>
+                  )}
+
+                  {/* Markers for all Filtered NER Hotspots */}
+                  {filteredHotspots.map(hotspot => {
+                    const isSelected = selectedHotspot?.id === hotspot.id;
+                    return (
+                      <Marker
+                        key={hotspot.id}
+                        position={[hotspot.lat, hotspot.lon]}
+                        icon={createNerMarkerIcon(hotspot, isSelected)}
+                        eventHandlers={{
+                          click: () => handleSelectHotspot(hotspot)
+                        }}
+                      >
+                        <Popup>
+                          <div style={{ color: '#000', padding: '4px', maxWidth: '240px' }}>
+                            <strong style={{ fontSize: '13px' }}>{hotspot.name}</strong>
+                            <div style={{ fontSize: '11px', color: '#444', marginTop: '2px' }}>
+                              {hotspot.district}, {hotspot.state} ({hotspot.highway})
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginTop: '6px', fontSize: '11px' }}>
+                              <div>Risk Score: <strong>{hotspot.risk_score}/100</strong></div>
+                              <div>FoS: <strong>{hotspot.factor_of_safety}</strong></div>
+                              <div>Slope: <strong>{hotspot.slope_deg}°</strong></div>
+                              <div>Rain: <strong>{hotspot.rainfall_24h_mm} mm</strong></div>
+                            </div>
+                            <div style={{ marginTop: '6px' }}>
+                              <button
+                                onClick={() => handleSelectHotspot(hotspot)}
+                                style={{ width: '100%', background: '#0a1929', color: '#00e5ff', border: 'none', padding: '4px', borderRadius: '3px', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                              >
+                                Inspect Detailed Geotechnical Profile
+                              </button>
+                            </div>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
+
+                  {/* Location-Anchored Scanning Radar HUD Marker (Pinned directly at selected hotspot) */}
+                  {isScanning && selectedHotspot && (
                     <Marker
-                      key={hotspot.id}
-                      position={[hotspot.lat, hotspot.lon]}
-                      icon={createNerMarkerIcon(hotspot, isSelected)}
-                      eventHandlers={{
-                        click: () => handleSelectHotspot(hotspot)
+                      position={[selectedHotspot.lat, selectedHotspot.lon]}
+                      icon={createLocationScanningIcon(selectedHotspot, scanAngle, scanMode)}
+                      interactive={false}
+                    />
+                  )}
+
+                  {/* Hazard Buffer Circle around selected hotspot */}
+                  {selectedHotspot && (
+                    <Circle
+                      center={[selectedHotspot.lat, selectedHotspot.lon]}
+                      radius={selectedHotspot.risk_score >= 85 ? 4500 : 3000}
+                      pathOptions={{
+                        color: selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#ffb020',
+                        fillColor: selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#ffb020',
+                        fillOpacity: 0.18,
+                        weight: 2
                       }}
-                    >
-                      <Popup>
-                        <div style={{ color: '#000', padding: '4px', maxWidth: '240px' }}>
-                          <strong style={{ fontSize: '13px' }}>{hotspot.name}</strong>
-                          <div style={{ fontSize: '11px', color: '#444', marginTop: '2px' }}>
-                            {hotspot.district}, {hotspot.state} ({hotspot.highway})
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginTop: '6px', fontSize: '11px' }}>
-                            <div>Risk Score: <strong>{hotspot.risk_score}/100</strong></div>
-                            <div>FoS: <strong>{hotspot.factor_of_safety}</strong></div>
-                            <div>Slope: <strong>{hotspot.slope_deg}°</strong></div>
-                            <div>Rain: <strong>{hotspot.rainfall_24h_mm} mm</strong></div>
-                          </div>
-                          <div style={{ marginTop: '6px' }}>
-                            <button
-                              onClick={() => handleSelectHotspot(hotspot)}
-                              style={{ width: '100%', background: '#0a1929', color: '#00e5ff', border: 'none', padding: '4px', borderRadius: '3px', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                            >
-                              Inspect Detailed Geotechnical Profile
-                            </button>
-                          </div>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-
-                {/* Location-Anchored Scanning Radar HUD Marker (Pinned directly at selected hotspot) */}
-                {isScanning && selectedHotspot && (
-                  <Marker
-                    position={[selectedHotspot.lat, selectedHotspot.lon]}
-                    icon={createLocationScanningIcon(selectedHotspot, scanAngle, scanMode)}
-                    interactive={false}
-                  />
-                )}
-
-                {/* Hazard Buffer Circle around selected hotspot */}
-                {selectedHotspot && (
-                  <Circle
-                    center={[selectedHotspot.lat, selectedHotspot.lon]}
-                    radius={selectedHotspot.risk_score >= 85 ? 4500 : 3000}
-                    pathOptions={{
-                      color: selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#ffb020',
-                      fillColor: selectedHotspot.risk_score >= 85 ? '#ff3b5c' : '#ffb020',
-                      fillOpacity: 0.18,
-                      weight: 2
-                    }}
-                  />
-                )}
-              </MapContainer>
+                    />
+                  )}
+                </MapContainer>
+              )}
 
               {/* Real-Time LiDAR Curtain Overlay */}
               {isScanning && scanMode === 'LIDAR' && <div className="ner-lidar-sweep-bar" />}
