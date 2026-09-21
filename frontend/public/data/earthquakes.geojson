@@ -2169,6 +2169,30 @@
     },
     {
       "type": "Feature",
+      "id": "USGS-EQ-ci10254054",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.342666666667,
+          33.9866666666667,
+          5.08
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "15 km E of Desert Hot Springs, CA",
+        "severity_metric": "Magnitude 0.5",
+        "magnitude": 0.5,
+        "depth_km": 5.08,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci10254054",
+        "timestamp": "2026-09-21T05:24:06.950000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
       "id": "USGS-EQ-ci41335863",
       "geometry": {
         "type": "Point",
@@ -3037,22 +3061,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -101.468,
-          32.085,
-          2.878
+          -101.478,
+          32.088,
+          8.9111
         ]
       },
       "properties": {
         "hazard_type": "Earthquake",
         "category": "SEISMIC",
-        "location_name": "9 km WSW of Forsan, Texas",
-        "severity_metric": "Magnitude 1.1",
-        "magnitude": 1.1,
-        "depth_km": 2.878,
+        "location_name": "10 km WSW of Forsan, Texas",
+        "severity_metric": "Magnitude 0.8",
+        "magnitude": 0.8,
+        "depth_km": 8.9111,
         "alert_level": "LOW",
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026soxuwx",
-        "timestamp": "2026-09-21T01:55:22.037000+00:00"
+        "timestamp": "2026-09-21T01:55:22.133000+00:00"
       }
     },
     {
@@ -5169,6 +5193,30 @@
     },
     {
       "type": "Feature",
+      "id": "USGS-EQ-uu80157581",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -112.902333333333,
+          37.0801666666667,
+          13.66
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "10 km NE of Hildale, Utah",
+        "severity_metric": "Magnitude 1.1",
+        "magnitude": 1.13,
+        "depth_km": 13.66,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/uu80157581",
+        "timestamp": "2026-09-20T17:10:32.160000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
       "id": "USGS-EQ-aka2026srgcdi",
       "geometry": {
         "type": "Point",
@@ -5525,78 +5573,6 @@
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/hv75040822",
         "timestamp": "2026-09-20T15:15:35.590000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-aka2026srcbwk",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -151.04,
-          62.567,
-          86.3
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "16 km WNW of Petersville, Alaska",
-        "severity_metric": "Magnitude 2.3",
-        "magnitude": 2.3,
-        "depth_km": 86.3,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/aka2026srcbwk",
-        "timestamp": "2026-09-20T15:09:55.140000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-ci41335575",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -119.143,
-          35.0071666666667,
-          11.62
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "18 km N of Pine Mountain Club, CA",
-        "severity_metric": "Magnitude 1.1",
-        "magnitude": 1.08,
-        "depth_km": 11.62,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335575",
-        "timestamp": "2026-09-20T15:08:34.030000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-aka2026srbzoo",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -148.558,
-          65.504,
-          15.2
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "2 km SSW of Livengood, Alaska",
-        "severity_metric": "Magnitude 0.9",
-        "magnitude": 0.9,
-        "depth_km": 15.2,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/aka2026srbzoo",
-        "timestamp": "2026-09-20T15:07:16.437000+00:00"
       }
     }
   ]

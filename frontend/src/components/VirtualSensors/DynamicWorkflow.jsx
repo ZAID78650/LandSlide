@@ -293,7 +293,7 @@ export default function DynamicWorkflow({ location }) {
           </div>
           <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: '#9ca3af', marginTop: 4, maxWidth: 840 }}>
             Closed-loop disaster intelligence: continuous multi-platform ingestion, Kalman signal conditioning, 1D Green-Ampt infiltration,
-            Infinite Slope Factor of Safety (\(\text{FoS}\)) derivation, Whisper-Large-V3 risk fusion, and automated multi-agency SOP escalation.
+            Infinite Slope Factor of Safety (FoS) derivation, Whisper-Large-V3 risk fusion, and automated multi-agency SOP escalation.
           </div>
         </div>
 
