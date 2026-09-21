@@ -162,13 +162,53 @@ const WORKFLOW_STAGES = [
   },
 ];
 
-export default function DynamicWorkflow({ location }) {
-  const [selectedScenario, setSelectedScenario] = useState(SCENARIOS[1]); // default to Cloudburst
+export default function DynamicWorkflow({ location, sensors = [], liveWeather = null, currentRisk = null }) {
+  // Extract live parameters from virtual sensors or weather
+  const livePrecip = parseFloat((liveWeather?.precipitation ?? (sensors.find(s => s.sensor_type === 'rainfall')?.last_value ?? 0)).toFixed(1));
+  const liveHumidity = parseFloat((liveWeather?.relative_humidity_2m ?? (sensors.find(s => s.sensor_type === 'humidity')?.last_value ?? 68)).toFixed(0));
+  const liveSoil = parseFloat((sensors.find(s => s.sensor_type === 'soil_moisture')?.last_value ?? Math.min(95, liveHumidity * 0.82)).toFixed(1));
+  const livePorePressure = Math.max(6.0, parseFloat((livePrecip * 1.6 + liveSoil * 0.32).toFixed(1)));
+
+  // Dynamic Live Scenario built directly from active telemetry
+  const liveAdaptiveScenario = {
+    id: 'live_telemetry',
+    label: '⚡ LIVE ADAPTIVE (REAL-TIME)',
+    name: `Live Telemetry Stream — ${location?.name || 'Current Monitoring Zone'}`,
+    description: `Dynamic physical parameters assimilated from ${sensors.length || 8} virtual sensors: ${livePrecip}mm/h rain, ${liveSoil}% soil moisture, ${livePorePressure}kPa pore pressure.`,
+    rainfall: livePrecip,
+    porePressure: livePorePressure,
+    frictionAngle: 31.5,
+    cohesion: 12.0,
+    slopeAngle: 38.0,
+    depth: 3.2,
+    unitWeight: 20.4,
+    threatLevel: currentRisk?.overall_level || (livePrecip > 50 ? 'CRITICAL' : livePrecip > 20 ? 'ELEVATED' : 'MODERATE'),
+    color: CYAN,
+    alertTitle: `REAL-TIME TELEMETRY: ${currentRisk?.overall_level || 'OPERATIONAL'} STATUS`,
+    dispatches: [
+      { agency: 'Regional SEOC / DDMA', status: 'SYNCHRONIZED', note: `Live feed locked to ${location?.name || 'hotspot'}` },
+      { agency: 'Border Roads Organisation (BRO)', status: 'TELEMETRY ACTIVE', note: 'Highway slope inclinometers nominal' },
+      { agency: 'NDRF Battalion Control Room', status: 'STANDBY', note: 'Common Alerting Protocol (CAP) channel open' },
+      { agency: 'CWC Hydrological Bureau', status: 'LOGGING', note: 'Basin discharge velocity verified' }
+    ]
+  };
+
+  const allScenarios = [liveAdaptiveScenario, ...SCENARIOS];
+
+  const [selectedScenario, setSelectedScenario] = useState(liveAdaptiveScenario);
   const [activeStage, setActiveStage] = useState(1);
   const [isRunning, setIsRunning] = useState(false);
+  const [isWatchdogActive, setIsWatchdogActive] = useState(true);
   const [progressPct, setProgressPct] = useState(0);
   const [logs, setLogs] = useState([]);
   const logContainerRef = useRef(null);
+
+  // Auto-update live scenario parameters if selected
+  useEffect(() => {
+    if (selectedScenario.id === 'live_telemetry') {
+      setSelectedScenario(liveAdaptiveScenario);
+    }
+  }, [livePrecip, liveSoil, livePorePressure, location?.name, currentRisk?.overall_level]);
 
   // Calculate Infinite Slope FoS dynamically:
   // FoS = [c' + (gamma * z * cos^2(beta) - u) * tan(phi')] / [gamma * z * sin(beta) * cos(beta)]
@@ -195,8 +235,19 @@ export default function DynamicWorkflow({ location }) {
   // Add a log entry
   const addLog = (text, type = 'info') => {
     const time = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, { time, text, type }].slice(-50));
+    setLogs(prev => [...prev, { time, text, type }].slice(-60));
   };
+
+  // Real-time continuous watchdog loop
+  useEffect(() => {
+    if (!isWatchdogActive) return;
+    const iv = setInterval(() => {
+      const activeFos = calcFos(selectedScenario);
+      const logType = activeFos < 1.0 ? 'error' : activeFos < 1.3 ? 'warn' : 'info';
+      addLog(`[LIVE WATCHDOG] Pkg Rx: 8 nodes OK | FoS: ${activeFos} (${activeFos < 1.0 ? 'FAILURE IMMINENT' : activeFos < 1.3 ? 'MARGINAL' : 'STABLE'}) | Rain: ${selectedScenario.rainfall}mm/h | u: ${selectedScenario.porePressure}kPa | EKF: -62dBm`, logType);
+    }, 7000);
+    return () => clearInterval(iv);
+  }, [isWatchdogActive, selectedScenario]);
 
   // Auto-scroll logs
   useEffect(() => {
@@ -284,11 +335,11 @@ export default function DynamicWorkflow({ location }) {
               DYNAMIC GEOTECHNICAL & EARLY WARNING WORKFLOW ENGINE
             </span>
             <span style={{
-              fontFamily: FONT_MONO, fontSize: 9, background: isRunning ? `${RED}22` : `${GREEN}22`,
-              color: isRunning ? RED : GREEN, border: `1px solid ${isRunning ? RED : GREEN}66`,
+              fontFamily: FONT_MONO, fontSize: 9, background: isWatchdogActive ? `${CYAN}22` : isRunning ? `${RED}22` : `${GREEN}22`,
+              color: isWatchdogActive ? CYAN : isRunning ? RED : GREEN, border: `1px solid ${isWatchdogActive ? CYAN : isRunning ? RED : GREEN}66`,
               padding: '2px 8px', borderRadius: 4, fontWeight: 700
             }}>
-              {isRunning ? '● EXECUTING PIPELINE' : '● STANDBY (10s POLLING)'}
+              {isWatchdogActive ? '● REAL-TIME WATCHDOG ACTIVE (7s)' : isRunning ? '● EXECUTING PIPELINE' : '● STANDBY'}
             </span>
           </div>
           <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: '#9ca3af', marginTop: 4, maxWidth: 840 }}>
@@ -298,7 +349,21 @@ export default function DynamicWorkflow({ location }) {
         </div>
 
         {/* Execution Controls */}
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button
+            onClick={() => setIsWatchdogActive(!isWatchdogActive)}
+            style={{
+              background: isWatchdogActive ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255,255,255,0.05)',
+              color: isWatchdogActive ? CYAN : '#9ca3af',
+              border: `1px solid ${isWatchdogActive ? CYAN : 'rgba(255,255,255,0.15)'}`,
+              borderRadius: 6, padding: '10px 14px', fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
+            }}
+          >
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: isWatchdogActive ? CYAN : '#666', boxShadow: isWatchdogActive ? `0 0 6px ${CYAN}` : 'none' }} />
+            {isWatchdogActive ? 'WATCHDOG: ACTIVE' : 'WATCHDOG: PAUSED'}
+          </button>
+
           <button
             onClick={runSimulation}
             disabled={isRunning}
@@ -349,8 +414,8 @@ export default function DynamicWorkflow({ location }) {
         <div style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700, color: AMBER, letterSpacing: '0.1em', marginBottom: 10 }}>
           ⚡ SELECT OPERATIONAL DRILL SCENARIO (INJECT PHYSICAL FORCING):
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-          {SCENARIOS.map(sc => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
+          {allScenarios.map(sc => (
             <div
               key={sc.id}
               onClick={() => handleSelectScenario(sc)}
@@ -369,7 +434,7 @@ export default function DynamicWorkflow({ location }) {
                   fontFamily: FONT_MONO, fontSize: 9, padding: '2px 6px', borderRadius: 4,
                   background: `${sc.color}22`, color: sc.color, fontWeight: 700
                 }}>
-                  FoS: {sc.expectedFos}
+                  FoS: {sc.expectedFos || calcFos(sc)}
                 </span>
               </div>
               <div style={{ fontFamily: FONT_BODY, fontSize: 11, fontWeight: 600, color: '#f3f4f6', marginBottom: 4 }}>

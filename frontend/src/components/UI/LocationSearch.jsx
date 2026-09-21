@@ -5,14 +5,49 @@ export default function LocationSearch({ onLocationSelect }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const containerRef = useRef(null);
   const timeoutRef = useRef(null);
   const hasAutoLocated = useRef(false);
-  // Add a flag to prevent search from triggering right after selecting a dropdown item
+  const userTypedRef = useRef(false);
   const preventSearchRef = useRef(false);
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const searchPlaces = async (searchTerm) => {
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchTerm)}&count=10&language=en&format=json`);
-    if (!res.ok) throw new Error('Geocoding failed');
+    // If it's formatted as GPS or numbers, check if it's direct coordinates
+    const coordMatch = searchTerm.replace(/°[NE]/gi, '').match(/([-+]?\d*\.?\d+)[,\s]+([-+]?\d*\.?\d+)/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lon = parseFloat(coordMatch[2]);
+      if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+        return [{
+          lat, lon,
+          primaryName: `Target Point (${lat.toFixed(4)}°, ${lon.toFixed(4)}°)`,
+          displayName: `Custom Coordinates: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`,
+          locality: 'Coordinate Target',
+          city: '',
+          state: '',
+          country: '',
+          type: 'COORDINATES'
+        }];
+      }
+    }
+
+    // Clean search term
+    const cleanTerm = searchTerm.replace(/^GPS:\s*/i, '').trim();
+    if (!cleanTerm || cleanTerm.length < 2) return [];
+
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanTerm)}&count=10&language=en&format=json`);
+    if (!res.ok) return [];
     const data = await res.json();
     return (data.results || []).map(item => ({
       lat: item.latitude,
@@ -28,30 +63,28 @@ export default function LocationSearch({ onLocationSelect }) {
   };
 
   useEffect(() => {
-    if (preventSearchRef.current) {
+    if (preventSearchRef.current || !userTypedRef.current) {
       preventSearchRef.current = false;
       return;
     }
 
-    if (query.trim().length > 0) {
+    if (query.trim().length > 0 && !query.startsWith('GPS:')) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(async () => {
         setLoading(true);
         try {
           const mapped = await searchPlaces(query);
-          if (mapped.length > 0) {
-            setSuggestions(mapped);
-          } else {
-            setSuggestions([]);
+          setSuggestions(mapped);
+          if (userTypedRef.current) {
+            setShowDropdown(true);
           }
         } catch (err) {
           console.error('Location search error:', err);
           setSuggestions([]);
         } finally {
           setLoading(false);
-          setShowDropdown(true);
         }
-      }, 300); // 300ms debounce is fast and responsive
+      }, 250);
     } else {
       setSuggestions([]);
       setShowDropdown(false);
@@ -59,16 +92,19 @@ export default function LocationSearch({ onLocationSelect }) {
   }, [query]);
 
   const handleSelect = (place) => {
-    preventSearchRef.current = true; // Prevent the useEffect from firing another search
-    setQuery(place.primaryName || place.city || place.locality || '');
+    userTypedRef.current = false;
+    preventSearchRef.current = true;
+    setQuery(place.primaryName || place.city || place.locality || `Lat: ${place.lat.toFixed(4)}, Lon: ${place.lon.toFixed(4)}`);
     setShowDropdown(false);
     onLocationSelect(place);
   };
 
   const handleGps = () => {
-    setLoading(true);
+    userTypedRef.current = false;
     preventSearchRef.current = true;
-    setQuery('Detecting location...');
+    setShowDropdown(false);
+    setLoading(true);
+    setQuery('Detecting GPS location...');
     let settled = false;
 
     const settle = (callback) => {
@@ -83,7 +119,9 @@ export default function LocationSearch({ onLocationSelect }) {
         const data = await res.json();
         if (data && data.latitude && data.longitude) {
           const locName = `${data.city ? data.city + ', ' : ''}${data.region ? data.region + ', ' : ''}${data.country || ''}`;
-          setQuery(locName);
+          preventSearchRef.current = true;
+          setQuery(locName || 'Detected Location');
+          setShowDropdown(false);
           settle(() => onLocationSelect({
             lat: parseFloat(data.latitude), 
             lon: parseFloat(data.longitude), 
@@ -91,16 +129,18 @@ export default function LocationSearch({ onLocationSelect }) {
             city: data.city || '', 
             state: data.region || '', 
             country: data.country || '', 
-            displayName: locName
+            displayName: locName || 'Detected Station'
           }));
         } else {
           throw new Error('Invalid IP data');
         }
       } catch (err) {
         console.warn('IP Geolocation fallback failed:', err.message);
-        setQuery('Mumbai, Maharashtra, India');
+        preventSearchRef.current = true;
+        setQuery('Gangtok, Sikkim, India');
+        setShowDropdown(false);
         settle(() => onLocationSelect({
-          lat: 19.0760, lon: 72.8777, locality: 'Default (Mumbai)', city: 'Mumbai', state: 'Maharashtra', country: 'India', displayName: 'Default Station: Mumbai (19.0760°N, 72.8777°E)'
+          lat: 27.3314, lon: 88.6139, locality: 'Gangtok', city: 'Gangtok', state: 'Sikkim', country: 'India', displayName: 'Gangtok, Sikkim, India'
         }));
       } finally {
         setLoading(false);
@@ -108,23 +148,23 @@ export default function LocationSearch({ onLocationSelect }) {
     };
 
     if (navigator.geolocation) {
-      // Some desktop browsers never invoke either geolocation callback. Use a
-      // real IP-location fallback after the same bounded wait.
-      const gpsDeadline = setTimeout(fetchIpLocation, 8500);
+      const gpsDeadline = setTimeout(fetchIpLocation, 7000);
       navigator.geolocation.getCurrentPosition((pos) => {
         clearTimeout(gpsDeadline);
         setLoading(false);
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
+        preventSearchRef.current = true;
+        userTypedRef.current = false;
         setQuery(`GPS: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`);
+        setShowDropdown(false);
         settle(() => onLocationSelect({
           lat, lon, locality: 'GPS Position', city: '', state: '', country: '', displayName: `GPS: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`
         }));
       }, (err) => {
         clearTimeout(gpsDeadline);
-        console.warn('Geolocation notice:', err.message);
         fetchIpLocation(); 
-      }, { timeout: 8000 });
+      }, { timeout: 6000 });
     } else {
       fetchIpLocation();
     }
