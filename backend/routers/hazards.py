@@ -241,3 +241,13 @@ def trigger_geonode_updatelayers():
         "stats": stats,
         "geonode_github_repo": "https://github.com/GeoNode/geonode"
     }
+
+
+@router.get("/ner")
+def get_ner_disaster_intelligence():
+    """
+    Dedicated AI Monitoring & Early Warning endpoint for the North Eastern Region (NER), India.
+    Covers the 8 states, critical highway lifelines (NH-10, NH-29, NH-27), geotechnical sensors,
+    and automatic DDMA advisory generation.
+    """
+    return hazard_pipeline.get_ner_intelligence()

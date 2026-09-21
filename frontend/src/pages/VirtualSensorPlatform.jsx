@@ -618,7 +618,7 @@ export default function VirtualSensorPlatform() {
         <GeoNodeHazardPipeline compact={true} onSyncComplete={fetchData} />
 
         {/* Location Search */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 16 }}>
           <LocationSearch
             onLocationSelect={(loc) => {
               const name = loc.display_name || loc.name || loc.displayName || 'Selected Location';
@@ -639,6 +639,56 @@ export default function VirtualSensorPlatform() {
             }}
             placeholder="Search any global location for risk intelligence..."
           />
+        </div>
+
+        {/* ── North Eastern Region (NER) High-Vulnerability Hotspot Selector ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+          background: 'rgba(255, 176, 32, 0.05)', border: '1px solid rgba(255, 176, 32, 0.25)',
+          borderRadius: 8, padding: '10px 14px', marginBottom: 20
+        }}>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 800, color: AMBER, letterSpacing: '0.1em' }}>
+            🏔️ NER PRIORITY WATCH CORRIDORS:
+          </span>
+          {[
+            { name: 'Gangtok, Sikkim', lat: 27.3314, lon: 88.6139, label: 'Sikkim (NH-10 Teesta)' },
+            { name: 'Guwahati, Assam', lat: 26.1445, lon: 91.7362, label: 'Assam (Kamrup/Haflong)' },
+            { name: 'Kohima, Nagaland', lat: 25.6751, lon: 94.1086, label: 'Nagaland (NH-29 Dzüdza)' },
+            { name: 'Imphal, Manipur', lat: 24.8170, lon: 93.9368, label: 'Manipur (Tupul Scarp)' },
+            { name: 'Shillong, Meghalaya', lat: 25.5788, lon: 91.8933, label: 'Meghalaya (Sohra/Shella)' },
+            { name: 'Aizawl, Mizoram', lat: 23.7271, lon: 92.7176, label: 'Mizoram (Durtlang Ridge)' },
+            { name: 'Itanagar, Arunachal Pradesh', lat: 27.0844, lon: 93.6053, label: 'Arunachal (Sela/NH-13)' },
+            { name: 'Agartala, Tripura', lat: 23.8315, lon: 91.2868, label: 'Tripura (Jampui Hills)' }
+          ].map((hub, hIdx) => (
+            <button
+              key={hIdx}
+              onClick={() => {
+                setIsRegistering(true);
+                setRiskFusion(null);
+                import('../api/client').then(({ api }) => {
+                  api.post('/risk-fusion/monitor', null, { params: { name: hub.name, lat: hub.lat, lon: hub.lon } })
+                    .then(res => {
+                      setLocation({ name: hub.name, lat: hub.lat, lon: hub.lon, id: res.data.location_id });
+                    })
+                    .finally(() => setIsRegistering(false));
+                });
+              }}
+              style={{
+                background: location.name === hub.name ? 'linear-gradient(135deg, #ffb020 0%, #ff6b35 100%)' : 'rgba(0,0,0,0.4)',
+                color: location.name === hub.name ? '#000' : '#d1d5db',
+                border: `1px solid ${location.name === hub.name ? AMBER : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 4,
+                padding: '4px 8px',
+                fontFamily: FONT_MONO,
+                fontSize: 9,
+                fontWeight: location.name === hub.name ? 800 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              {hub.label}
+            </button>
+          ))}
         </div>
 
         {/* System Health */}

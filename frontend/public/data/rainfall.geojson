@@ -9,32 +9,6 @@
   "features": [
     {
       "type": "Feature",
-      "id": "METEO-RAIN-NAIROBI",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.8219,
-          -1.2921
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Nairobi, Kenya",
-        "city": "Nairobi",
-        "country": "Kenya",
-        "severity_metric": "0.2 mm/hr",
-        "rain_mm_hr": 0.2,
-        "wind_speed_kmh": 12.0,
-        "weather_code": 53,
-        "alert_level": "LOW",
-        "is_active_rain": true,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T17:30"
-      }
-    },
-    {
-      "type": "Feature",
       "id": "METEO-RAIN-NEW-YORK",
       "geometry": {
         "type": "Point",
@@ -51,12 +25,38 @@
         "country": "USA",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 16.1,
+        "wind_speed_kmh": 17.9,
         "weather_code": 3,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T10:30"
+        "timestamp": "2026-09-21T10:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-MUMBAI",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          72.8777,
+          19.076
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Mumbai, India",
+        "city": "Mumbai",
+        "country": "India",
+        "severity_metric": "0.1 mm/hr",
+        "rain_mm_hr": 0.1,
+        "wind_speed_kmh": 2.1,
+        "weather_code": 51,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
       }
     },
     {
@@ -77,12 +77,64 @@
         "country": "Indonesia",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 4.8,
+        "wind_speed_kmh": 5.0,
         "weather_code": 0,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T21:30"
+        "timestamp": "2026-09-21T21:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-LONDON",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1278,
+          51.5074
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "London, United Kingdom",
+        "city": "London",
+        "country": "United Kingdom",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 6.1,
+        "weather_code": 0,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T15:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-MANILA",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9842,
+          14.5995
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Manila, Philippines",
+        "city": "Manila",
+        "country": "Philippines",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 0.7,
+        "weather_code": 0,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T22:45"
       }
     },
     {
@@ -104,37 +156,11 @@
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
         "wind_speed_kmh": 10.5,
-        "weather_code": 2,
+        "weather_code": 1,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T23:30"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-LONDON",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.1278,
-          51.5074
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "London, United Kingdom",
-        "city": "London",
-        "country": "United Kingdom",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 5.8,
-        "weather_code": 0,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T15:30"
+        "timestamp": "2026-09-21T23:45"
       }
     },
     {
@@ -155,64 +181,38 @@
         "country": "USA",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 3.3,
+        "wind_speed_kmh": 4.7,
         "weather_code": 0,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T10:30"
+        "timestamp": "2026-09-21T10:45"
       }
     },
     {
       "type": "Feature",
-      "id": "METEO-RAIN-MUMBAI",
+      "id": "METEO-RAIN-NAIROBI",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.8777,
-          19.076
+          36.8219,
+          -1.2921
         ]
       },
       "properties": {
         "hazard_type": "Active Rainfall",
         "category": "HYDROLOGICAL",
-        "location_name": "Mumbai, India",
-        "city": "Mumbai",
-        "country": "India",
-        "severity_metric": "0.1 mm/hr",
-        "rain_mm_hr": 0.1,
-        "wind_speed_kmh": 2.2,
-        "weather_code": 51,
+        "location_name": "Nairobi, Kenya",
+        "city": "Nairobi",
+        "country": "Kenya",
+        "severity_metric": "0.2 mm/hr",
+        "rain_mm_hr": 0.2,
+        "wind_speed_kmh": 12.1,
+        "weather_code": 53,
         "alert_level": "LOW",
-        "is_active_rain": false,
+        "is_active_rain": true,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T20:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-MANILA",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          120.9842,
-          14.5995
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Manila, Philippines",
-        "city": "Manila",
-        "country": "Philippines",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 0.9,
-        "weather_code": 0,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T22:30"
+        "timestamp": "2026-09-21T17:45"
       }
     },
     {
@@ -238,85 +238,7 @@
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T11:30"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-SAN-FRANCISCO",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -122.4194,
-          37.7749
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "San Francisco, USA",
-        "city": "San Francisco",
-        "country": "USA",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 6.1,
-        "weather_code": 3,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T07:30"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-DELHI",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.209,
-          28.6139
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Delhi, India",
-        "city": "Delhi",
-        "country": "India",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 3.3,
-        "weather_code": 0,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T20:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-REYKJAVIK",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -21.9426,
-          64.1466
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Reykjavik, Iceland",
-        "city": "Reykjavik",
-        "country": "Iceland",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 31.0,
-        "weather_code": 3,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T14:30"
+        "timestamp": "2026-09-21T11:45"
       }
     },
     {
@@ -337,38 +259,12 @@
         "country": "Nepal",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 1.7,
+        "wind_speed_kmh": 1.9,
         "weather_code": 2,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T20:15"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-QUITO",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -78.4678,
-          -0.1807
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Quito, Ecuador",
-        "city": "Quito",
-        "country": "Ecuador",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 8.8,
-        "weather_code": 3,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T09:30"
+        "timestamp": "2026-09-21T20:30"
       }
     },
     {
@@ -389,12 +285,116 @@
         "country": "Australia",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 16.8,
+        "wind_speed_kmh": 16.2,
         "weather_code": 3,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-22T00:30"
+        "timestamp": "2026-09-22T00:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-SAN-FRANCISCO",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.4194,
+          37.7749
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "San Francisco, USA",
+        "city": "San Francisco",
+        "country": "USA",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 6.8,
+        "weather_code": 3,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T07:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-QUITO",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -78.4678,
+          -0.1807
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Quito, Ecuador",
+        "city": "Quito",
+        "country": "Ecuador",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 9.9,
+        "weather_code": 3,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T09:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-REYKJAVIK",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -21.9426,
+          64.1466
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Reykjavik, Iceland",
+        "city": "Reykjavik",
+        "country": "Iceland",
+        "severity_metric": "0.3 mm/hr",
+        "rain_mm_hr": 0.3,
+        "wind_speed_kmh": 32.8,
+        "weather_code": 55,
+        "alert_level": "LOW",
+        "is_active_rain": true,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T14:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-DELHI",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.209,
+          28.6139
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Delhi, India",
+        "city": "Delhi",
+        "country": "India",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 3.2,
+        "weather_code": 0,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
       }
     },
     {
@@ -420,59 +420,7 @@
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T22:30"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-HONOLULU",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -157.8583,
-          21.3069
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Honolulu, USA (Hawaii)",
-        "city": "Honolulu",
-        "country": "USA (Hawaii)",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 16.9,
-        "weather_code": 3,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T04:30"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "METEO-RAIN-SANTIAGO",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -70.6693,
-          -33.4489
-        ]
-      },
-      "properties": {
-        "hazard_type": "Active Rainfall",
-        "category": "HYDROLOGICAL",
-        "location_name": "Santiago, Chile",
-        "city": "Santiago",
-        "country": "Chile",
-        "severity_metric": "0.0 mm/hr (Clear)",
-        "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 3.6,
-        "weather_code": 1,
-        "alert_level": "LOW",
-        "is_active_rain": false,
-        "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T11:30"
+        "timestamp": "2026-09-21T22:45"
       }
     },
     {
@@ -493,38 +441,64 @@
         "country": "New Zealand",
         "severity_metric": "0.0 mm/hr (Clear)",
         "rain_mm_hr": 0.0,
-        "wind_speed_kmh": 15.7,
+        "wind_speed_kmh": 15.2,
         "weather_code": 3,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-22T02:30"
+        "timestamp": "2026-09-22T02:45"
       }
     },
     {
       "type": "Feature",
-      "id": "METEO-RAIN-BANGKOK",
+      "id": "METEO-RAIN-HONOLULU",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          100.5018,
-          13.7563
+          -157.8583,
+          21.3069
         ]
       },
       "properties": {
         "hazard_type": "Active Rainfall",
         "category": "HYDROLOGICAL",
-        "location_name": "Bangkok, Thailand",
-        "city": "Bangkok",
-        "country": "Thailand",
-        "severity_metric": "0.1 mm/hr",
-        "rain_mm_hr": 0.1,
-        "wind_speed_kmh": 1.5,
-        "weather_code": 51,
+        "location_name": "Honolulu, USA (Hawaii)",
+        "city": "Honolulu",
+        "country": "USA (Hawaii)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 16.4,
+        "weather_code": 2,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T21:30"
+        "timestamp": "2026-09-21T04:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-SANTIAGO",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.6693,
+          -33.4489
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Santiago, Chile",
+        "city": "Santiago",
+        "country": "Chile",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 3.4,
+        "weather_code": 1,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T11:45"
       }
     },
     {
@@ -545,12 +519,38 @@
         "country": "Sri Lanka",
         "severity_metric": "0.1 mm/hr",
         "rain_mm_hr": 0.1,
-        "wind_speed_kmh": 8.9,
+        "wind_speed_kmh": 9.0,
         "weather_code": 51,
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T20:00"
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-GANGTOK",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.6139,
+          27.3314
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Gangtok, India (Sikkim)",
+        "city": "Gangtok",
+        "country": "India (Sikkim)",
+        "severity_metric": "0.1 mm/hr",
+        "rain_mm_hr": 0.1,
+        "wind_speed_kmh": 2.6,
+        "weather_code": 51,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
       }
     },
     {
@@ -576,7 +576,319 @@
         "alert_level": "LOW",
         "is_active_rain": false,
         "source": "Open-Meteo Global Forecasting Model",
-        "timestamp": "2026-09-21T23:30"
+        "timestamp": "2026-09-21T23:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-BANGKOK",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100.5018,
+          13.7563
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Bangkok, Thailand",
+        "city": "Bangkok",
+        "country": "Thailand",
+        "severity_metric": "0.1 mm/hr",
+        "rain_mm_hr": 0.1,
+        "wind_speed_kmh": 1.5,
+        "weather_code": 51,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T21:45"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-MANGAN-(TEESTA-BASIN)",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.528,
+          27.508
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Mangan (Teesta Basin), India (Sikkim)",
+        "city": "Mangan (Teesta Basin)",
+        "country": "India (Sikkim)",
+        "severity_metric": "1.0 mm/hr",
+        "rain_mm_hr": 1.0,
+        "wind_speed_kmh": 2.4,
+        "weather_code": 96,
+        "alert_level": "LOW",
+        "is_active_rain": true,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-GUWAHATI",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7362,
+          26.1445
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Guwahati, India (Assam)",
+        "city": "Guwahati",
+        "country": "India (Assam)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 1.8,
+        "weather_code": 1,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-HAFLONG-(DIMA-HASAO)",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.0238,
+          25.1762
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Haflong (Dima Hasao), India (Assam)",
+        "city": "Haflong (Dima Hasao)",
+        "country": "India (Assam)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 0.6,
+        "weather_code": 1,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-SHILLONG",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8933,
+          25.5788
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Shillong, India (Meghalaya)",
+        "city": "Shillong",
+        "country": "India (Meghalaya)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 2.3,
+        "weather_code": 3,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-ITANAGAR",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.6053,
+          27.0844
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Itanagar, India (Arunachal Pradesh)",
+        "city": "Itanagar",
+        "country": "India (Arunachal Pradesh)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 3.5,
+        "weather_code": 0,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-CHERRAPUNJI",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7317,
+          25.2986
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Cherrapunji, India (Meghalaya)",
+        "city": "Cherrapunji",
+        "country": "India (Meghalaya)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 2.5,
+        "weather_code": 3,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-AIZAWL",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.7176,
+          23.7271
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Aizawl, India (Mizoram)",
+        "city": "Aizawl",
+        "country": "India (Mizoram)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 2.3,
+        "weather_code": 3,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-TAWANG-(SELA-PASS)",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8594,
+          27.5861
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Tawang (Sela Pass), India (Arunachal Pradesh)",
+        "city": "Tawang (Sela Pass)",
+        "country": "India (Arunachal Pradesh)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 0.6,
+        "weather_code": 1,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-KOHIMA-(NH-29)",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          94.1086,
+          25.6751
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Kohima (NH-29), India (Nagaland)",
+        "city": "Kohima (NH-29)",
+        "country": "India (Nagaland)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 2.4,
+        "weather_code": 2,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-IMPHAL-(TUPUL)",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.9368,
+          24.817
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Imphal (Tupul), India (Manipur)",
+        "city": "Imphal (Tupul)",
+        "country": "India (Manipur)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 4.0,
+        "weather_code": 1,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "METEO-RAIN-AGARTALA",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.2868,
+          23.8315
+        ]
+      },
+      "properties": {
+        "hazard_type": "Active Rainfall",
+        "category": "HYDROLOGICAL",
+        "location_name": "Agartala, India (Tripura)",
+        "city": "Agartala",
+        "country": "India (Tripura)",
+        "severity_metric": "0.0 mm/hr (Clear)",
+        "rain_mm_hr": 0.0,
+        "wind_speed_kmh": 4.8,
+        "weather_code": 0,
+        "alert_level": "LOW",
+        "is_active_rain": false,
+        "source": "Open-Meteo Global Forecasting Model",
+        "timestamp": "2026-09-21T20:15"
       }
     }
   ]

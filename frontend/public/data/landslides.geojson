@@ -50,7 +50,7 @@
         "severity_metric": "Critical Slope Instability (FoS 0.78 | Ru 68%)",
         "alert_level": "CRITICAL",
         "source": "ISRO Landslide Atlas of India / GSI",
-        "timestamp": "2026-09-21T14:44:53.587383+00:00"
+        "timestamp": "2026-09-21T14:57:31.829965+00:00"
       }
     },
     {
@@ -96,7 +96,7 @@
         "severity_metric": "Critical Soil Saturation (FoS 0.82 | Ru 74%)",
         "alert_level": "CRITICAL",
         "source": "GSI Rapid Geotechnical Assessment Team",
-        "timestamp": "2026-09-21T14:44:53.587390+00:00"
+        "timestamp": "2026-09-21T14:57:31.829975+00:00"
       }
     },
     {
@@ -118,7 +118,243 @@
         "severity_metric": "Elevated Monsoon Slump Risk (FoS 0.94)",
         "alert_level": "HIGH",
         "source": "Nepal Department of Mines and Geology (DMG)",
-        "timestamp": "2026-09-21T14:44:53.587394+00:00"
+        "timestamp": "2026-09-21T14:57:31.829981+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-01",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.48,
+              27.2
+            ],
+            [
+              88.54,
+              27.26
+            ],
+            [
+              88.58,
+              27.22
+            ],
+            [
+              88.53,
+              27.18
+            ],
+            [
+              88.48,
+              27.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Sikkim): NH-10 Teesta River Scarp Corridor",
+        "event_name": "Teesta Lifeline Bank Undercutting & Sinking Zone",
+        "state": "Sikkim",
+        "country": "India (Sikkim)",
+        "highway": "NH-10 (Siliguri - Gangtok Lifeline)",
+        "severity_metric": "Critical Slope Instability (FoS 0.74 | Ru 71%)",
+        "factor_of_safety": 0.74,
+        "pore_pressure_ru": 0.71,
+        "insar_creep_rate_mm_wk": 24.5,
+        "road_blockage_probability": "94%",
+        "alert_level": "CRITICAL",
+        "source": "ISRO Landslide Atlas of India / GSI Sikkim Unit",
+        "timestamp": "2026-09-21T14:57:31.829987+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-02",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          94.02,
+          25.71
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Nagaland): NH-29 Dz\u00fcdza Mudflow & Sinking Zone",
+        "event_name": "Dz\u00fcdza Bridge Sinking & Mudflow Cut",
+        "state": "Nagaland",
+        "country": "India (Nagaland)",
+        "highway": "NH-29 (Dimapur - Kohima - Imphal Lifeline)",
+        "severity_metric": "Active Mudflow Downslope Failure (FoS 0.81 | Ru 68%)",
+        "factor_of_safety": 0.81,
+        "pore_pressure_ru": 0.68,
+        "insar_creep_rate_mm_wk": 31.0,
+        "road_blockage_probability": "89%",
+        "alert_level": "CRITICAL",
+        "source": "Nagaland PWD / BRO Project Sewak / GSI",
+        "timestamp": "2026-09-21T14:57:31.829996+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-03",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.66,
+              24.83
+            ],
+            [
+              93.7,
+              24.87
+            ],
+            [
+              93.72,
+              24.85
+            ],
+            [
+              93.68,
+              24.81
+            ],
+            [
+              93.66,
+              24.83
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Manipur): Noney Tupul Ijai River Debris Scarp",
+        "event_name": "Tupul Railway Yard Debris Scarp Zone",
+        "state": "Manipur",
+        "country": "India (Manipur)",
+        "highway": "Jiribam-Imphal Railway Corridor / NH-37",
+        "severity_metric": "Critical Planar Shear Failure (FoS 0.76 | Ru 73%)",
+        "factor_of_safety": 0.76,
+        "pore_pressure_ru": 0.73,
+        "insar_creep_rate_mm_wk": 18.2,
+        "road_blockage_probability": "91%",
+        "alert_level": "CRITICAL",
+        "source": "Manipur Disaster Management Authority / GSI",
+        "timestamp": "2026-09-21T14:57:31.830002+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-04",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.024,
+          25.176
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Assam): Dima Hasao Jatinga Hill Cutting Scarp",
+        "event_name": "Haflong Hill Cutting Collapse Zone",
+        "state": "Assam",
+        "country": "India (Assam)",
+        "highway": "Lumding-Badarpur Hill Rail & NH-27",
+        "severity_metric": "Elevated Hill Cutting Slump Risk (FoS 0.85 | Ru 62%)",
+        "factor_of_safety": 0.85,
+        "pore_pressure_ru": 0.62,
+        "insar_creep_rate_mm_wk": 14.8,
+        "road_blockage_probability": "78%",
+        "alert_level": "HIGH",
+        "source": "Assam State Disaster Management Authority (ASDMA)",
+        "timestamp": "2026-09-21T14:57:31.830008+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-05",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.732,
+          25.299
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Meghalaya): Cherrapunji-Shella Escarpment",
+        "event_name": "Sohra Plateau Escarpment Flash Failure",
+        "state": "Meghalaya",
+        "country": "India (Meghalaya)",
+        "highway": "SH-5 Shillong-Sohra Corridor",
+        "severity_metric": "Extreme Orographic Rainfall Threshold Exceeded (FoS 0.88)",
+        "factor_of_safety": 0.88,
+        "pore_pressure_ru": 0.65,
+        "insar_creep_rate_mm_wk": 12.0,
+        "road_blockage_probability": "74%",
+        "alert_level": "HIGH",
+        "source": "Meghalaya SDMA / CWC Flood Warning",
+        "timestamp": "2026-09-21T14:57:31.830013+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-06",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.718,
+          23.727
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Mizoram): Aizawl Bawngkawn Urban Slope Slip",
+        "event_name": "Unplanned Hill Cutting Sinking Scarp",
+        "state": "Mizoram",
+        "country": "India (Mizoram)",
+        "highway": "NH-54 Silchar-Aizawl Lifeline",
+        "severity_metric": "Fragile Tertiary Sandstone Slump (FoS 0.79 | Ru 69%)",
+        "factor_of_safety": 0.79,
+        "pore_pressure_ru": 0.69,
+        "insar_creep_rate_mm_wk": 22.0,
+        "road_blockage_probability": "86%",
+        "alert_level": "CRITICAL",
+        "source": "Mizoram Disaster Management Authority",
+        "timestamp": "2026-09-21T14:57:31.830019+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-NER-07",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.859,
+          27.586
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India (Arunachal Pradesh): Sela Pass Debris Corridor",
+        "event_name": "Tawang Strategic Lifeline Debris Flow Zone",
+        "state": "Arunachal Pradesh",
+        "country": "India (Arunachal Pradesh)",
+        "highway": "Balipara-Charduar-Tawang (BCT) Road",
+        "severity_metric": "Periglacial Slump & Rockfall (FoS 0.87 | Ru 58%)",
+        "factor_of_safety": 0.87,
+        "pore_pressure_ru": 0.58,
+        "insar_creep_rate_mm_wk": 9.5,
+        "road_blockage_probability": "70%",
+        "alert_level": "HIGH",
+        "source": "Border Roads Organisation (BRO Project Vartak)",
+        "timestamp": "2026-09-21T14:57:31.830024+00:00"
       }
     }
   ]

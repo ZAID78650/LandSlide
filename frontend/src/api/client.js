@@ -203,3 +203,4 @@ export const getRainfallHazards = () => api.get('/hazards/rainfall');
 export const getHazardAnalytics = () => api.get('/hazards/analytics');
 export const getGeoNodeLayers = () => api.get('/hazards/geonode/layers');
 export const triggerGeoNodeUpdateLayers = () => api.post('/hazards/geonode/updatelayers');
+export const getNerHazardIntelligence = () => api.get('/hazards/ner');
