@@ -9,6 +9,7 @@ import {
   BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, Cell
 } from 'recharts';
 import LocationSearch from '../components/UI/LocationSearch';
+import GeoNodeHazardPipeline from '../components/GIS/GeoNodeHazardPipeline';
 
 const CYAN = '#00e5ff';
 const RED = '#ff3b5c';
@@ -490,6 +491,7 @@ export default function VirtualSensorPlatform() {
 
   const TABS = [
     { id: 'overview', label: 'OVERVIEW', icon: '🌐' },
+    { id: 'geonode_pipeline', label: '24/7 GEONODE PIPELINE', icon: '🌍' },
     { id: 'sensors', label: 'VIRTUAL SENSORS', icon: '📡' },
     { id: 'risk', label: 'RISK FUSION', icon: '⚠️' },
     { id: 'forecast', label: '7-DAY FORECAST', icon: '📅' },
@@ -612,6 +614,9 @@ export default function VirtualSensorPlatform() {
       </div>
 
       <div style={{ padding: 24 }}>
+        {/* 24/7 Global Multi-Hazard Ingestion & GeoNode Synchronizer Banner */}
+        <GeoNodeHazardPipeline compact={true} onSyncComplete={fetchData} />
+
         {/* Location Search */}
         <div style={{ marginBottom: 20 }}>
           <LocationSearch
@@ -1042,6 +1047,11 @@ export default function VirtualSensorPlatform() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ── 24/7 GEONODE MULTI-HAZARD PIPELINE TAB ── */}
+        {activeTab === 'geonode_pipeline' && (
+          <GeoNodeHazardPipeline compact={false} onSyncComplete={fetchData} />
         )}
       </div>
     </div>

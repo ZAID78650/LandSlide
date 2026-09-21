@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import LocationSearch from '../components/UI/LocationSearch';
 import DataReliabilityScore from '../components/UI/DataReliabilityScore';
-import { getCycloneData, getActiveCyclones, getLiveRainfall } from '../api/client';
+import { getCycloneData, getActiveCyclones, getLiveRainfall, getCycloneHazards } from '../api/client';
+import GeoNodeHazardPipeline from '../components/GIS/GeoNodeHazardPipeline';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -86,14 +87,38 @@ export default function CycloneTrackerPage() {
     } else { ipFallback(); }
   }, []);
 
-  /* ─── Fetch global active cyclones once ─── */
+  /* ─── Fetch global active cyclones from IMD + GDACS 24/7 pipeline ─── */
   useEffect(() => {
-    getActiveCyclones()
-      .then(r => {
-        const list = Array.isArray(r.data) ? r.data : [];
-        setGlobalCyclones(list);
-      })
-      .catch(() => setGlobalCyclones([]));
+    Promise.allSettled([getActiveCyclones(), getCycloneHazards()]).then(([r1, r2]) => {
+      const list = r1.status === 'fulfilled' && Array.isArray(r1.value?.data) ? [...r1.value.data] : [];
+      if (r2.status === 'fulfilled' && r2.value?.data?.features) {
+        r2.value.data.features.forEach((feat, idx) => {
+          const props = feat.properties || {};
+          const geom = feat.geometry || {};
+          const coords = geom.coordinates || [0, 0];
+          const lat = geom.type === 'Point' ? coords[1] : coords[0]?.[0]?.[1] || 0;
+          const lon = geom.type === 'Point' ? coords[0] : coords[0]?.[0]?.[0] || 0;
+          const name = props.event_name || `Storm-${idx + 1}`;
+          // Avoid duplicate
+          if (!list.some(c => c.name?.toLowerCase().includes(name.toLowerCase()))) {
+            list.push({
+              id: feat.id || `GDACS-TC-${idx}`,
+              name: name,
+              basin: props.country || "Global Tropical Basin",
+              category: props.severity_metric || "Tropical Cyclone Alert",
+              category_level: props.alert_level === 'CRITICAL' ? 3 : 1,
+              wind_speed_kmh: props.wind_speed_kmh || 120,
+              pressure_hpa: props.pressure_hpa || 985,
+              source: props.source || "UN/EU GDACS Global Cyclone Engine",
+              track: {
+                current: { lat, lon, wind_kmh: props.wind_speed_kmh || 120, pressure_hpa: props.pressure_hpa || 985 }
+              }
+            });
+          }
+        });
+      }
+      setGlobalCyclones(list);
+    }).catch(() => setGlobalCyclones([]));
   }, []);
 
   /* ─── Fetch cyclone data for detected/selected location ─── */
@@ -160,6 +185,14 @@ export default function CycloneTrackerPage() {
 
   return (
     <div style={{ padding: 24, height: 'calc(100vh - 56px)', overflow: 'auto', background: '#030609' }}>
+
+      {/* ── 24/7 Multi-Hazard Ingestion Pipeline Banner ── */}
+      <GeoNodeHazardPipeline
+        compact={true}
+        activeHazardFilter="Cyclone"
+        title="24/7 Global Cyclone & Severe Storm Pipeline (UN/EU GDACS · IMD · JMA)"
+        onSyncComplete={() => { if (location) fetchCyclone(location.lat, location.lon, locationLabel); }}
+      />
 
       {/* ── Header ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>

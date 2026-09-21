@@ -1,0 +1,125 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "LS-LIVE-01",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              79.055,
+              30.742
+            ],
+            [
+              79.068,
+              30.748
+            ],
+            [
+              79.079,
+              30.739
+            ],
+            [
+              79.073,
+              30.728
+            ],
+            [
+              79.061,
+              30.725
+            ],
+            [
+              79.055,
+              30.742
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India: Kedarnath Mandakini Scarp Zone",
+        "event_name": "Mandakini Valley Debris Flow Scarp",
+        "country": "India",
+        "severity_metric": "Critical Slope Instability (FoS 0.78 | Ru 68%)",
+        "alert_level": "CRITICAL",
+        "source": "ISRO Landslide Atlas of India / GSI",
+        "timestamp": "2026-09-21T14:44:53.587383+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-LIVE-02",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.125,
+              11.52
+            ],
+            [
+              76.138,
+              11.532
+            ],
+            [
+              76.149,
+              11.522
+            ],
+            [
+              76.142,
+              11.508
+            ],
+            [
+              76.128,
+              11.512
+            ],
+            [
+              76.125,
+              11.52
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "India: Wayanad Meppadi Debris Flow Basin",
+        "event_name": "Chooralmala-Mundakkai Slide Zone",
+        "country": "India",
+        "severity_metric": "Critical Soil Saturation (FoS 0.82 | Ru 74%)",
+        "alert_level": "CRITICAL",
+        "source": "GSI Rapid Geotechnical Assessment Team",
+        "timestamp": "2026-09-21T14:44:53.587390+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "LS-LIVE-03",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.324,
+          27.917
+        ]
+      },
+      "properties": {
+        "hazard_type": "Landslide",
+        "category": "GEOTECHNICAL",
+        "location_name": "Nepal: Sindhupalchok Jure Highway Landslide",
+        "event_name": "Sunkoshi River Scarp",
+        "country": "Nepal",
+        "severity_metric": "Elevated Monsoon Slump Risk (FoS 0.94)",
+        "alert_level": "HIGH",
+        "source": "Nepal Department of Mines and Geology (DMG)",
+        "timestamp": "2026-09-21T14:44:53.587394+00:00"
+      }
+    }
+  ]
+}

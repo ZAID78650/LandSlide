@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import LocationSearch from '../components/UI/LocationSearch';
 import DisasterMap from '../components/Map/DisasterMap';
-import { getNearbyEarthquakes } from '../api/client';
+import { getNearbyEarthquakes, getEarthquakeHazards } from '../api/client';
+import GeoNodeHazardPipeline from '../components/GIS/GeoNodeHazardPipeline';
 
 const cardStyle = {
   background: '#0a0f14', border: '1px solid rgba(129, 151, 178, 0.22)', borderRadius: 12,
@@ -104,6 +105,14 @@ export default function EarthquakeIntelligencePage() {
 
   return (
     <div style={{ padding: 24, height: 'calc(100vh - 56px)', overflow: 'auto', background: '#030609' }}>
+      {/* ── 24/7 Multi-Hazard Ingestion Pipeline Banner ── */}
+      <GeoNodeHazardPipeline
+        compact={true}
+        activeHazardFilter="Earthquake"
+        title="24/7 Global Seismic & Earthquake Ingestion Pipeline (USGS Live 24h Feed)"
+        onSyncComplete={() => { if (location) loadEarthquakes(location); }}
+      />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 18 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

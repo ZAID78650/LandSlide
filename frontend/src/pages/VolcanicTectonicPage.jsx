@@ -5,7 +5,8 @@ import DataReliabilityScore from '../components/UI/DataReliabilityScore';
 import SimulationBanner from '../components/UI/SimulationBanner';
 import Volcano3DViewer from '../components/GIS/Volcano3DViewer';
 import LocationTerrain3D from '../components/GIS/LocationTerrain3D';
-import { getVolcanoes, getEarthquakes, getTectonicInfo, getVolcanicAnalytics } from '../api/client';
+import { getVolcanoes, getEarthquakes, getTectonicInfo, getVolcanicAnalytics, getVolcanoHazards } from '../api/client';
+import GeoNodeHazardPipeline from '../components/GIS/GeoNodeHazardPipeline';
 
 export default function VolcanicTectonicPage() {
   const [location, setLocation] = useState(null);
@@ -136,10 +137,31 @@ export default function VolcanicTectonicPage() {
     setLoading(true);
     Promise.all([
       getEarthquakes(0, 0, 20000, 4.5).catch(() => ({ data: { earthquakes: [] } })),
-      getVolcanoes(0, 0, 20000, apiKey).catch(() => ({ data: [] }))
-    ]).then(([eqRes, volRes]) => {
+      getVolcanoes(0, 0, 20000, apiKey).catch(() => ({ data: [] })),
+      getVolcanoHazards().catch(() => ({ data: { features: [] } }))
+    ]).then(([eqRes, volRes, hazRes]) => {
       const eqs  = eqRes.data?.earthquakes || eqRes.data || [];
-      const vols = Array.isArray(volRes.data) ? volRes.data : [];
+      const vols = Array.isArray(volRes.data) ? [...volRes.data] : [];
+      if (hazRes.data?.features) {
+        hazRes.data.features.forEach((feat, idx) => {
+          const props = feat.properties || {};
+          const geom = feat.geometry || {};
+          const coords = geom.coordinates || [0, 0];
+          const name = props.event_name || `Volcano-${idx + 1}`;
+          if (!vols.some(v => v.name?.toLowerCase().includes(name.toLowerCase()))) {
+            vols.push({
+              name: name,
+              country: props.country || "Global",
+              lat: geom.type === 'Point' ? coords[1] : 0,
+              lon: geom.type === 'Point' ? coords[0] : 0,
+              elevation_m: 1200,
+              status: props.severity_metric || "Active Eruption Alert",
+              type: "Stratovolcano / Caldera",
+              alert_level: props.alert_level || "HIGH"
+            });
+          }
+        });
+      }
       setEarthquakes(eqs);
       setVolcanoes(vols);
       if (vols.length > 0 && !selectedVolcano) setSelectedVolcano(vols[0]);
@@ -152,10 +174,31 @@ export default function VolcanicTectonicPage() {
     Promise.all([
       getEarthquakes(loc.lat, loc.lon, 1000, 2.0).catch(() => ({ data: { earthquakes: [] } })),
       getVolcanoes(loc.lat, loc.lon, 1500, key).catch(() => ({ data: [] })),
-      getTectonicInfo(loc.lat, loc.lon).catch(() => ({ data: null }))
-    ]).then(([eqRes, volRes, tecRes]) => {
+      getTectonicInfo(loc.lat, loc.lon).catch(() => ({ data: null })),
+      getVolcanoHazards().catch(() => ({ data: { features: [] } }))
+    ]).then(([eqRes, volRes, tecRes, hazRes]) => {
       const eqs  = eqRes.data?.earthquakes || eqRes.data || [];
-      const vols = Array.isArray(volRes.data) ? volRes.data : [];
+      const vols = Array.isArray(volRes.data) ? [...volRes.data] : [];
+      if (hazRes.data?.features) {
+        hazRes.data.features.forEach((feat, idx) => {
+          const props = feat.properties || {};
+          const geom = feat.geometry || {};
+          const coords = geom.coordinates || [0, 0];
+          const name = props.event_name || `Volcano-${idx + 1}`;
+          if (!vols.some(v => v.name?.toLowerCase().includes(name.toLowerCase()))) {
+            vols.push({
+              name: name,
+              country: props.country || "Global",
+              lat: geom.type === 'Point' ? coords[1] : 0,
+              lon: geom.type === 'Point' ? coords[0] : 0,
+              elevation_m: 1200,
+              status: props.severity_metric || "Active Eruption Alert",
+              type: "Stratovolcano / Caldera",
+              alert_level: props.alert_level || "HIGH"
+            });
+          }
+        });
+      }
       setEarthquakes(eqs);
       setVolcanoes(vols);
       setTectonicInfo(tecRes?.data || null);
@@ -212,6 +255,14 @@ export default function VolcanicTectonicPage() {
 
   return (
     <div style={{ padding: '24px', height: 'calc(100vh - 56px)', overflow: 'auto' }}>
+      {/* ── 24/7 Multi-Hazard Ingestion Pipeline Banner ── */}
+      <GeoNodeHazardPipeline
+        compact={true}
+        activeHazardFilter="Volcano"
+        title="24/7 Global Volcanic & Tectonic Pipeline (UN/EU GDACS · Smithsonian GVP)"
+        onSyncComplete={() => { if (location) doFetch(location, apiKey, locationLabel); }}
+      />
+
       <SimulationBanner />
 
       {/* ── Real-time Location Status Bar ── */}

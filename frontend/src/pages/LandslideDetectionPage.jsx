@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, Polyline, Tooltip as LeafletTooltip, useMap } from 'react-leaflet';
 import TerrainMap3D from '../components/Map/TerrainMap3D';
+import GeoNodeHazardPipeline from '../components/GIS/GeoNodeHazardPipeline';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -914,6 +915,13 @@ export default function LandslideDetectionPage() {
 
   return (
     <div style={{ padding: '20px 24px', maxWidth: '1600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+      {/* ── 24/7 Multi-Hazard Ingestion Pipeline Banner ── */}
+      <GeoNodeHazardPipeline
+        compact={true}
+        activeHazardFilter="Landslide"
+        title="24/7 Global Landslide & Slope Stability Ingestion Pipeline (ISRO Atlas · UN/EU GDACS)"
+      />
       
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SYSTEM BANNER & STATE / HIGHWAY REGIONAL FILTER BAR          */}

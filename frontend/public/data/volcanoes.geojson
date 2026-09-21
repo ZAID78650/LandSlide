@@ -1,0 +1,143 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000148",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          105.4233,
+          -6.1009
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Indonesia: Krakatau",
+        "event_name": "Krakatau",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-09-04T21:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000144",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          123.685,
+          13.257
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Philippines: Mayon",
+        "event_name": "Mayon",
+        "country": "Philippines",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-07-16T01:59:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000140",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          127.8783,
+          1.6992
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Indonesia: Dukono",
+        "event_name": "Dukono",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-05-08T09:10:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000138",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          123.132,
+          10.412
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Philippines: Kanlaon",
+        "event_name": "Kanlaon",
+        "country": "Philippines",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-03-15T10:54:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000125",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.922,
+          -8.108
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Indonesia: Semeru",
+        "event_name": "Semeru",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Red Activity",
+        "alert_level": "CRITICAL",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2025-11-19T12:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000122",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          122.775,
+          -8.542
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Indonesia: Lewotobi",
+        "event_name": "Lewotobi",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2025-10-14T22:00:00"
+      }
+    }
+  ]
+}

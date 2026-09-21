@@ -11,9 +11,10 @@ from routers import auth, risk, incidents, alerts, sensors, analytics, models_ai
 from routers import location, weather_live, volcano_tectonic, earthquake, sensor_health
 from routers import landslide
 from routers import correlation, history, reports, system
-from routers import risk_fusion, report
+from routers import risk_fusion, report, hazards
 import seed as seed_module
 from services.ingestion import start_background_ingestion
+from services.hazard_pipeline import start_hazard_ingestion_daemon
 import os
 from fastapi.staticfiles import StaticFiles
 
@@ -28,6 +29,7 @@ app = FastAPI(title="NEXUS-LAND API")
 @app.on_event("startup")
 async def startup_event():
     start_background_ingestion()
+    start_hazard_ingestion_daemon()
 
 
 # CORS config
@@ -82,6 +84,7 @@ app.include_router(reports.router, prefix="/api")
 app.include_router(system.router, prefix="/api")
 app.include_router(risk_fusion.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
+app.include_router(hazards.router, prefix="/api")
 
 @app.get("/")
 def read_root():

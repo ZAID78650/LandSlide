@@ -1,0 +1,443 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001305",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.4,
+          23.8
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Japan, China, Northern Mariana Islands: SAUDEL-26",
+        "event_name": "SAUDEL-26",
+        "country": "Japan, China, Northern Mariana Islands",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-08-18T12:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001297",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6,
+          27.9
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Marshall Islands, Japan, China: DOLPHIN-26",
+        "event_name": "DOLPHIN-26",
+        "country": "Marshall Islands, Japan, China",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-07-27T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001294",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.5,
+          22.9
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "China, Philippines: NOUL-26",
+        "event_name": "NOUL-26",
+        "country": "China, Philippines",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-07-23T06:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001279",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.4,
+          28.7
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Guam, Northern Mariana Islands, Japan, Taiwan, China: BAVI-26",
+        "event_name": "BAVI-26",
+        "country": "Guam, Northern Mariana Islands, Japan, Taiwan, China",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-07-01T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001281",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          107.9,
+          21.6
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Viet Nam, China, Laos: MAYSAK-26",
+        "event_name": "MAYSAK-26",
+        "country": "Viet Nam, China, Laos",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-07-01T18:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001270",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          156.1,
+          28.7
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Northern Mariana Islands, Guam: SINLAKU-26",
+        "event_name": "SINLAKU-26",
+        "country": "Northern Mariana Islands, Guam",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-04-09T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001256",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          41.6,
+          -35.63
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Madagascar, Mozambique: GEZANI-26",
+        "event_name": "GEZANI-26",
+        "country": "Madagascar, Mozambique",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-02-06T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001254",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          54.85,
+          -23.41
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Madagascar: FYTIA-26",
+        "event_name": "FYTIA-26",
+        "country": "Madagascar",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2026-01-29T12:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001238",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.8,
+          10.5
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Sri Lanka, India: DITWAH-25",
+        "event_name": "DITWAH-25",
+        "country": "Sri Lanka, India",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-11-27T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001234",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          128.3,
+          26.3
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Philippines, China, Japan: FUNG-WONG-25",
+        "event_name": "FUNG-WONG-25",
+        "country": "Philippines, China, Japan",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-11-04T06:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001233",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          109.1,
+          13.6
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Viet Nam, Cambodia, Philippines, Laos: KALMAEGI-25",
+        "event_name": "KALMAEGI-25",
+        "country": "Viet Nam, Cambodia, Philippines, Laos",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-11-01T06:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001230",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -60.5,
+          39.0
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Jamaica, Cuba, Bahamas, Bermuda, Haiti, Canada: MELISSA-25",
+        "event_name": "MELISSA-25",
+        "country": "Jamaica, Cuba, Bahamas, Bermuda, Haiti, Canada",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-10-21T15:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001232",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.4,
+          16.9
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "India: MONTHA-25",
+        "event_name": "MONTHA-25",
+        "country": "India",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-10-26T12:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001229",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          108.6,
+          16.0
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Viet Nam, China, Cambodia, Philippines, Laos, Thailand: FENGSHEN-25",
+        "event_name": "FENGSHEN-25",
+        "country": "Viet Nam, China, Cambodia, Philippines, Laos, Thailand",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-10-18T00:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001219",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          108.5,
+          21.9
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "China, Viet Nam, Philippines: MATMO-25",
+        "event_name": "MATMO-25",
+        "country": "China, Viet Nam, Philippines",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-10-01T06:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001218",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.7,
+          19.5
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "India: ONE-25",
+        "event_name": "ONE-25",
+        "country": "India",
+        "severity_metric": "Alert Level: Orange | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "HIGH",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-10-01T06:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001214",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.2,
+          18.2
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Viet Nam, Philippines, Laos: BUALOI-25",
+        "event_name": "BUALOI-25",
+        "country": "Viet Nam, Philippines, Laos",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-09-23T12:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-TC-1001211",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          111.1,
+          21.8
+        ]
+      },
+      "properties": {
+        "hazard_type": "Cyclone / Tropical Cyclone",
+        "category": "ATMOSPHERIC",
+        "location_name": "Philippines, China: RAGASA-25",
+        "event_name": "RAGASA-25",
+        "country": "Philippines, China",
+        "severity_metric": "Alert Level: Red | Wind ~120 km/h",
+        "wind_speed_kmh": 120,
+        "pressure_hpa": 985,
+        "alert_level": "CRITICAL",
+        "source": "UN/EU Global Disaster Alert and Coordination System (GDACS)",
+        "timestamp": "2025-09-18T12:00:00"
+      }
+    }
+  ]
+}

@@ -190,3 +190,16 @@ export const downloadReport = (reportId, format) => {
   const token = localStorage.getItem('access_token');
   window.open(`http://localhost:8000/api/report/${reportId}/download/${format}?token=${token}`, '_blank');
 };
+
+// ─── 24/7 Multi-Hazard Ingestion Pipeline & GeoNode APIs ────────────────────
+export const getLiveHazards = () => api.get('/hazards/live');
+export const getHazardStats = () => api.get('/hazards/stats');
+export const syncHazardsPipeline = () => api.post('/hazards/sync');
+export const getEarthquakeHazards = (minMag = 1.0) => api.get('/hazards/earthquakes', { params: { min_mag: minMag } });
+export const getCycloneHazards = () => api.get('/hazards/cyclones');
+export const getVolcanoHazards = () => api.get('/hazards/volcanoes');
+export const getLandslideHazards = () => api.get('/hazards/landslides');
+export const getRainfallHazards = () => api.get('/hazards/rainfall');
+export const getHazardAnalytics = () => api.get('/hazards/analytics');
+export const getGeoNodeLayers = () => api.get('/hazards/geonode/layers');
+export const triggerGeoNodeUpdateLayers = () => api.post('/hazards/geonode/updatelayers');
