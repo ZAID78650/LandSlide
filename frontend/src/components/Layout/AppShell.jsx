@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import PageSkeleton from '../UI/PageSkeleton';
+import LiveAnalyticsDashboard from '../UI/LiveAnalyticsDashboard';
 
 export default function AppShell() {
   return (
@@ -14,7 +15,10 @@ export default function AppShell() {
         <div className="page-scroll">
           <ErrorBoundary>
             <Suspense fallback={<PageSkeleton />}>
-              <Outlet />
+              <div className="route-stage">
+                <LiveAnalyticsDashboard />
+                <Outlet />
+              </div>
             </Suspense>
           </ErrorBoundary>
         </div>
