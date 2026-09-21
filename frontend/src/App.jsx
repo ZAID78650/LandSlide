@@ -1,42 +1,43 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppShell from './components/Layout/AppShell';
 import { LoadingScreen } from './components/UI';
 import useStore from './store/useStore';
 import { getMe } from './api/client';
+import lazyWithRetry from './utils/lazyWithRetry';
 
 // Auth pages (eager)
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
-// Lazy-loaded pages for instant startup and zero bundle blocking
-const GlobalCommandCenter = lazy(() => import('./pages/GlobalCommandCenter'));
-const GlobeExplorer = lazy(() => import('./pages/GlobeExplorer'));
-const CommandCenter = lazy(() => import('./pages/CommandCenter'));
-const AlertCenter = lazy(() => import('./pages/AlertCenter'));
-const IncidentsPage = lazy(() => import('./pages/IncidentsPage'));
-const IncidentDetail = lazy(() => import('./pages/IncidentDetail'));
-const ForecastsAnalytics = lazy(() => import('./pages/ForecastsAnalytics'));
-const AICopilotPage = lazy(() => import('./pages/AICopilotPage'));
-const ModelOpsPage = lazy(() => import('./pages/ModelOpsPage'));
-const DataSourcesPage = lazy(() => import('./pages/DataSourcesPage'));
-const SystemHealthPage = lazy(() => import('./pages/SystemHealthPage'));
-const AuditPage = lazy(() => import('./pages/AuditPage'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const ResponseCenterPage = lazy(() => import('./pages/ResponseCenterPage'));
-const RiskIntelligencePage = lazy(() => import('./pages/RiskIntelligencePage'));
-const DatasetsPage = lazy(() => import('./pages/DatasetsPage'));
-const LocationIntelligencePage = lazy(() => import('./pages/LocationIntelligencePage'));
-const RainfallAnalysisPage = lazy(() => import('./pages/RainfallAnalysisPage'));
-const CycloneTrackerPage = lazy(() => import('./pages/CycloneTrackerPage'));
-const VolcanicTectonicPage = lazy(() => import('./pages/VolcanicTectonicPage'));
-const LandslideDetectionPage = lazy(() => import('./pages/LandslideDetectionPage'));
-const EarthquakeIntelligencePage = lazy(() => import('./pages/EarthquakeIntelligencePage'));
-const SensorPricingPage = lazy(() => import('./pages/SensorPricingPage'));
-const SimulationModePage = lazy(() => import('./pages/SimulationModePage'));
-const ReportGeneratorPage = lazy(() => import('./pages/ReportGeneratorPage'));
-const VirtualSensorPlatform = lazy(() => import('./pages/VirtualSensorPlatform'));
+// Lazy-loaded pages with automatic retry and cache recovery across all tabs
+const GlobalCommandCenter = lazyWithRetry(() => import('./pages/GlobalCommandCenter'));
+const GlobeExplorer = lazyWithRetry(() => import('./pages/GlobeExplorer'));
+const CommandCenter = lazyWithRetry(() => import('./pages/CommandCenter'));
+const AlertCenter = lazyWithRetry(() => import('./pages/AlertCenter'));
+const IncidentsPage = lazyWithRetry(() => import('./pages/IncidentsPage'));
+const IncidentDetail = lazyWithRetry(() => import('./pages/IncidentDetail'));
+const ForecastsAnalytics = lazyWithRetry(() => import('./pages/ForecastsAnalytics'));
+const AICopilotPage = lazyWithRetry(() => import('./pages/AICopilotPage'));
+const ModelOpsPage = lazyWithRetry(() => import('./pages/ModelOpsPage'));
+const DataSourcesPage = lazyWithRetry(() => import('./pages/DataSourcesPage'));
+const SystemHealthPage = lazyWithRetry(() => import('./pages/SystemHealthPage'));
+const AuditPage = lazyWithRetry(() => import('./pages/AuditPage'));
+const AdminPage = lazyWithRetry(() => import('./pages/AdminPage'));
+const ResponseCenterPage = lazyWithRetry(() => import('./pages/ResponseCenterPage'));
+const RiskIntelligencePage = lazyWithRetry(() => import('./pages/RiskIntelligencePage'));
+const DatasetsPage = lazyWithRetry(() => import('./pages/DatasetsPage'));
+const LocationIntelligencePage = lazyWithRetry(() => import('./pages/LocationIntelligencePage'));
+const RainfallAnalysisPage = lazyWithRetry(() => import('./pages/RainfallAnalysisPage'));
+const CycloneTrackerPage = lazyWithRetry(() => import('./pages/CycloneTrackerPage'));
+const VolcanicTectonicPage = lazyWithRetry(() => import('./pages/VolcanicTectonicPage'));
+const LandslideDetectionPage = lazyWithRetry(() => import('./pages/LandslideDetectionPage'));
+const EarthquakeIntelligencePage = lazyWithRetry(() => import('./pages/EarthquakeIntelligencePage'));
+const SensorPricingPage = lazyWithRetry(() => import('./pages/SensorPricingPage'));
+const SimulationModePage = lazyWithRetry(() => import('./pages/SimulationModePage'));
+const ReportGeneratorPage = lazyWithRetry(() => import('./pages/ReportGeneratorPage'));
+const VirtualSensorPlatform = lazyWithRetry(() => import('./pages/VirtualSensorPlatform'));
 
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import GlobalAlertSystem from './components/UI/GlobalAlertSystem';
