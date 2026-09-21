@@ -10,6 +10,27 @@ const SCAN_STAGES = [
   'Analysis complete. High-risk zones & contour lines demarcated.',
 ];
 
+// Self-contained fallback for geospatial datasets. It intentionally uses a
+// data URI rather than a public-file URL so the preview remains visible even
+// when the Vite static-file server or a remote image service is unavailable.
+const GEO_CONTEXT_IMAGE = `data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6bb4d5"/><stop offset="1" stop-color="#d8eef0"/></linearGradient>
+      <linearGradient id="slope" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7a9a62"/><stop offset="1" stop-color="#243a2d"/></linearGradient>
+      <filter id="shade"><feGaussianBlur stdDeviation="14"/></filter>
+    </defs>
+    <rect width="1200" height="800" fill="url(#sky)"/>
+    <path d="M0 340L160 175l120 135 155-205 150 220 132-145 165 150 123-95 175 175v290H0z" fill="#566d6d"/>
+    <path d="M0 430l210-135 178 106 210-155 172 167 190-108 240 132v363H0z" fill="url(#slope)"/>
+    <path d="M-30 600c180-150 310-70 405-144 120-93 235-68 342 13 104 79 256 21 510 174" fill="none" stroke="#c8e7e6" stroke-width="22" opacity=".68" filter="url(#shade)"/>
+    <path d="M-30 600c180-150 310-70 405-144 120-93 235-68 342 13 104 79 256 21 510 174" fill="none" stroke="#dffdf8" stroke-width="7" opacity=".9"/>
+    <g fill="none" stroke="#d8f9ef" stroke-width="2" opacity=".34"><path d="M0 510q190-80 360 5t390-15 450 18"/><path d="M0 560q180-72 350 8t400-20 450 22"/><path d="M0 650q200-88 360 5t380-20 460 25"/><path d="M0 715q185-67 360 4t390-18 450 20"/></g>
+    <rect x="28" y="28" width="455" height="66" rx="8" fill="#061019" fill-opacity=".86" stroke="#00e5ff"/>
+    <text x="48" y="57" fill="#00e5ff" font-family="monospace" font-size="20" font-weight="700">GEO-SPATIAL CONTEXT PREVIEW</text>
+    <text x="48" y="80" fill="#dce9ee" font-family="monospace" font-size="14">TERRAIN / HYDROLOGY BASEMAP</text>
+  </svg>`)} `;
+
 export default function DatasetsPage() {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -351,7 +372,7 @@ export default function DatasetsPage() {
         // decoded by an <img> or CSS background, so show a bundled geospatial
         // context image instead of issuing a broken image request.
         const isRasterDataset = /\.(png|jpe?g|webp|gif|bmp|tiff?)$/i.test(viewingFile);
-        const contextImageUrl = '/sensors/terrain_multispectral_ndvi.jpg';
+        const contextImageUrl = GEO_CONTEXT_IMAGE;
         let imageUrl = currentPair?.image_url;
         let maskUrl = currentPair?.mask_url;
 
