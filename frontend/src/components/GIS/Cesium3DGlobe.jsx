@@ -92,9 +92,10 @@ export default function Cesium3DGlobe({
     if (viewerRef.current && !viewerRef.current.isDestroyed()) return;
     containerRef.current.innerHTML = '';
 
-    // Primary High-Resolution Free Basemap (Default: ESRI World Imagery Photo-Realistic Satellite)
+    // Primary High-Resolution Free Basemap (Default: ESRI World Imagery Satellite)
     const initialImagery = new UrlTemplateImageryProvider({
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      subdomains: ['a','b','c'],
       maximumLevel: 19
     });
     initialImagery.errorEvent.addEventListener(() => {});
@@ -151,23 +152,23 @@ export default function Cesium3DGlobe({
       } catch (e) {}
     }
 
-    // Professional Atmospheric Scattering & Depth
-    viewer.scene.globe.baseColor = Color.fromCssColorString('#0a1322');
+    // Disable Advanced Atmospheric Scattering & HDR for WebGL stability on all devices
+    try {
+      viewer.scene.highDynamicRange = false;
+    } catch (e) {}
+
+    viewer.scene.globe.baseColor = Color.fromCssColorString('#103b60');
     viewer.scene.globe.depthTestAgainstTerrain = false;
     viewer.scene.globe.enableLighting = false;
-    viewer.scene.globe.showGroundAtmosphere = true;
-    viewer.scene.globe.atmosphereLightIntensity = 2.8;
+    viewer.scene.globe.showGroundAtmosphere = false;
     viewer.scene.backgroundColor = Color.fromCssColorString('#020408');
 
     if (viewer.scene.skyAtmosphere) {
-      viewer.scene.skyAtmosphere.show = true;
-      viewer.scene.skyAtmosphere.brightnessShift = 0.08;
-      viewer.scene.skyAtmosphere.saturationShift = 0.15;
+      viewer.scene.skyAtmosphere.show = false;
     }
 
     if (viewer.scene.fog) {
-      viewer.scene.fog.enabled = true;
-      viewer.scene.fog.density = 0.00015;
+      viewer.scene.fog.enabled = false;
     }
 
     // 12 Dedicated CustomDataSources for instantaneous layer toggles
@@ -379,28 +380,36 @@ export default function Cesium3DGlobe({
     let referenceProvider = null;
 
     if (basemap === 'dark') {
-      // CartoDB Dark Matter Base (Sleek dark cyber map)
+      // Free ESRI Dark Canvas Base + Reference Labels
       provider = new UrlTemplateImageryProvider({
-        url: 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: ['a','b','c','d'],
+        maximumLevel: 19
+      });
+      referenceProvider = new UrlTemplateImageryProvider({
+        url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
         subdomains: ['a','b','c','d'],
         maximumLevel: 19
       });
     } else if (basemap === 'osm' || basemap === 'street') {
-      // Free ArcGIS World Street Map (Full street navigation, city labels, borders)
+      // Free ArcGIS World Street Map (Full street navigation, city labels, borders - 100% Free, Never Blocked)
       provider = new UrlTemplateImageryProvider({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: ['a','b','c'],
         maximumLevel: 19
       });
     } else if (basemap === 'topo') {
       // Free ESRI World Topo Map
       provider = new UrlTemplateImageryProvider({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-        maximumLevel: 19
+        url: 'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+        subdomains: ['a','b','c'],
+        maximumLevel: 17
       });
     } else {
       // Default: Free ESRI World Imagery (High-Res Photo-Realistic Satellite)
       provider = new UrlTemplateImageryProvider({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: ['a','b','c'],
         maximumLevel: 19
       });
     }
@@ -666,53 +675,7 @@ export default function Cesium3DGlobe({
 
     pinEntity._disasterData = riskCircleEntity._disasterData;
 
-    // B5. Active 3D Scanning Radar Waves (when scanning sequence is active)
-    if (isScanning) {
-      let cachedScanRadius = radiusMeters * 0.2;
-      let cachedScanRadius2 = radiusMeters * 0.1;
-      let lastScanCalc = 0;
-      const scanRadiusProperty = new CallbackProperty(() => {
-        const now = performance.now();
-        if (now !== lastScanCalc) {
-          lastScanCalc = now;
-          cachedScanRadius = (radiusMeters * 0.2) + ((now / 1000 * 4500) % (radiusMeters * 2.5));
-          cachedScanRadius2 = (radiusMeters * 0.1) + (((now + 400) / 1000 * 4500) % (radiusMeters * 2.5));
-        }
-        return cachedScanRadius;
-      }, false);
-
-      const scanRadiusProperty2 = new CallbackProperty(() => cachedScanRadius2, false);
-
-      // Primary cyan pulse wave on 3D globe
-      pinDs.entities.add({
-        position: Cartesian3.fromDegrees(lon, lat),
-        ellipse: {
-          semiMinorAxis: scanRadiusProperty,
-          semiMajorAxis: scanRadiusProperty,
-          material: Color.fromCssColorString('#00e5ff').withAlpha(0.35),
-          outline: true,
-          outlineColor: Color.fromCssColorString('#00e5ff'),
-          outlineWidth: 3.0,
-          height: 15
-        }
-      });
-
-      // Secondary red pulse wave on 3D globe
-      pinDs.entities.add({
-        position: Cartesian3.fromDegrees(lon, lat),
-        ellipse: {
-          semiMinorAxis: scanRadiusProperty2,
-          semiMajorAxis: scanRadiusProperty2,
-          material: Color.fromCssColorString('#ff3b5c').withAlpha(0.2),
-          outline: true,
-          outlineColor: Color.fromCssColorString('#ff3b5c'),
-          outlineWidth: 2.0,
-          height: 20
-        }
-      });
-    }
-
-  }, [targetLat, targetLon, riskScore, riskLevel, riskRadius, isGps, gpsAccuracy, localityLabel, isScanning]);
+  }, [targetLat, targetLon, riskScore, riskLevel, riskRadius, isGps, gpsAccuracy, localityLabel]);
 
   // 7. Live GPS Movement Breadcrumb Trail
   useEffect(() => {
