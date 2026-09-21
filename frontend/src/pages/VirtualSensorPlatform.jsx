@@ -463,8 +463,39 @@ export default function VirtualSensorPlatform() {
   const wsRef = useRef(null);
 
   const handleInjectValue = (sensorId, val) => {
+    if (val === null || val === undefined) {
+      setInjectedOverrides(prev => {
+        const next = { ...prev };
+        delete next[sensorId];
+        return next;
+      });
+      setSelectedSensor(prev => {
+        if (!prev || prev.id !== sensorId) return prev;
+        const live = sensorReadings[sensorId];
+        const lastLiveVal = (live && live.length > 0) ? live[live.length - 1].v : prev.last_value;
+        return { ...prev, last_value: lastLiveVal };
+      });
+      setActiveDispatchNotification(`[DRILL REVERTED] Sensor #${sensorId} returned to live physical telemetry stream.`);
+      setTimeout(() => setActiveDispatchNotification(null), 4000);
+      return;
+    }
+
     setInjectedOverrides(prev => ({ ...prev, [sensorId]: val }));
     setSelectedSensor(prev => prev && prev.id === sensorId ? { ...prev, last_value: val } : prev);
+
+    const sObj = rawDisplaySensors.find(s => s.id === sensorId) || selectedSensor;
+    const meta = SENSOR_TYPES.find(m => m.id === sObj?.sensor_type) || {};
+    const crit = meta.thresholds?.critical ? meta.thresholds.critical[0] : 80;
+    const warn = meta.thresholds?.warning ? meta.thresholds.warning[0] : 50;
+
+    if (val >= crit) {
+      triggerDispatch('NDRF & BRO Taskforce', `OPERATIONAL DRILL: Critical breach injected on ${sObj?.name || sObj?.sensor_id || 'Sensor'} (${val.toFixed(1)} ${meta.unit || ''}). Emergency SOP activated.`, 'CRITICAL');
+    } else if (val >= warn) {
+      triggerDispatch('DDMA Highway Patrol', `OPERATIONAL DRILL: Warning threshold reached on ${sObj?.name || sObj?.sensor_id || 'Sensor'} (${val.toFixed(1)} ${meta.unit || ''}). Advisory dispatched.`, 'WARNING');
+    } else {
+      setActiveDispatchNotification(`[DRILL INJECTION] Sensor ${sObj?.name || sObj?.sensor_id || 'Sensor'} override set to nominal ${val.toFixed(1)} ${meta.unit || ''}.`);
+      setTimeout(() => setActiveDispatchNotification(null), 4000);
+    }
   };
 
   const triggerDispatch = (agency, action, level = 'HIGH') => {
@@ -2099,6 +2130,14 @@ export default function VirtualSensorPlatform() {
           location={location}
           onClose={() => setSelectedSensor(null)}
           onInjectValue={handleInjectValue}
+          isOverridden={injectedOverrides[selectedSensor.id] !== undefined}
+          injectedValue={injectedOverrides[selectedSensor.id]}
+          liveValue={(() => {
+            const h = sensorReadings[selectedSensor.id];
+            return (h && h.length > 0) ? h[h.length - 1].v : selectedSensor.last_value;
+          })()}
+          onResetOverride={() => handleInjectValue(selectedSensor.id, null)}
+          onTriggerDispatch={triggerDispatch}
         />
       )}
     </div>
