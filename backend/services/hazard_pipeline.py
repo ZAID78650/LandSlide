@@ -830,77 +830,151 @@ class HazardPipeline:
         """
         now_iso = self.last_sync_timestamp or datetime.now(timezone.utc).isoformat()
         return {
-            "count": 5,
-            "geonode_version": "GeoNode 4.2+ Compatible (RFC 7946 GeoJSON)",
+            "count": 6,
+            "geonode_version": "GeoNode 4.2+ Compatible (RFC 7946 GeoJSON / OGC WFS 2.0.0 / WMS 1.3.0)",
             "github_repository": "https://github.com/GeoNode/geonode",
             "layers": [
                 {
                     "name": "geonode:live_global_hazards",
                     "title": "24/7 Global Multi-Hazard Consolidated Layer",
-                    "abstract": "Consolidated live vectors for Earthquakes, Cyclones, Volcanoes, Landslides, and Rainfall.",
+                    "abstract": "Consolidated live vectors for Earthquakes, Cyclones, Volcanoes, Landslides, and Rainfall normalized from USGS, GDACS, and Open-Meteo.",
                     "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
                     "bbox": [-180.0, -90.0, 180.0, 90.0],
+                    "geometry_type": "Point / LineString / Polygon",
                     "feature_count": self.sync_stats["total_hazards"],
-                    "format": "GeoJSON",
+                    "format": "GeoJSON / OGC WFS 2.0",
                     "url": "/api/hazards/live",
                     "download_url": "/api/hazards/live_global_hazards.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/live",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:live_global_hazards",
                     "update_interval_sec": 900,
-                    "last_updated": now_iso
-                },
-                {
-                    "name": "geonode:earthquake_vectors",
-                    "title": "USGS Live 24-Hour Seismic Feed",
-                    "abstract": "Global earthquake events M1.0+ with hypocenter depth and magnitude from USGS.",
-                    "srs": "EPSG:4326",
-                    "feature_count": self.sync_stats["earthquakes"],
-                    "format": "GeoJSON",
-                    "url": "/api/hazards/earthquakes",
-                    "download_url": "/api/hazards/earthquakes.geojson",
-                    "last_updated": now_iso
-                },
-                {
-                    "name": "geonode:cyclone_tracks",
-                    "title": "GDACS Severe Storms & Tropical Cyclones",
-                    "abstract": "Tropical cyclone eyes, wind speed contours, and storm tracks from GDACS/IMD/JMA.",
-                    "srs": "EPSG:4326",
-                    "feature_count": self.sync_stats["cyclones"],
-                    "format": "GeoJSON",
-                    "url": "/api/hazards/cyclones",
-                    "download_url": "/api/hazards/cyclones.geojson",
-                    "last_updated": now_iso
-                },
-                {
-                    "name": "geonode:volcanic_alerts",
-                    "title": "Smithsonian & GDACS Volcanic Eruption Alerts",
-                    "abstract": "Active volcanic calderas, aviation color codes, and ash plume dispersion radii.",
-                    "srs": "EPSG:4326",
-                    "feature_count": self.sync_stats["volcanoes"],
-                    "format": "GeoJSON",
-                    "url": "/api/hazards/volcanoes",
-                    "download_url": "/api/hazards/volcanoes.geojson",
-                    "last_updated": now_iso
-                },
-                {
-                    "name": "geonode:landslide_scarps",
-                    "title": "ISRO & GDACS Landslide Geotechnical Scarps",
-                    "abstract": "High-risk slope scarps, Factor of Safety limits, and pore-water pressure saturation zones.",
-                    "srs": "EPSG:4326",
-                    "feature_count": self.sync_stats["landslides"],
-                    "format": "GeoJSON",
-                    "url": "/api/hazards/landslides",
-                    "download_url": "/api/hazards/landslides.geojson",
-                    "last_updated": now_iso
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "hazard_id", "type": "String (UUID)", "description": "Unique global vector identifier", "example": "USGS-EQ-ak2026"},
+                        {"field": "hazard_type", "type": "Enum", "description": "Earthquake | Cyclone | Volcano | Landslide | Active Rainfall", "example": "Earthquake"},
+                        {"field": "alert_level", "type": "Enum", "description": "Categorical severity: CRITICAL | HIGH | MODERATE | LOW", "example": "HIGH"},
+                        {"field": "location_name", "type": "String", "description": "Geographical location or nearest populated hub", "example": "Nanwalek, Alaska"},
+                        {"field": "value", "type": "Float", "description": "Magnitude / precipitation / factor of safety index", "example": "4.8"},
+                        {"field": "unit", "type": "String", "description": "Metric unit (mag, mm, FoS)", "example": "mag"},
+                        {"field": "source", "type": "String", "description": "Origin provider (USGS / GDACS / Open-Meteo)", "example": "USGS"},
+                        {"field": "timestamp", "type": "ISO 8601", "description": "Observation or detection timestamp in UTC", "example": "2026-09-21T15:20:00Z"}
+                    ]
                 },
                 {
                     "name": "geonode:ner_landslide_corridors",
                     "title": "North Eastern Region (NER) Lifeline Corridors & Slope Monitoring",
                     "abstract": "Real-time AI geotechnical early warning across the 8 NER states, NH-10, NH-29, NH-27, and vulnerable hill cutting sectors.",
                     "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
+                    "bbox": [88.0, 21.0, 97.5, 29.5],
+                    "geometry_type": "Point / LineString",
                     "feature_count": 8,
-                    "format": "GeoJSON",
+                    "format": "GeoJSON / OGC WFS 2.0",
                     "url": "/api/hazards/ner",
-                    "download_url": "/api/hazards/live_global_hazards.geojson",
-                    "last_updated": now_iso
+                    "download_url": "/api/hazards/ner_corridors.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/ner",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:ner_landslide_corridors",
+                    "update_interval_sec": 900,
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "state", "type": "String", "description": "NER State name (Sikkim, Assam, Nagaland, etc.)", "example": "Sikkim"},
+                        {"field": "capital", "type": "String", "description": "Administrative headquarters / capital city", "example": "Gangtok"},
+                        {"field": "risk_score", "type": "Integer (0-100)", "description": "Composite AI multi-factor landslide hazard index", "example": "92"},
+                        {"field": "factor_of_safety", "type": "Float", "description": "Slope stability ratio (FoS < 1 indicates active failure)", "example": "0.74"},
+                        {"field": "insar_creep_rate_mm_wk", "type": "Float", "description": "Satellite radar downslope surface creep rate (mm/week)", "example": "28.4"},
+                        {"field": "pore_water_ru", "type": "Float", "description": "Pore water pressure ratio in shear zone", "example": "0.72"},
+                        {"field": "active_rainfall_24h_mm", "type": "Float", "description": "24-hour cumulative rainfall from Open-Meteo", "example": "118.4"},
+                        {"field": "primary_threat", "type": "String", "description": "Critical geotechnical failure mode description", "example": "Teesta River Debris Flow"}
+                    ]
+                },
+                {
+                    "name": "geonode:earthquake_vectors",
+                    "title": "USGS Live 24-Hour Seismic Feed",
+                    "abstract": "Global earthquake events M1.0+ with hypocenter depth and magnitude from USGS.",
+                    "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
+                    "bbox": [-180.0, -90.0, 180.0, 90.0],
+                    "geometry_type": "Point",
+                    "feature_count": self.sync_stats["earthquakes"],
+                    "format": "GeoJSON / OGC WFS 2.0",
+                    "url": "/api/hazards/earthquakes",
+                    "download_url": "/api/hazards/earthquakes.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/earthquakes",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:earthquake_vectors",
+                    "update_interval_sec": 900,
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "magnitude", "type": "Float", "description": "Moment magnitude scale (Mw / Ml)", "example": "5.6"},
+                        {"field": "depth_km", "type": "Float", "description": "Hypocenter focal depth below surface (km)", "example": "10.0"},
+                        {"field": "location_name", "type": "String", "description": "USGS seismic geographic descriptor", "example": "Near Kokrajhar, Assam"}
+                    ]
+                },
+                {
+                    "name": "geonode:cyclone_tracks",
+                    "title": "GDACS Severe Storms & Tropical Cyclones",
+                    "abstract": "Tropical cyclone eyes, wind speed contours, and storm tracks from GDACS/IMD/JMA.",
+                    "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
+                    "bbox": [-180.0, -90.0, 180.0, 90.0],
+                    "geometry_type": "Point / LineString",
+                    "feature_count": self.sync_stats["cyclones"],
+                    "format": "GeoJSON / OGC WFS 2.0",
+                    "url": "/api/hazards/cyclones",
+                    "download_url": "/api/hazards/cyclones.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/cyclones",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:cyclone_tracks",
+                    "update_interval_sec": 900,
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "storm_name", "type": "String", "description": "WMO / GDACS designated storm identifier", "example": "REMAL"},
+                        {"field": "wind_speed_kmh", "type": "Float", "description": "Maximum sustained surface wind velocity (km/h)", "example": "120"},
+                        {"field": "central_pressure_hpa", "type": "Float", "description": "Barometric pressure at eye (hPa)", "example": "970"}
+                    ]
+                },
+                {
+                    "name": "geonode:volcanic_alerts",
+                    "title": "Smithsonian & GDACS Volcanic Eruption Alerts",
+                    "abstract": "Active volcanic calderas, aviation color codes, and ash plume dispersion radii.",
+                    "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
+                    "bbox": [-180.0, -90.0, 180.0, 90.0],
+                    "geometry_type": "Point",
+                    "feature_count": self.sync_stats["volcanoes"],
+                    "format": "GeoJSON / OGC WFS 2.0",
+                    "url": "/api/hazards/volcanoes",
+                    "download_url": "/api/hazards/volcanoes.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/volcanoes",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:volcanic_alerts",
+                    "update_interval_sec": 900,
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "volcano_name", "type": "String", "description": "Smithsonian Global Volcanism Program Name", "example": "Barren Island"},
+                        {"field": "alert_level", "type": "String", "description": "ICAO Aviation Color Code (RED, ORANGE, YELLOW)", "example": "ORANGE"},
+                        {"field": "elevation_m", "type": "Integer", "description": "Summits elevation above sea level (meters)", "example": "354"}
+                    ]
+                },
+                {
+                    "name": "geonode:landslide_scarps",
+                    "title": "ISRO & GDACS Landslide Geotechnical Scarps",
+                    "abstract": "High-risk slope scarps, Factor of Safety limits, and pore-water pressure saturation zones.",
+                    "srs": "EPSG:4326",
+                    "crs_supported": ["EPSG:4326", "EPSG:3857"],
+                    "bbox": [68.0, 8.0, 97.5, 37.0],
+                    "geometry_type": "Point / Polygon",
+                    "feature_count": self.sync_stats["landslides"],
+                    "format": "GeoJSON / OGC WFS 2.0",
+                    "url": "/api/hazards/landslides",
+                    "download_url": "/api/hazards/landslides.geojson",
+                    "wfs_url": "http://localhost:8000/api/hazards/landslides",
+                    "wms_url": "http://localhost:8000/api/hazards/geonode/wms?layers=geonode:landslide_scarps",
+                    "update_interval_sec": 900,
+                    "last_updated": now_iso,
+                    "schema_attributes": [
+                        {"field": "scarp_zone", "type": "String", "description": "Identified unstable slope or highway corridor", "example": "NH-10 Km 18"},
+                        {"field": "factor_of_safety", "type": "Float", "description": "Limit equilibrium slope stability factor (FoS)", "example": "0.78"},
+                        {"field": "failure_mode", "type": "String", "description": "Debris flow, translational slide, or rock fall", "example": "Debris Flow"}
+                    ]
                 }
             ]
         }

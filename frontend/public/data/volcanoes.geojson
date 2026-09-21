@@ -9,90 +9,134 @@
   "features": [
     {
       "type": "Feature",
-      "id": "VO-LIVE-01",
+      "id": "GDACS-VO-1000148",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          105.423,
-          -6.102
+          105.4233,
+          -6.1009
         ]
       },
       "properties": {
         "hazard_type": "Volcano",
         "category": "VOLCANIC",
-        "location_name": "Indonesia: Anak Krakatau",
-        "event_name": "Anak Krakatau Caldera",
+        "location_name": "Indonesia: Krakatau",
+        "event_name": "Krakatau",
         "country": "Indonesia",
-        "severity_metric": "Alert Level: Orange (Strombolian Explosions)",
+        "severity_metric": "Alert Level: Orange Activity",
         "alert_level": "HIGH",
-        "source": "PVMBG Indonesia / Smithsonian GVP",
-        "timestamp": "2026-09-21T15:12:47.133439+00:00"
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-09-04T21:00:00"
       }
     },
     {
       "type": "Feature",
-      "id": "VO-LIVE-02",
+      "id": "GDACS-VO-1000144",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          15.004,
-          37.751
+          123.685,
+          13.257
         ]
       },
       "properties": {
         "hazard_type": "Volcano",
         "category": "VOLCANIC",
-        "location_name": "Italy: Mount Etna",
-        "event_name": "Mount Etna Crater",
-        "country": "Italy",
-        "severity_metric": "Alert Level: Orange (Lava Fountaining)",
+        "location_name": "Philippines: Mayon",
+        "event_name": "Mayon",
+        "country": "Philippines",
+        "severity_metric": "Alert Level: Orange Activity",
         "alert_level": "HIGH",
-        "source": "INGV Catania / Smithsonian GVP",
-        "timestamp": "2026-09-21T15:12:47.133459+00:00"
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-07-16T01:59:00"
       }
     },
     {
       "type": "Feature",
-      "id": "VO-LIVE-03",
+      "id": "GDACS-VO-1000140",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -22.06,
-          63.88
+          127.8783,
+          1.6992
         ]
       },
       "properties": {
         "hazard_type": "Volcano",
         "category": "VOLCANIC",
-        "location_name": "Iceland: Reykjanes Sundhnukagigar",
-        "event_name": "Sundhnukur Fissure",
-        "country": "Iceland",
-        "severity_metric": "Alert Level: Red (Active Effusive Fissure)",
+        "location_name": "Indonesia: Dukono",
+        "event_name": "Dukono",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-05-08T09:10:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000138",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          123.132,
+          10.412
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Philippines: Kanlaon",
+        "event_name": "Kanlaon",
+        "country": "Philippines",
+        "severity_metric": "Alert Level: Orange Activity",
+        "alert_level": "HIGH",
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2026-03-15T10:54:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GDACS-VO-1000125",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.922,
+          -8.108
+        ]
+      },
+      "properties": {
+        "hazard_type": "Volcano",
+        "category": "VOLCANIC",
+        "location_name": "Indonesia: Semeru",
+        "event_name": "Semeru",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Red Activity",
         "alert_level": "CRITICAL",
-        "source": "Icelandic Met Office (IMO)",
-        "timestamp": "2026-09-21T15:12:47.133463+00:00"
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2025-11-19T12:00:00"
       }
     },
     {
       "type": "Feature",
-      "id": "VO-LIVE-04",
+      "id": "GDACS-VO-1000122",
       "geometry": {
         "type": "Point",
         "coordinates": [
-          130.557,
-          31.593
+          122.775,
+          -8.542
         ]
       },
       "properties": {
         "hazard_type": "Volcano",
         "category": "VOLCANIC",
-        "location_name": "Japan: Sakurajima",
-        "event_name": "Sakurajima Minamidake",
-        "country": "Japan",
-        "severity_metric": "Alert Level: Orange (Ash Plume 2.4km)",
+        "location_name": "Indonesia: Lewotobi",
+        "event_name": "Lewotobi",
+        "country": "Indonesia",
+        "severity_metric": "Alert Level: Orange Activity",
         "alert_level": "HIGH",
-        "source": "Japan Meteorological Agency (JMA)",
-        "timestamp": "2026-09-21T15:12:47.133482+00:00"
+        "source": "UN/EU GDACS / Smithsonian GVP",
+        "timestamp": "2025-10-14T22:00:00"
       }
     }
   ]
