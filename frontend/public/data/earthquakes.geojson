@@ -9,6 +9,30 @@
   "features": [
     {
       "type": "Feature",
+      "id": "USGS-EQ-aka2026ssxqjv",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -152.25,
+          59.091,
+          71.2
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "35 km SSW of Nanwalek, Alaska",
+        "severity_metric": "Magnitude 1.7",
+        "magnitude": 1.7,
+        "depth_km": 71.2,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/aka2026ssxqjv",
+        "timestamp": "2026-09-21T14:56:01.723000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
       "id": "USGS-EQ-tx2026spwoqf",
       "geometry": {
         "type": "Point",
@@ -2149,22 +2173,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -116.891666666667,
-          33.8878333333333,
-          15.18
+          -116.890333333333,
+          33.8845,
+          14.26
         ]
       },
       "properties": {
         "hazard_type": "Earthquake",
         "category": "SEISMIC",
-        "location_name": "4 km SSW of Banning, CA",
-        "severity_metric": "Magnitude 0.9",
-        "magnitude": 0.89,
-        "depth_km": 15.18,
+        "location_name": "5 km SSW of Banning, CA",
+        "severity_metric": "Magnitude 0.5",
+        "magnitude": 0.45,
+        "depth_km": 14.26,
         "alert_level": "LOW",
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335863",
-        "timestamp": "2026-09-21T05:23:59.310000+00:00"
+        "timestamp": "2026-09-21T05:23:59.390000+00:00"
       }
     },
     {
@@ -3037,22 +3061,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -116.3055,
-          33.3098333333333,
-          29.07
+          -116.377833333333,
+          33.2153333333333,
+          11.78
         ]
       },
       "properties": {
         "hazard_type": "Earthquake",
         "category": "SEISMIC",
-        "location_name": "9 km NE of Borrego Springs, CA",
-        "severity_metric": "Magnitude 0.7",
-        "magnitude": 0.69,
-        "depth_km": 29.07,
+        "location_name": "5 km S of Borrego Springs, CA",
+        "severity_metric": "Magnitude 0.5",
+        "magnitude": 0.48,
+        "depth_km": 11.78,
         "alert_level": "LOW",
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335799",
-        "timestamp": "2026-09-21T01:50:25.350000+00:00"
+        "timestamp": "2026-09-21T01:50:27.790000+00:00"
       }
     },
     {

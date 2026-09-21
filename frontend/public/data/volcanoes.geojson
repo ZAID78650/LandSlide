@@ -26,7 +26,7 @@
         "severity_metric": "Alert Level: Orange (Strombolian Explosions)",
         "alert_level": "HIGH",
         "source": "PVMBG Indonesia / Smithsonian GVP",
-        "timestamp": "2026-09-21T14:57:31.829899+00:00"
+        "timestamp": "2026-09-21T15:04:27.048283+00:00"
       }
     },
     {
@@ -48,7 +48,7 @@
         "severity_metric": "Alert Level: Orange (Lava Fountaining)",
         "alert_level": "HIGH",
         "source": "INGV Catania / Smithsonian GVP",
-        "timestamp": "2026-09-21T14:57:31.829905+00:00"
+        "timestamp": "2026-09-21T15:04:27.048298+00:00"
       }
     },
     {
@@ -70,7 +70,7 @@
         "severity_metric": "Alert Level: Red (Active Effusive Fissure)",
         "alert_level": "CRITICAL",
         "source": "Icelandic Met Office (IMO)",
-        "timestamp": "2026-09-21T14:57:31.829910+00:00"
+        "timestamp": "2026-09-21T15:04:27.048305+00:00"
       }
     },
     {
@@ -92,7 +92,7 @@
         "severity_metric": "Alert Level: Orange (Ash Plume 2.4km)",
         "alert_level": "HIGH",
         "source": "Japan Meteorological Agency (JMA)",
-        "timestamp": "2026-09-21T14:57:31.829940+00:00"
+        "timestamp": "2026-09-21T15:04:27.048350+00:00"
       }
     }
   ]
