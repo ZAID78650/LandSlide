@@ -36,7 +36,7 @@ export default class GlobeErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError || this.state.use2DFallback) {
-      if (this.state.use2DFallback && this.props.fallback2D) {
+      if (this.props.fallback2D) {
         return (
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <div style={{
@@ -45,36 +45,37 @@ export default class GlobeErrorBoundary extends React.Component {
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 1000,
-              background: 'rgba(15, 23, 42, 0.92)',
+              background: 'rgba(8, 14, 26, 0.95)',
               backdropFilter: 'blur(12px)',
-              border: '1px solid #f59e0b',
+              border: '1px solid rgba(0, 229, 255, 0.4)',
               borderRadius: 20,
               padding: '6px 18px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.6), 0 0 14px rgba(0,229,255,0.2)',
               color: '#f8fafc',
-              fontSize: 12,
+              fontSize: 11,
               fontFamily: 'var(--font-mono, monospace)'
             }}>
-              <span style={{ color: '#f59e0b' }}>⚠️ 2D SAFE MAP MODE ACTIVE</span>
+              <span style={{ color: 'var(--cyan, #00e5ff)', fontWeight: 700 }}>🌐 2D TACTICAL MAP ACTIVE</span>
               <button
                 onClick={this.handleRetry}
                 style={{
-                  background: 'rgba(0, 229, 255, 0.15)',
+                  background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(41, 121, 255, 0.2))',
                   border: '1px solid #00e5ff',
                   color: '#00e5ff',
-                  padding: '3px 10px',
+                  padding: '3px 12px',
                   borderRadius: 12,
                   cursor: 'pointer',
-                  fontSize: 11,
+                  fontSize: 10,
+                  fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 4
                 }}
               >
-                ⟳ Return to 3D Globe
+                ⟳ Launch 3D Globe
               </button>
             </div>
             {this.props.fallback2D}

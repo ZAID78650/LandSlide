@@ -707,25 +707,43 @@ ELEV: ${elevation}m · SLOPE: ${slope}° · FoS: ${fos}`,
     // F. Active LiDAR Scanning Wave (when scanning transition is active)
     if (isScanning) {
       let cachedScanRadius = 60;
+      let cachedScanRadius2 = 30;
       let lastScanCalc = 0;
       const scanRadiusProperty = new CallbackProperty(() => {
         const now = performance.now();
         if (now !== lastScanCalc) {
           lastScanCalc = now;
-          cachedScanRadius = 60 + ((now / 1000 * 850) % 2600);
+          cachedScanRadius = 60 + ((now / 1000 * 950) % 3200);
+          cachedScanRadius2 = 30 + (((now + 500) / 1000 * 950) % 3200);
         }
         return cachedScanRadius;
       }, false);
 
+      const scanRadiusProperty2 = new CallbackProperty(() => cachedScanRadius2, false);
+
+      // Primary Sonar Wave Ring
       entitySource.entities.add({
         position: Cartesian3.fromDegrees(lon, lat),
         ellipse: {
           semiMinorAxis: scanRadiusProperty,
           semiMajorAxis: scanRadiusProperty,
-          material: themeColor.withAlpha(0.35),
+          material: Color.fromCssColorString('#00e5ff').withAlpha(0.35),
           outline: true,
-          outlineColor: Color.WHITE,
-          outlineWidth: 2.5
+          outlineColor: Color.fromCssColorString('#00e5ff'),
+          outlineWidth: 3.0
+        }
+      });
+
+      // Secondary Echo Wave Ring
+      entitySource.entities.add({
+        position: Cartesian3.fromDegrees(lon, lat),
+        ellipse: {
+          semiMinorAxis: scanRadiusProperty2,
+          semiMajorAxis: scanRadiusProperty2,
+          material: Color.fromCssColorString('#ff3b5c').withAlpha(0.2),
+          outline: true,
+          outlineColor: Color.fromCssColorString('#ff3b5c'),
+          outlineWidth: 2.0
         }
       });
     }

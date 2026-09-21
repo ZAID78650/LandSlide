@@ -9,12 +9,16 @@ export default defineConfig({
     cesium({ rebuildCesium: false }),
   ],
   server: {
-    // Disabling HMR skips the React Fast Refresh preamble guard that was
-    // crashing the app (blank page) due to a race condition with vite-plugin-cesium
     hmr: false,
+    host: 'localhost',
+    port: 5173,
   },
+  // Disable dep pre-bundling entirely — this app uses large ESM packages
+  // (Cesium, Three.js, globe.gl) that cause Vite's optimizer to hang/OOM.
+  // noDiscovery + empty include is the Vite 5+ way to disable optimization.
   optimizeDeps: {
-    include: ['cesium'],
+    noDiscovery: true,
+    include: [],
   },
 });
 

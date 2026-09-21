@@ -2153,3 +2153,211 @@ select.form-input {
   padding: 24px;
 }
 
+
+/* ============================================================
+   SCANNER & DASHBOARD ANIMATION SYSTEM
+   Enhanced UI/UX — LANDSense AI
+   ============================================================ */
+
+/* ─── Core Keyframes ──────────────────────────────────────── */
+@keyframes scanBeam {
+  0%   { top: -2%; opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 102%; opacity: 0.6; }
+}
+@keyframes stagePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,229,255,0.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(0,229,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); }
+}
+@keyframes stageComplete {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.8); }
+  70%  { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+@keyframes slideInUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(32px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes glitchFlicker {
+  0%,100% { opacity:1; transform:translateX(0); filter:none; }
+  10%     { opacity:0.8; transform:translateX(-2px); }
+  20%     { opacity:1;   transform:translateX(2px); }
+  50%     { opacity:0.7; filter:hue-rotate(30deg) brightness(1.3); }
+  60%     { opacity:1;   filter:none; }
+}
+@keyframes hudBracketIn {
+  from { opacity:0; transform:scale(1.2); }
+  to   { opacity:1; transform:scale(1); }
+}
+@keyframes logEntryIn {
+  from { opacity:0; transform:translateX(-8px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes fosGaugeSweep {
+  from { stroke-dashoffset: 283; }
+  to   { stroke-dashoffset: var(--fos-offset, 100); }
+}
+@keyframes ringExpand {
+  0%   { transform:translate(-50%,-50%) scale(1); opacity:0.8; }
+  100% { transform:translate(-50%,-50%) scale(2.8); opacity:0; }
+}
+@keyframes tickerScroll {
+  from { transform:translateX(0); }
+  to   { transform:translateX(-50%); }
+}
+@keyframes particleFloat {
+  0%   { transform:translateY(0) translateX(0); opacity:0.8; }
+  50%  { transform:translateY(-8px) translateX(3px); opacity:1; }
+  100% { transform:translateY(-14px) translateX(-2px); opacity:0; }
+}
+@keyframes scanlineSweep {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+@keyframes pipelineConnect {
+  from { width:0; }
+  to   { width:100%; }
+}
+@keyframes countRoll {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Scanner HUD Corners ────────────────────────────────── */
+.scanner-hud-corner {
+  position:absolute; width:18px; height:18px;
+  pointer-events:none; z-index:20;
+  animation: hudBracketIn 0.4s ease both;
+}
+.scanner-hud-corner.tl { top:8px; left:8px; border-top:2px solid #00e5ff; border-left:2px solid #00e5ff; box-shadow:-2px -2px 6px rgba(0,229,255,0.5); }
+.scanner-hud-corner.tr { top:8px; right:8px; border-top:2px solid #00e5ff; border-right:2px solid #00e5ff; box-shadow:2px -2px 6px rgba(0,229,255,0.5); }
+.scanner-hud-corner.bl { bottom:8px; left:8px; border-bottom:2px solid #00e5ff; border-left:2px solid #00e5ff; box-shadow:-2px 2px 6px rgba(0,229,255,0.5); }
+.scanner-hud-corner.br { bottom:8px; right:8px; border-bottom:2px solid #00e5ff; border-right:2px solid #00e5ff; box-shadow:2px 2px 6px rgba(0,229,255,0.5); }
+
+/* ─── Stage Pipeline Nodes ───────────────────────────────── */
+.stage-node {
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; font-family:monospace;
+  flex-shrink:0; transition:all 0.3s ease; position:relative;
+}
+.stage-node.pending { background:#0f172a; border:2px solid #1e2a3a; color:#475569; }
+.stage-node.active  { background:rgba(0,229,255,0.15); border:2px solid #00e5ff; color:#00e5ff; animation:stagePulse 1.2s ease infinite; }
+.stage-node.done    { background:rgba(34,197,94,0.15); border:2px solid #22c55e; color:#22c55e; animation:stageComplete 0.5s ease 1; }
+
+.stage-connector { flex:1; height:2px; background:#1e2a3a; position:relative; overflow:hidden; }
+.stage-connector-fill {
+  position:absolute; left:0; top:0; bottom:0;
+  background:linear-gradient(90deg,#22c55e,#00e5ff);
+  transition:width 0.5s ease;
+  box-shadow:0 0 6px rgba(0,229,255,0.6);
+}
+
+/* ─── Result Card ────────────────────────────────────────── */
+.scanner-result-card { animation: slideInUp 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
+.scanner-log-entry   { animation: logEntryIn 0.2s ease both; }
+
+/* ─── Ticker ─────────────────────────────────────────────── */
+.hud-ticker-wrap { overflow:hidden; white-space:nowrap; }
+.hud-ticker-inner { display:inline-block; animation:tickerScroll 28s linear infinite; }
+
+/* ─── FoS Gauge ──────────────────────────────────────────── */
+.fos-ring-bg   { fill:none; stroke:#1e293b; stroke-width:10; }
+.fos-ring-fill {
+  fill:none; stroke-width:10; stroke-linecap:round;
+  stroke-dasharray:283;
+  animation: fosGaugeSweep 1.4s cubic-bezier(0.4,0,0.2,1) both;
+  transform:rotate(-90deg); transform-origin:center;
+  transition: stroke 0.4s ease;
+}
+
+/* ─── Misc Utilities ─────────────────────────────────────── */
+.ring-expand {
+  position:absolute; top:50%; left:50%;
+  width:36px; height:36px;
+  border:1.5px solid #00e5ff; border-radius:50%;
+  animation:ringExpand 1.8s ease-out infinite;
+}
+.particle-dot {
+  position:absolute; width:3px; height:3px;
+  border-radius:50%; background:#00e5ff;
+  animation:particleFloat 2.2s ease-in-out infinite;
+}
+.scan-grid-overlay {
+  position:absolute; inset:0; pointer-events:none; z-index:8;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
+  background-size:30px 30px;
+  animation:fadeInScale 0.4s ease both;
+}
+.glitch-flash  { animation:glitchFlicker 0.45s ease both; }
+.stat-anim-in  { animation:countRoll 0.4s ease both; }
+.shimmer-bar {
+  background: linear-gradient(90deg, #1e293b 25%, #2d3a52 50%, #1e293b 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.8s infinite;
+}
+.scanner-terminal::-webkit-scrollbar { width:3px; }
+.scanner-terminal::-webkit-scrollbar-track { background:transparent; }
+.scanner-terminal::-webkit-scrollbar-thumb { background:#1e2a3a; border-radius:2px; }
+
+/* ─── Advanced Scanning & Dashboard Animations ──────────────── */
+@keyframes soundWave {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+@keyframes radarSpinRev {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to   { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+@keyframes laserSweepEnhanced {
+  0%   { top: 0%; opacity: 0.9; }
+  49%  { opacity: 1; }
+  50%  { top: 100%; opacity: 0.9; }
+  51%  { opacity: 1; }
+  100% { top: 0%; opacity: 0.9; }
+}
+
+@keyframes neonPulseCyan {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2); }
+  50%      { box-shadow: 0 0 25px rgba(0, 229, 255, 0.8), inset 0 0 16px rgba(0, 229, 255, 0.4); }
+}
+
+@keyframes neonPulseRed {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 59, 92, 0.4), inset 0 0 8px rgba(255, 59, 92, 0.2); }
+  50%      { box-shadow: 0 0 25px rgba(255, 59, 92, 0.8), inset 0 0 16px rgba(255, 59, 92, 0.4); }
+}
+
+.radar-reticle-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 140px; height: 140px;
+  border: 1px dotted rgba(0, 229, 255, 0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: radarSpinRev 5s linear infinite;
+}
+
+.equalizer-bar {
+  width: 3px;
+  background: var(--cyan);
+  border-radius: 2px;
+  animation: soundWave 0.8s ease-in-out infinite;
+}
