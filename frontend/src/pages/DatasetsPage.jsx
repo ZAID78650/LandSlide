@@ -29,6 +29,7 @@ export default function DatasetsPage() {
   const [showContours, setShowContours] = useState(true);
   const [showRiskMask, setShowRiskMask] = useState(true);
   const [tableSearch, setTableSearch] = useState('');
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
   const [liveTelemetry, setLiveTelemetry] = useState({
     elev: 468,
     slope: 38.5,
@@ -66,6 +67,7 @@ export default function DatasetsPage() {
     setDatasetPreview(null);
     setSelectedPairIndex(pairIdx);
     setTableSearch('');
+    setImageLoadFailed(false);
 
     // 1. Fetch rich preview data (manifest pairs, tabular rows, or image analysis)
     getDatasetPreview(file)
@@ -129,6 +131,7 @@ export default function DatasetsPage() {
     setScanProgress(0);
     setInferenceResult(null);
     setDatasetPreview(null);
+    setImageLoadFailed(false);
   };
 
   const fetchDatasets = () => {
@@ -334,30 +337,32 @@ export default function DatasetsPage() {
       {/* 🛰️ INSPECTION & REAL-TIME SCAN MODAL */}
       {viewingFile && (() => {
         const isManifest = datasetPreview?.type === 'mask_manifest' || viewingFile.toLowerCase().includes('meta');
-        const isTabular = datasetPreview?.type === 'tabular_csv' && !isManifest;
         const currentPair = isManifest && datasetPreview?.pairs?.length ? datasetPreview.pairs[selectedPairIndex] : null;
 
         // Effective telemetry values
         const confidenceVal = currentPair?.confidence_pct || inferenceResult?.confidence_pct || 94.8;
         const riskLevel = currentPair?.risk_level || inferenceResult?.risk_level || 'CRITICAL (HIGH RISK)';
-        const severity = inferenceResult?.severity || 'CRITICAL';
         const riskScore = inferenceResult?.risk_score || 94;
         const slopeDeg = currentPair?.slope_deg || inferenceResult?.slope_deg || 38.5;
         const fos = currentPair?.factor_of_safety || inferenceResult?.factor_of_safety || 0.78;
         const affectedArea = inferenceResult?.affected_area_m2 || 14250;
 
-        // Image & Mask URLs
+        // Image & Mask URLs. GeoJSON/CSV and other non-raster files cannot be
+        // decoded by an <img> or CSS background, so show a bundled geospatial
+        // context image instead of issuing a broken image request.
+        const isRasterDataset = /\.(png|jpe?g|webp|gif|bmp|tiff?)$/i.test(viewingFile);
+        const contextImageUrl = '/sensors/terrain_multispectral_ndvi.jpg';
         let imageUrl = currentPair?.image_url;
         let maskUrl = currentPair?.mask_url;
 
-        if (!imageUrl && datasetPreview?.image_url) imageUrl = datasetPreview.image_url;
+        if (!imageUrl && isRasterDataset && datasetPreview?.image_url) imageUrl = datasetPreview.image_url;
         if (!maskUrl && datasetPreview?.mask_url) maskUrl = datasetPreview.mask_url;
 
-        // Fallbacks
-        if (!imageUrl) {
-          imageUrl = viewingFile.match(/\.(png|jpg|jpeg|webp)$/i)
-            ? `http://localhost:8000/uploads/${viewingFile}`
-            : 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=1200&q=80';
+        if (!isRasterDataset || imageLoadFailed) {
+          imageUrl = contextImageUrl;
+          maskUrl = null;
+        } else if (!imageUrl) {
+          imageUrl = `http://localhost:8000/uploads/${viewingFile}`;
         }
 
         return (
@@ -707,6 +712,13 @@ export default function DatasetsPage() {
               </div>
 
               {/* 🖼️ VIEWPORT DISPLAY: Original Image / After Scan / Split / Tabular */}
+              <img
+                src={imageUrl}
+                alt=""
+                aria-hidden="true"
+                onError={() => setImageLoadFailed(true)}
+                style={{ display: 'none' }}
+              />
               {previewMode === 'table' ? (
                 /* 📋 TABULAR EXPLORER MODE */
                 <div style={{ height: 540, overflow: 'auto', padding: 16, background: '#070b12' }}>
@@ -861,7 +873,7 @@ export default function DatasetsPage() {
                       File: <strong style={{ color: 'var(--cyan)' }}>{viewingFile}</strong>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 3 }}>
-                      Unprocessed Baseline Sensor Data · Zero AI Overlays · TrueColor RGB
+                      {isRasterDataset ? 'Unprocessed Baseline Sensor Data · Zero AI Overlays · TrueColor RGB' : 'GeoJSON geospatial context imagery · Zero AI Overlays'}
                     </div>
                   </div>
 
