@@ -213,7 +213,7 @@ export default function LoginPage() {
       const res = await api.post('/auth/google', { token: credentialResponse.credential });
       setToken(res.data.access_token);
       setUser(res.data.user);
-      navigate('/dashboard');
+      navigate('/globe');
     } catch { setError('Google Sign-In Failed. Please try again.'); }
   };
 
@@ -232,7 +232,7 @@ export default function LoginPage() {
           const res = await api.post('/auth/login', { email: targetEmail, password: targetPassword });
           setToken(res.data.access_token);
           setUser(res.data.user);
-          navigate('/dashboard');
+          navigate('/globe');
           return;
         } catch (loginErr) {
           // If explicitly wrong password, surface it; otherwise fallback to dev token
@@ -248,7 +248,7 @@ export default function LoginPage() {
       const res = await api.post('/auth/google', { token: 'dev_mock_google_token' });
       setToken(res.data.access_token);
       setUser(res.data.user);
-      navigate('/dashboard');
+      navigate('/globe');
     } catch {
       setError('Login failed. Please verify the backend is running on port 8000.');
     } finally {

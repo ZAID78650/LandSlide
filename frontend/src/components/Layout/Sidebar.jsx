@@ -7,7 +7,6 @@ const NAV_GROUPS = [
     title: 'CMD',
     items: [
       { to: '/globe', icon: '🌐', label: '3D Global Command Center' },
-      { to: '/dashboard', icon: '⬡', label: 'Local Geotechnical Scanner' },
       { to: '/alerts', icon: '⚡', label: 'Alert Center', badge: 'alerts' },
       { to: '/incidents', icon: '◈', label: 'Incidents' },
       { to: '/risk', icon: '◎', label: 'Risk Intelligence' },
@@ -33,8 +32,6 @@ const NAV_GROUPS = [
       { to: '/reports', icon: '📋', label: 'Intelligence Reports' },
       { to: '/forecasts', icon: '◷', label: 'Forecast Analytics' },
       { to: '/ai-copilot', icon: '✦', label: 'AI Copilot' },
-      { to: '/models', icon: '⬡', label: 'Model Ops' },
-      { to: '/data-sources', icon: '◈', label: 'Data Sources' },
       { to: '/datasets', icon: '▤', label: 'Datasets' },
       { to: '/response', icon: '◉', label: 'Response Center' },
     ]
@@ -155,7 +152,7 @@ export default function Sidebar() {
         flexShrink: 0,
         fontFamily: 'var(--font-headline)',
         cursor: 'pointer'
-      }} onClick={() => navigate('/dashboard')}>
+      }} onClick={() => navigate('/globe')}>
         N
       </div>
 

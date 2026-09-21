@@ -50,7 +50,7 @@
         "severity_metric": "Critical Slope Instability (FoS 0.78 | Ru 68%)",
         "alert_level": "CRITICAL",
         "source": "ISRO Landslide Atlas of India / GSI",
-        "timestamp": "2026-09-21T15:43:03.399026+00:00"
+        "timestamp": "2026-09-21T16:28:32.240215+00:00"
       }
     },
     {
@@ -96,7 +96,7 @@
         "severity_metric": "Critical Soil Saturation (FoS 0.82 | Ru 74%)",
         "alert_level": "CRITICAL",
         "source": "GSI Rapid Geotechnical Assessment Team",
-        "timestamp": "2026-09-21T15:43:03.399034+00:00"
+        "timestamp": "2026-09-21T16:28:32.240330+00:00"
       }
     },
     {
@@ -118,7 +118,7 @@
         "severity_metric": "Elevated Monsoon Slump Risk (FoS 0.94)",
         "alert_level": "HIGH",
         "source": "Nepal Department of Mines and Geology (DMG)",
-        "timestamp": "2026-09-21T15:43:03.399038+00:00"
+        "timestamp": "2026-09-21T16:28:32.240346+00:00"
       }
     },
     {
@@ -166,7 +166,7 @@
         "road_blockage_probability": "94%",
         "alert_level": "CRITICAL",
         "source": "ISRO Landslide Atlas of India / GSI Sikkim Unit",
-        "timestamp": "2026-09-21T15:43:03.399043+00:00"
+        "timestamp": "2026-09-21T16:28:32.240436+00:00"
       }
     },
     {
@@ -194,7 +194,7 @@
         "road_blockage_probability": "89%",
         "alert_level": "CRITICAL",
         "source": "Nagaland PWD / BRO Project Sewak / GSI",
-        "timestamp": "2026-09-21T15:43:03.399073+00:00"
+        "timestamp": "2026-09-21T16:28:32.240490+00:00"
       }
     },
     {
@@ -242,7 +242,7 @@
         "road_blockage_probability": "91%",
         "alert_level": "CRITICAL",
         "source": "Manipur Disaster Management Authority / GSI",
-        "timestamp": "2026-09-21T15:43:03.399078+00:00"
+        "timestamp": "2026-09-21T16:28:32.240497+00:00"
       }
     },
     {
@@ -270,7 +270,7 @@
         "road_blockage_probability": "78%",
         "alert_level": "HIGH",
         "source": "Assam State Disaster Management Authority (ASDMA)",
-        "timestamp": "2026-09-21T15:43:03.399082+00:00"
+        "timestamp": "2026-09-21T16:28:32.240510+00:00"
       }
     },
     {
@@ -298,7 +298,7 @@
         "road_blockage_probability": "74%",
         "alert_level": "HIGH",
         "source": "Meghalaya SDMA / CWC Flood Warning",
-        "timestamp": "2026-09-21T15:43:03.399100+00:00"
+        "timestamp": "2026-09-21T16:28:32.240526+00:00"
       }
     },
     {
@@ -326,7 +326,7 @@
         "road_blockage_probability": "86%",
         "alert_level": "CRITICAL",
         "source": "Mizoram Disaster Management Authority",
-        "timestamp": "2026-09-21T15:43:03.399104+00:00"
+        "timestamp": "2026-09-21T16:28:32.240531+00:00"
       }
     },
     {
@@ -354,7 +354,7 @@
         "road_blockage_probability": "70%",
         "alert_level": "HIGH",
         "source": "Border Roads Organisation (BRO Project Vartak)",
-        "timestamp": "2026-09-21T15:43:03.399108+00:00"
+        "timestamp": "2026-09-21T16:28:32.240536+00:00"
       }
     }
   ]

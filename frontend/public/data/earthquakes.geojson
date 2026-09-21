@@ -9,6 +9,54 @@
   "features": [
     {
       "type": "Feature",
+      "id": "USGS-EQ-us7000tiya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          142.3611,
+          31.7337,
+          10.0
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "Izu Islands, Japan region",
+        "severity_metric": "Magnitude 4.5",
+        "magnitude": 4.5,
+        "depth_km": 10.0,
+        "alert_level": "MODERATE",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tiya",
+        "timestamp": "2026-09-21T15:56:20.386000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "USGS-EQ-ci41336047",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.717,
+          33.3213333333333,
+          2.4
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "4 km SSE of Bombay Beach, CA",
+        "severity_metric": "Magnitude 1.5",
+        "magnitude": 1.47,
+        "depth_km": 2.4,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41336047",
+        "timestamp": "2026-09-21T15:56:03.090000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
       "id": "USGS-EQ-ci41336023",
       "geometry": {
         "type": "Point",
@@ -37,9 +85,9 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -115.719333333333,
-          33.3233333333333,
-          2.41
+          -115.721833333333,
+          33.3216666666667,
+          2.26
         ]
       },
       "properties": {
@@ -47,12 +95,12 @@
         "category": "SEISMIC",
         "location_name": "3 km SSE of Bombay Beach, CA",
         "severity_metric": "Magnitude 1.8",
-        "magnitude": 1.77,
-        "depth_km": 2.41,
+        "magnitude": 1.75,
+        "depth_km": 2.26,
         "alert_level": "LOW",
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41336015",
-        "timestamp": "2026-09-21T15:31:47.770000+00:00"
+        "timestamp": "2026-09-21T15:31:47.730000+00:00"
       }
     },
     {
@@ -393,6 +441,30 @@
     },
     {
       "type": "Feature",
+      "id": "USGS-EQ-uu80157641",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -112.9025,
+          38.4845,
+          2.86
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "13 km NE of Milford, Utah",
+        "severity_metric": "Magnitude 0.6",
+        "magnitude": 0.58,
+        "depth_km": 2.86,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/uu80157641",
+        "timestamp": "2026-09-21T13:28:51.070000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
       "id": "USGS-EQ-nc75439397",
       "geometry": {
         "type": "Point",
@@ -589,9 +661,9 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -118.345,
-          35.9828333333333,
-          2.39
+          -118.348666666667,
+          35.9825,
+          5.88
         ]
       },
       "properties": {
@@ -599,12 +671,12 @@
         "category": "SEISMIC",
         "location_name": "26 km NNE of Kernville, CA",
         "severity_metric": "Magnitude 0.7",
-        "magnitude": 0.69,
-        "depth_km": 2.39,
+        "magnitude": 0.7,
+        "depth_km": 5.88,
         "alert_level": "LOW",
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335959",
-        "timestamp": "2026-09-21T12:59:53.170000+00:00"
+        "timestamp": "2026-09-21T12:59:53.220000+00:00"
       }
     },
     {
@@ -1013,6 +1085,30 @@
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/aka2026ssqjze",
         "timestamp": "2026-09-21T11:18:44.178000+00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "USGS-EQ-uu80157631",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -112.902166666667,
+          38.509,
+          2.01
+        ]
+      },
+      "properties": {
+        "hazard_type": "Earthquake",
+        "category": "SEISMIC",
+        "location_name": "15 km NE of Milford, Utah",
+        "severity_metric": "Magnitude 1.4",
+        "magnitude": 1.44,
+        "depth_km": 2.01,
+        "alert_level": "LOW",
+        "source": "USGS Earthquake Hazards Program",
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/uu80157631",
+        "timestamp": "2026-09-21T11:06:51.290000+00:00"
       }
     },
     {
@@ -5549,78 +5645,6 @@
         "source": "USGS Earthquake Hazards Program",
         "url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026sofhss",
         "timestamp": "2026-09-20T16:36:59.186000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-ci41335599",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -118.833833333333,
-          34.557,
-          1.57
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "16 km NNW of Piru, CA",
-        "severity_metric": "Magnitude 1.2",
-        "magnitude": 1.22,
-        "depth_km": 1.57,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335599",
-        "timestamp": "2026-09-20T16:17:05.450000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-ci41335591",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -116.7275,
-          33.6636666666667,
-          13.28
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "9 km S of Idyllwild, CA",
-        "severity_metric": "Magnitude 0.5",
-        "magnitude": 0.49,
-        "depth_km": 13.28,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41335591",
-        "timestamp": "2026-09-20T16:02:30.310000+00:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "USGS-EQ-hv75040837",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -155.503326416016,
-          19.0900001525879,
-          31.8799991607666
-        ]
-      },
-      "properties": {
-        "hazard_type": "Earthquake",
-        "category": "SEISMIC",
-        "location_name": "8 km ENE of Naalehu, Hawaii",
-        "severity_metric": "Magnitude 1.7",
-        "magnitude": 1.71,
-        "depth_km": 31.8799991607666,
-        "alert_level": "LOW",
-        "source": "USGS Earthquake Hazards Program",
-        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/hv75040837",
-        "timestamp": "2026-09-20T15:47:08.230000+00:00"
       }
     }
   ]

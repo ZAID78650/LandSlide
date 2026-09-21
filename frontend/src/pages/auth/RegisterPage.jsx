@@ -157,7 +157,7 @@ export default function RegisterPage() {
   const handleGoogleSuccess = async (cred) => {
     try {
       const res = await api.post('/auth/google', { token: cred.credential });
-      setToken(res.data.access_token); setUser(res.data.user); navigate('/dashboard');
+      setToken(res.data.access_token); setUser(res.data.user); navigate('/globe');
     } catch { setError('Google Sign-In Failed'); }
   };
 
@@ -182,7 +182,7 @@ export default function RegisterPage() {
       const res = await api.post('/auth/google', { token: 'dev_mock_google_token' });
       setToken(res.data.access_token); setUser(res.data.user);
       setStep(3);
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setTimeout(() => navigate('/globe'), 2000);
     } catch (e) {
       setError('Registration failed. Please try again.');
     } finally { setLoading(false); }

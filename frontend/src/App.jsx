@@ -14,14 +14,11 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 // Lazy-loaded pages with automatic retry and cache recovery across all tabs
 const GlobalCommandCenter = lazyWithRetry(() => import('./pages/GlobalCommandCenter'));
 const GlobeExplorer = lazyWithRetry(() => import('./pages/GlobeExplorer'));
-const CommandCenter = lazyWithRetry(() => import('./pages/CommandCenter'));
 const AlertCenter = lazyWithRetry(() => import('./pages/AlertCenter'));
 const IncidentsPage = lazyWithRetry(() => import('./pages/IncidentsPage'));
 const IncidentDetail = lazyWithRetry(() => import('./pages/IncidentDetail'));
 const ForecastsAnalytics = lazyWithRetry(() => import('./pages/ForecastsAnalytics'));
 const AICopilotPage = lazyWithRetry(() => import('./pages/AICopilotPage'));
-const ModelOpsPage = lazyWithRetry(() => import('./pages/ModelOpsPage'));
-const DataSourcesPage = lazyWithRetry(() => import('./pages/DataSourcesPage'));
 const SystemHealthPage = lazyWithRetry(() => import('./pages/SystemHealthPage'));
 const AuditPage = lazyWithRetry(() => import('./pages/AuditPage'));
 const AdminPage = lazyWithRetry(() => import('./pages/AdminPage'));
@@ -102,15 +99,12 @@ export default function App() {
             <Route index element={<Navigate to="/globe" replace />} />
             <Route path="globe" element={<GlobeExplorer />} />
             <Route path="command-center" element={<GlobalCommandCenter />} />
-            <Route path="dashboard" element={<CommandCenter />} />
             <Route path="alerts" element={<AlertCenter />} />
             <Route path="incidents" element={<IncidentsPage />} />
             <Route path="incidents/:id" element={<IncidentDetail />} />
             <Route path="risk" element={<RiskIntelligencePage />} />
             <Route path="forecasts" element={<ForecastsAnalytics />} />
             <Route path="ai-copilot" element={<AICopilotPage />} />
-            <Route path="models" element={<ModelOpsPage />} />
-            <Route path="data-sources" element={<DataSourcesPage />} />
             <Route path="datasets" element={<DatasetsPage />} />
             <Route path="response" element={<ResponseCenterPage />} />
             <Route path="location" element={<LocationIntelligencePage />} />
@@ -129,7 +123,7 @@ export default function App() {
           </Route>
 
           {/* 404 fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/globe" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

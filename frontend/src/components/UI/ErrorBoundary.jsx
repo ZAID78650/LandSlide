@@ -222,7 +222,7 @@ export default class ErrorBoundary extends React.Component {
               ⚡ Full System Reload
             </button>
             <a
-              href="/dashboard"
+              href="/globe"
               className="btn btn-ghost"
               style={{ padding: '8px 16px', fontSize: 12, textDecoration: 'none' }}
             >

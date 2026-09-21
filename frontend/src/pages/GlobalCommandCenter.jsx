@@ -713,22 +713,6 @@ export default function GlobalCommandCenter() {
             </div>
           </div>
 
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="btn btn-secondary btn-sm"
-            style={{
-              marginLeft: 8,
-              fontSize: 10,
-              fontFamily: 'var(--font-mono)',
-              padding: '4px 10px',
-              borderRadius: 6,
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-secondary)'
-            }}
-            title="Open Local Geotechnical LiDAR Contour Scanner"
-          >
-            ⬡ LOCAL DEM SCANNER
-          </button>
         </div>
 
         {/* Center: Search Bar & Preset Controls */}
