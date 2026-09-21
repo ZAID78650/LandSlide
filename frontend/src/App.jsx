@@ -131,5 +131,3 @@ export default function App() {
     </>
 );
 }
-
-// I need to replace the router in App.jsx to point / to /login and /dashboard to CommandCenter.
